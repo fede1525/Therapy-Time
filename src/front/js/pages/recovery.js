@@ -8,7 +8,7 @@ export const Recovery = () => {
     const [recoveryMessage, setRecoveryMessage] = useState("");
     const [error, setError] = useState("");
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,14 +27,11 @@ export const Recovery = () => {
         }
     }
 
-    const handleEmailChange = (e) => {
-        setEmailInput(e.target.value);
-        if (!emailRegex.test(e.target.value)) {
-            setEmailError("Formato de correo electronico inválido.");
-        } else {
-            setEmailError("");
-        }
-    }
+    const handleInputChange = () => {
+        setEmailError('');
+        setRecoveryMessage('');
+        setError('');
+    };
 
     return (
         <div className="container">
@@ -42,13 +39,26 @@ export const Recovery = () => {
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
                         <label htmlFor="emailInput" className="form-label">Ingresa la dirección de tu correo electrónico, te enviaremos un mail para que recuperes tu contraseña</label>
-                        <input type="email" className="form-control" id="emailInput" value={emailInput} onChange={handleEmailChange} required />
-                        {emailError && <p style={{ color: 'red' }}>{emailError}</p>}
+                        <input type="email"
+                            className="form-control"
+                            id="emailInput"
+                            value={emailInput}
+                            onChange={(e) => { setEmailInput(e.target.value); handleInputChange(); }}
+                            required
+                        />
                     </div>
-                    <button type="submit" className="btn btn-primary">Recuperar contraseña</button>
+                    {emailError && (
+                        <div className="alert alert-danger" role="alert">
+                            {emailError}
+                        </div>
+                    )}
+                    {error && (
+                        <div className="alert alert-danger" role="alert">
+                            {error}
+                        </div>
+                    )}
+                    <button type="submit" className="btn">Recuperar contraseña</button>
                 </form>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {recoveryMessage && <p>{recoveryMessage}</p>}
             </div>
         </div>
     );

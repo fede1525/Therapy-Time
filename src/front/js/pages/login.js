@@ -54,6 +54,10 @@ export const Login = () => {
                         onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
                         required
                     />
+                    <button id="toggle-password" type="button" class="d-none"
+                        aria-label="Show password as plain text. Warning: this will display your password on the screen.">
+                    </button>
+
                 </div>
                 {errorMessage && (
                     <div className="alert alert-danger" role="alert">
