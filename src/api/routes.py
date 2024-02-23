@@ -116,13 +116,13 @@ def list_users():
     return jsonify(serialized_users), 200
 
 # Login de usuario
-@api.route('/login', methods=['POST'])
+@api.route('/login_user', methods=['POST'])
 def login():
     data = request.get_json()
-    email = data.get("email")
+    username = data.get("username")
     password = data.get("password")
 
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(username=username).first()
 
     if user and bcrypt.check_password_hash(user.password, password):
 

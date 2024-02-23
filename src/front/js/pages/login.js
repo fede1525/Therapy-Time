@@ -4,7 +4,7 @@ import { Context } from "../store/appContext";
 
 export const Login = () => {
     const { actions } = useContext(Context);
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
@@ -12,16 +12,14 @@ export const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const result = await actions.loginUser(email, password);
-            if (result) {
-                navigate("/home");
-                setEmail('');
-                setPassword('');
-            }
-          } catch (error) {
+            const result = await actions.loginUser(username, password);
+            navigate("/home");
+            setUsername('');
+            setPassword('');
+        } catch (error) {
             console.error("Error en el inicio de sesión:", error.message);
-            setErrorMessage(error.message); 
-        }  
+            setErrorMessage(error.message);
+        }
     };
 
     const handleInputChange = () => {
@@ -32,15 +30,15 @@ export const Login = () => {
         <div className="container login">
             <form onSubmit={handleLogin}>
                 <div className="form-group">
-                    <label htmlFor="email">Email:</label>
+                    <label htmlFor="username">Nombre de usuario :</label>
                     <input
-                        type="email"
+                        type="text"
                         className="form-control"
-                        id="email"
-                        name="email"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) => {setEmail(e.target.value); handleInputChange(); }}
+                        id="username"
+                        name="username"
+                        placeholder="Ingrese su nombre de usuario"
+                        value={username}
+                        onChange={(e) => { setUsername(e.target.value); handleInputChange(); }}
                         required
                     />
                 </div>
@@ -53,7 +51,7 @@ export const Login = () => {
                         name="password"
                         placeholder="Enter your password"
                         value={password}
-                        onChange={(e) => {setPassword(e.target.value); handleInputChange(); }}
+                        onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
                         required
                     />
                 </div>
@@ -64,19 +62,19 @@ export const Login = () => {
                 )}
                 <div className="text-center">
                     <button type="submit" className="btn btnLogin">
-                        Login
+                        Iniciar sesión
                     </button>
                 </div>
             </form>
             <div className="mt-3 text-center link">
                 <p>
-                    Don't have an account? <Link to="/signup">Create account</Link>
+                    ¿No tienes una cuenta? <Link to="/signup">Crear cuenta</Link>
                 </p>
                 <p>
-                     Forgot your password? <Link to="/recovery">Recover it here</Link>
+                    ¿Olvidaste tu contraseña? <Link to="/recovery"> Recuperar contraseña</Link>
                 </p>
                 <p>
-                    <Link to="/">← Go Back</Link>
+                    <Link to="/">← Volver</Link>
                 </p>
             </div>
         </div>
