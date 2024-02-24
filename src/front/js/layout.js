@@ -10,7 +10,7 @@ import { Signup } from "./pages/signup";
 import { Recovery } from "./pages/recovery";
 import { HomePatient } from "./pages/homePatient";
 import { HomeTherapist } from "./pages/homeTherapist";
-import { Scheduling } from "./pages/scheduling";
+import { Scheduling } from "./pages/scheduling.jsx";
 import { AppointmentScheduler } from "./pages/appointmentScheduler";
 import { IncomeControl } from "./pages/incomeControl";
 import { Inbox } from "./pages/inbox";
