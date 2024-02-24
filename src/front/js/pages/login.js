@@ -30,7 +30,7 @@ export const Login = () => {
         <div className="container login">
             <form onSubmit={handleLogin}>
                 <div className="form-group">
-                    <label htmlFor="username">Nombre de usuario :</label>
+                    <label htmlFor="username">Nombre de usuario </label>
                     <input
                         type="text"
                         className="form-control"
@@ -43,13 +43,13 @@ export const Login = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="password">Password:</label>
+                    <label htmlFor="password">Contraseña </label>
                     <input
                         type="password"
                         className="form-control"
                         id="password"
                         name="password"
-                        placeholder="Enter your password"
+                        placeholder="Ingrese su contraseña"
                         value={password}
                         onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
                         required

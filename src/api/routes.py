@@ -38,6 +38,7 @@ def verify_password_reset_token(token, max_age=3600):
         return None
     
 # Funcion para enviar el mail de recuperación 
+    #INCOMPLETO
 def send_email_recovery_email(recipient_email, link):
     api_key = os.environ['API_KEY']
     domain = os.environ['DOMAIN']

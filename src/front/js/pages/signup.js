@@ -26,6 +26,12 @@ export const Signup = () => {
       return;
     }
 
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("Debe ingresar un email valido")
+      return;
+    }
+
     const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
     if (!passwordRegex.test(password)) {
       setPasswordError("La contraseña debe tener al menos 8 caracteres, una mayúscula y un carácter especial");
@@ -63,7 +69,7 @@ export const Signup = () => {
     <div className="container signup">
       <div className="row">
         <div className="col-md-5">
-          <h1 className="titleSignup">Crear una cuenta</h1>
+          <h1 className="titleSignup">Crear paciente</h1>
         </div>
         <div className="col-md-7">
           <form onSubmit={handleSignup}>
@@ -72,7 +78,7 @@ export const Signup = () => {
               <input
                 type="username"
                 className="form-control"
-                placeholder="Enter your username"
+                placeholder="Ingrese su nombre de usuario"
                 value={username}
                 onChange={(e) => { setUsername(e.target.value); handleInputChange(); }}
                 required
@@ -96,7 +102,7 @@ export const Signup = () => {
             </div>
             <div className="form-group">
               <label>Contraseña</label>
-              <div className="passwordInputContainer">
+              <div className="input-group">
                 <input
                   type={showPassword ? "text" : "password"}
                   className="form-control"
@@ -120,7 +126,7 @@ export const Signup = () => {
             )}
             <div className="form-group">
               <label>Repetir contraseña</label>
-              <div className="confirmInputContainer">
+              <div className="input-group">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   className="form-control"
