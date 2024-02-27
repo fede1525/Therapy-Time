@@ -1,21 +1,26 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 export const Login = () => {
     const { actions } = useContext(Context);
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-    const navigate = useNavigate();
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
+    const navigate = useNavigate()
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
             const result = await actions.loginUser(username, password);
-            navigate("/home");
-            setUsername('');
-            setPassword('');
+            if (result.ok) {
+                navigate("/home");
+                setUsername('');
+                setPassword('');
+            }
         } catch (error) {
             console.error("Error en el inicio de sesión:", error.message);
             setErrorMessage(error.message);
@@ -25,6 +30,10 @@ export const Login = () => {
     const handleInputChange = () => {
         setErrorMessage('');
     };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword)
+    }
 
     return (
         <div className="container login">
@@ -54,8 +63,11 @@ export const Login = () => {
                         onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
                         required
                     />
-                    <button id="toggle-password" type="button" class="d-none"
-                        aria-label="Show password as plain text. Warning: this will display your password on the screen.">
+                    <button id="toggle-password" type="button" className="d-none" onClick={togglePasswordVisibility}>
+                        <FontAwesomeIcon
+                            icon={showPassword ? faEyeSlash : faEye}
+                            className="eye-icon"
+                        />
                     </button>
 
                 </div>
@@ -65,21 +77,19 @@ export const Login = () => {
                     </div>
                 )}
                 <div className="text-center">
-                    <button type="submit" className="btn btnLogin">
-                        Iniciar sesión
+                    <button type="submit" className="btn btnLogin btn-border-radius">
+                        Ingresar
                     </button>
                 </div>
             </form>
             <div className="mt-3 text-center link">
-                <p>
-                    ¿No tienes una cuenta? <Link to="/signup">Crear cuenta</Link>
-                </p>
-                <p>
-                    ¿Olvidaste tu contraseña? <Link to="/recovery"> Recuperar contraseña</Link>
-                </p>
-                <p>
-                    <Link to="/">← Volver</Link>
-                </p>
+                <Link to="/signup">Crear cuenta</Link>
+            </div>
+            <div className="mt-3 text-center link">
+                <Link to="/recovery">Recuperar contraseña</Link>
+            </div>
+            <div className="mt-3 text-center link">
+                <Link to="/">← Volver</Link>
             </div>
         </div>
     );

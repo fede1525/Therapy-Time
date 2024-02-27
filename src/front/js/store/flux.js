@@ -107,7 +107,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 						username: data.username,
 						email: data.email,
 						password: data.password,
-						profile_picture: data.profile_picture,
 						is_active: data.is_active
 					};
 					const updatedUserList = [...getStore().user, newUser]
