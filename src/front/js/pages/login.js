@@ -16,14 +16,20 @@ export const Login = () => {
         e.preventDefault();
         try {
             const result = await actions.loginUser(username, password);
+
             if (result.ok) {
-                navigate("/home");
-                setUsername('');
-                setPassword('');
+                const userRole = result.role_id
+                setUsername('')
+                setPassword('')
+                if (userRole === 0) {
+                    navigate("/homePatient")
+                } else if (userRole === 1) {
+                    navigate("/homeTherapist")
+                }
             }
         } catch (error) {
             console.error("Error en el inicio de sesión:", error.message);
-            setErrorMessage(error.message);
+            setErrorMessage("Error al iniciar sesión.");
         }
     };
 
@@ -82,9 +88,6 @@ export const Login = () => {
                     </button>
                 </div>
             </form>
-            <div className="mt-3 text-center link">
-                <Link to="/signup">Crear cuenta</Link>
-            </div>
             <div className="mt-3 text-center link">
                 <Link to="/recovery">Recuperar contraseña</Link>
             </div>

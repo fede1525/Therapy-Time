@@ -183,7 +183,7 @@ def login():
         db.session.commit()
     
         token = create_access_token(identity=user.id)
-        return jsonify({"message": "Inicio de sesión exitoso", "token": token}), 200
+        return jsonify({"message": "Inicio de sesión exitoso", "token": token, "role_id": user.role_id}), 200
     else:
         return jsonify({"error": "Credenciales inválidas"}), 401
 
@@ -228,6 +228,8 @@ def edit_profile():
             continue
         user[key] = data[key]
        
+    # Innecesario; probablemente para borrar:
+    # -----------------------------------------
     """ if 'username' in data:
         user.username = data['username']
 
@@ -242,6 +244,7 @@ def edit_profile():
 
     if 'phone' in data:
         user.phone = data['phone'] """
+    # -----------------------------------------
 
     if 'password' in data:
         user.password = bcrypt.generate_password_hash(data['password']).decode("utf-8")
