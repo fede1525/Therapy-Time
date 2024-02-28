@@ -74,7 +74,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						headers: {
 							"Access-Control-Allow-Origin": "*",
 							"Authorization": "Bearer " + token
-						},,
+						},
 					}
 					if (body != null) {
 						params.headers["Content-Type"] = "application/json"
