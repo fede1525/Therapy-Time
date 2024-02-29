@@ -60,7 +60,7 @@ export const Login = () => {
                 <div className="form-group">
                     <label htmlFor="password">Contraseña </label>
                     <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         className="form-control"
                         id="password"
                         name="password"

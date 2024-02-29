@@ -32,12 +32,6 @@ const Layout = () => {
                     <Routes>
                         <Route element={<Landing />} path="/" />
                         <Route element={role === "therapist" ? <HomeTherapist /> : <HomePatient />} path="/home" />
-
-                        {/* 
-                        <Route element={<HomeTherapist />} path="/homeTherapist" />
-                        <Route element={<HomePatient />} path="/homePatient" /> 
-                        */}
-
                         <Route element={<Login />} path="/login" />
                         <Route element={<Signup />} path="/signup" />
                         <Route element={<Recovery />} path="/recovery" />

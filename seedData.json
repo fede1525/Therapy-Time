@@ -25,6 +25,19 @@
             "password": "",
             "virtual_link": "",
             "is_active": true
+        },
+        
+        { 
+            "role_id": 1, 
+            "username": "federesano",
+            "name": "Federico",
+            "lastname": "Resano",
+            "dni": "41202848",  
+            "email": "federicoresano1@gmail.com",
+            "phone": "2345651150",
+            "password": "",
+            "virtual_link": "",
+            "is_active": true
         }
         
     }
