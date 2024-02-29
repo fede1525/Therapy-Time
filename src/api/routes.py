@@ -35,6 +35,7 @@ def verify_password_reset_token(token, max_age=3600):
         return None
     
 # Funcion para enviar el mail de recuperación 
+    #INCOMPLETO
 def send_email_recovery_email(recipient_email, link):
     api_key = os.environ['API_KEY']
     domain = os.environ['DOMAIN']
@@ -167,13 +168,13 @@ def edit_user(id):
     return jsonify({"message": "Usuario actualizado exitosamente"}), 200
 
 # Login de usuario
-@api.route('/login', methods=['POST'])
+@api.route('/login_user', methods=['POST'])
 def login():
     data = request.get_json()
-    email = data.get("email")
+    username = data.get("username")
     password = data.get("password")
 
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(username=username).first()
 
     if user and bcrypt.check_password_hash(user.password, password):
 
@@ -181,7 +182,7 @@ def login():
         db.session.commit()
     
         token = create_access_token(identity=user.id)
-        return jsonify({"message": "Inicio de sesión exitoso", "token": token}), 200
+        return jsonify({"message": "Inicio de sesión exitoso", "token": token, "role_id": user.role_id}), 200
     else:
         return jsonify({"error": "Credenciales inválidas"}), 401
 
@@ -226,6 +227,8 @@ def edit_profile():
             continue
         user[key] = data[key]
        
+    # Innecesario; probablemente para borrar:
+    # -----------------------------------------
     """ if 'username' in data:
         user.username = data['username']
 
@@ -240,6 +243,7 @@ def edit_profile():
 
     if 'phone' in data:
         user.phone = data['phone'] """
+    # -----------------------------------------
 
     if 'password' in data:
         user.password = bcrypt.generate_password_hash(data['password']).decode("utf-8")

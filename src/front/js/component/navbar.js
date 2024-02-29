@@ -39,6 +39,7 @@ export const Navbar = () => {
 					<Link to="/patient_schedule">
 						<p id="turns-button">Turnero</p>
 					</Link>
+					<div class="vertical-line"></div>
 					<Link to="/payments">
 						<p>Mis Pagos</p>
 					</Link>

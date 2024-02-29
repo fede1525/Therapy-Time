@@ -4,20 +4,45 @@ const getState = ({ getStore, getActions, setStore }) => {
 			user: [
 				{
 					"id": "",
-					"role": "",
+					"role":  "",
 					"username": "",
 					"name": "",
 					"lastname": "",
-					"dni" :"",
+					"dni": "",
 					"email": "",
+					"phone": "",
 					"phone": "",
 					"password": "",
 					"virtual_link": "",
 					"is_active": "",
+
 				},
 			],
 		},
 		actions: {
+			apiFetch: async (endpoint, method = 'GET', body = null) => {
+				try {
+					let params = {
+						method,
+						headers: {
+							"Content-Type": "application/json",
+							"Access-Control-Allow-Origin": "*",
+						}
+					}
+					if (body != null) {
+						params.body = JSON.stringify(body)
+					}
+					let resp = await fetch(process.env.BACKEND_URL + "api" + endpoint, params);
+					if (!resp.ok) {
+						console.error(resp.statusText)
+						return { error: resp.statusText }
+					}
+					return await resp.json()
+				} catch (error) {
+					console.error("Error:", error)
+				}
+			},
+
 			apiFetch: async (endpoint, method = 'GET', body = null) => {
 				try {
 					let params = {
@@ -69,34 +94,59 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await getActions().protectedFetch("/logout", "POST", null)
 				localStorage.removeItem("token")
 			},
-			loginUser: async (email, password) => {
+
+			loginUser: async (username, password) => {
 				try {
-					const resp = await fetch(process.env.BACKEND_URL + "api/login", {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin': '*'
-						},
-						body: JSON.stringify({ email, password }),
+					const data = await getActions().apiFetch("/login_user", "POST", { username, password })
+					localStorage.setItem("token", data.token)
+					const updatedUserList = getStore().user.map(u => {
+						if (u.username === data.username) {
+							return { ...u, is_active: true }
+						}
+						return u
 					});
-					if (resp.ok) {
-						const data = await resp.json();
-						localStorage.setItem("token", data.token);
-						const updatedUserList = getStore().user.map(u => {
-							if (u.email === data.email) {
-								return { ...u, is_active: true };
-							}
-							return u;
-						});
-						setStore({ user: updatedUserList });
-						setStore({ is_active: true });
-						return data;
+					setStore({ user: updatedUserList })
+					setStore({ is_active: true })
+					return data
+				} catch (error) {
+					console.error("Error al iniciar sesión:", error.message)
+					if (error & error.error) {
+						throw new Error(error.error)
 					} else {
-						throw new Error("Credenciales invalidas.");
+						throw new Error("Credenciales incorrectas.")
+					}
+				}
+
+			},
+			createUser: async (body) => {
+				try {
+					const data = await getActions().apiFetch("/signup", "POST", { username, email, password })
+					const newUser = {
+						id: data.id,
+						username: data.username,
+						email: data.email,
+						password: data.password,
+						is_active: data.is_active
+					};
+					const updatedUserList = [...getStore().user, newUser]
+					setStore({ user: updatedUserList })
+					return data
+				} catch (error) {
+					console.log("Error creating user:", error);
+				}
+			},
+
+			sendPasswordRecoveryRequest: async (emailInput, setRecoveryMessage, setError) => {
+				try {
+					const respData = await getActions().apiFetch("/recovery", "POST", { email: emailInput })
+					if (respData.message) {
+						setRecoveryMessage(respData.message)
+					} else {
+						throw new Error(respData.error || "Error al enviar la solicitud de recuperación de contraseña.");
 					}
 				} catch (error) {
-					console.error("Error en la autenticación:", error.message);
-					throw new Error(error.message);
+					console.error("Error al enviar la solicitud de recuperación de contraseña:", error);
+					setError(error.message);
 				}
 			},
 			createUser: async (body) => {
@@ -108,56 +158,76 @@ const getState = ({ getStore, getActions, setStore }) => {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin':'*'
-						},
-						body: JSON.stringify(body),
+							'Access-Control-Allow-Origin': '*',
+							'Authorization': 'Bearer ' + localStorage.getItem("token")
+						}
 					});
-			
 					if (resp.ok) {
 						const data = await resp.json();
-						const newUser = {
-							id: data.role_id,
-							username: data.username,
-							name: data.name,
-							lastname: data.lastname,
-							dni: data.dni,
-							phone: data.phone,
-							email: data.email,
-							virtual_link: data.virtual_link
-						};
-						const updatedUserList = [...getStore().user, newUser];
-						setStore({ user: updatedUserList });
 						return data;
 					} else {
-						const errorMessage = await resp.text(); 
-						throw new Error(errorMessage || "Error al crear el usuario.");
+						throw new Error("Error al obtener el usuario.");
 					}
 				} catch (error) {
-					console.error("Error creating user:", error);
+					console.error("Error al obtener usuarios:", error.message);
 					throw error;
 				}
-			},								
-			sendPasswordRecoveryRequest: async (emailInput, setRecoveryMessage, setError) => {
+			},
+			editUser: async (id, userData) => {
 				try {
-					const response = await fetch(process.env.BACKEND_URL + "api/recovery", {
-						method: "POST",
+					const resp = await fetch(process.env.BACKEND_URL + `api/edit_user/${id}`, {
+						method: 'PUT',
 						headers: {
-							"Content-Type": "application/json",
-							'Access-Control-Allow-Origin': '*'
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+							'Authorization': 'Bearer ' + localStorage.getItem("token")
 						},
-						body: JSON.stringify({ email: emailInput }),
+						body: JSON.stringify(userData)
 					});
-
-					const responseData = await response.json();
-
-					if (response.ok) {
-						setRecoveryMessage(responseData.message);
+					if (resp.ok) {
+						const userIndex = getStore().user.findIndex(user => user.id === id);
+						if (userIndex !== -1) {
+							const updatedUsers = [...getStore().user];
+							updatedUsers[userIndex] = {...userData, id};
+							setStore({ user: updatedUsers });
+							return {...userData, id};
+						} else {
+							throw new Error('Usuario no encontrado');
+						}
 					} else {
-						throw new Error(responseData.error || "Error al enviar la solicitud de recuperación de contraseña.");
+						throw new Error('Error al editar el usuario');
 					}
 				} catch (error) {
-					console.error("Error al enviar la solicitud de recuperación de contraseña:", error);
-					setError(error.message);
+					console.error("Error al editar el usuario:", error.message);
+					throw error; 
+				}	
+			},
+			getUserData: async () => {
+				try {
+					const resp = await getActions().protectedFetch("/profile", "GET", null)
+					if (!resp.ok) {
+						console.error("Error al traer datos de usuario: ", resp)
+						return { error: "Error al traer datos de usuario" }
+					}
+					return await resp.json()
+				} catch (error) {
+					console.error("Error: ", error)
+					return { Error: "Error al traer datos de usuario" }
+				}
+			},
+			editProfile: async (changes) => {
+				try {
+					const resp = await getActions().protectedFetch("/profile_edit", "PUT", changes)
+
+					if (!resp.ok) {
+						throw new Error("No se pudo actualizar el perfil")
+					}
+
+					return await resp.json()
+
+				} catch (error) {
+					console.error("Error al actualizar el perfil: ", error)
+					throw error
 				}
 			},
 			getUsers: async () => {
