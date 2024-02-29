@@ -14,31 +14,32 @@
         ]
     },
     {   "target_class": "User",
-        "data":{
-            "role_id": 2, 
-            "username": "SVIGANO",
-            "name": "Sofia",
-            "lastname": "Vigano",
-            "dni": "36353875",  
-            "email": "marmargara.mm@gmail.com",
-            "phone": "3513052538",
-            "password": "",
-            "virtual_link": "",
-            "is_active": true
-        },
-        
-        { 
-            "role_id": 1, 
-            "username": "federesano",
-            "name": "Federico",
-            "lastname": "Resano",
-            "dni": "41202848",  
-            "email": "federicoresano1@gmail.com",
-            "phone": "2345651150",
-            "password": "",
-            "virtual_link": "",
-            "is_active": true
-        }
-        
+        "data":[
+            {
+                "role_id": 2, 
+                "username": "SVIGANO",
+                "name": "Sofia",
+                "lastname": "Vigano",
+                "dni": "36353875",  
+                "email": "marmargara.mm@gmail.com",
+                "phone": "3513052538",
+                "password": "",
+                "virtual_link": "",
+                "is_active": true
+            },
+            {
+                "role_id": 1, 
+                "username": "FRESANO",
+                "name": "Federico",
+                "lastname": "Resano",
+                "dni": "41202848",  
+                "email": "federesano1@gmail.com",
+                "phone": "2345651150",
+                "password": "",
+                "virtual_link": "",
+                "is_active": true
+            }
+
+        ]
     }
 ]
