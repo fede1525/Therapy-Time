@@ -4,7 +4,7 @@ import { Context } from "../store/appContext";
 
 export const Login = () => {
     const { actions } = useContext(Context);
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
@@ -12,15 +12,17 @@ export const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const result = await actions.loginUser(email, password);
-            if (result) {
+            const result = await actions.loginUser(username, password);
+            if (result.success) {
                 navigate("/home");
-                setEmail('');
+                setUsername('');
                 setPassword('');
+            } else {
+                setErrorMessage(result.error);
             }
-          } catch (error) {
+        } catch (error) {
             console.error("Error en el inicio de sesión:", error.message);
-            setErrorMessage(error.message); 
+            setErrorMessage("Error de red"); 
         }  
     };
 
@@ -32,15 +34,15 @@ export const Login = () => {
         <div className="container login">
             <form onSubmit={handleLogin}>
                 <div className="form-group">
-                    <label htmlFor="email">Email:</label>
+                    <label htmlFor="username">Username:</label>
                     <input
-                        type="email"
+                        type="text"
                         className="form-control"
-                        id="email"
-                        name="email"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) => {setEmail(e.target.value); handleInputChange(); }}
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        value={username}
+                        onChange={(e) => {setUsername(e.target.value); handleInputChange(); }}
                         required
                     />
                 </div>
@@ -79,6 +81,3 @@ export const Login = () => {
         </div>
     );
 };
-
-
-

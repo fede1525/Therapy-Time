@@ -34,28 +34,6 @@ def verify_password_reset_token(token, max_age=3600):
     except Exception as e:
         return None
     
-# Funcion para enviar el mail de recuperación 
-def send_email_recovery_email(recipient_email, link):
-    api_key = os.environ['API_KEY']
-    domain = os.environ['DOMAIN']
-    url = f"https://api.mailgun.net/v3/{domain}/messages"
-
-    text = f"Click the link below to reset your password:\n{link}"
-
-    payload = {
-        "from": "keverapp@gmail.com",
-        "to": recipient_email,
-        "subject": "Kever password reset.",
-        "text": text
-    }
-
-    response = requests.post(url, auth=("api", api_key), data=payload)
-
-    if response.status_code == 200:
-        print("Password reset email sent successfully.")
-    else:
-        print("Failed to send password reset email.")
-    
 # Alta a nuevo usuario
 @api.route('/signup', methods=['POST'])
 def create_user():
@@ -77,8 +55,8 @@ def create_user():
     if existing_dni_user:
         return jsonify({"error": "Este DNI ya está registrado."}), 400
 
-    default_password = bcrypt.generate_password_hash(bcrypt.generate_password_hash(dni, 10).decode("utf-8"), 10).decode("utf-8")
-    
+    default_password = bcrypt.generate_password_hash(dni, 10).decode("utf-8")
+
     new_user = User(
         role_id=role_id,
         username=username,
@@ -170,20 +148,33 @@ def edit_user(id):
 @api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    email = data.get("email")
+    username = data.get("username")
     password = data.get("password")
 
-    user = User.query.filter_by(email=email).first()
-
-    if user and bcrypt.check_password_hash(user.password, password):
-
-        user.is_active = True
-        db.session.commit()
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return jsonify({"msg": "Usuario incorrecto"}), 404
     
+    if not bcrypt.check_password_hash(user.password, password):
+        return jsonify({"error": "Contraseña incorrecta"}), 401  
+    
+    if bcrypt.check_password_hash(user.password, password):
         token = create_access_token(identity=user.id)
-        return jsonify({"message": "Inicio de sesión exitoso", "token": token}), 200
+        return jsonify({"message": "Inicio de sesión exitoso", "token": token, "isAuthenticated": True}), 200
     else:
-        return jsonify({"error": "Credenciales inválidas"}), 401
+        return jsonify({"error": "Usuario o contraseña incorrectos", "isAuthenticated": False}), 401
+
+  
+
+
+
+
+
+
+
+
+
+
 
 # Para cerrar sesión
 @api.route('/logout', methods=['POST'])
@@ -248,33 +239,7 @@ def edit_profile():
 
     return jsonify({"message": "Perfil actualizado"}), 200
 
-# Link para recupero de contraseña
-@api.route('/recovery', methods=['POST'])
-def handle_password_recovery():
-    data = request.get_json()
-    email = data.get("email")
-    user = User.query.filter_by(email=email).first()
 
-    if user is None:
-        return jsonify({"error": "Usuario no encontrado"}), 404
-
-    try:
-        reset_token = generate_password_reset_token(user.id)
-        reset_link = url_for('api.reset_password', token=reset_token, _external=True)
-
-        msg = Message("Reestablecimiento de contraseña", sender="keverapp@gmail.com", recipients=[user.email])
-        msg.body = f"Para reestablecer tu contraseña, sigue este enlace: {reset_link}"
-        mail.send(msg)
-    except Exception as error: 
-        print(error)
-        return jsonify({"error": "No se pudo enviar el correo."}), 500
-    
-
-    return jsonify({"message": "Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña."}), 200
-
-# Resetear contraseña
-@api.route('/reset_password/<token>', methods=['POST'])
-def reset_password(token):
     user_id = verify_password_reset_token(token)
     if user_id is None:
         return jsonify({"error": "El token de restablecimiento de contraseña no es válido o ha caducado."}), 400
