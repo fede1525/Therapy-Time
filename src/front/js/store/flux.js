@@ -14,6 +14,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"password": "",
 					"virtual_link": "",
 					"is_active": "",
+					"isAuthenticated": false
 				},
 			],
 		},
@@ -69,36 +70,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await getActions().protectedFetch("/logout", "POST", null)
 				localStorage.removeItem("token")
 			},
-			loginUser: async (email, password) => {
-				try {
-					const resp = await fetch(process.env.BACKEND_URL + "api/login", {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin': '*'
-						},
-						body: JSON.stringify({ email, password }),
-					});
-					if (resp.ok) {
-						const data = await resp.json();
-						localStorage.setItem("token", data.token);
-						const updatedUserList = getStore().user.map(u => {
-							if (u.email === data.email) {
-								return { ...u, is_active: true };
-							}
-							return u;
-						});
-						setStore({ user: updatedUserList });
-						setStore({ is_active: true });
-						return data;
-					} else {
-						throw new Error("Credenciales invalidas.");
-					}
-				} catch (error) {
-					console.error("Error en la autenticación:", error.message);
-					throw new Error(error.message);
-				}
-			},
 			createUser: async (body) => {
 				try {
 					if (!body.username || !body.name || !body.lastname || !body.dni || !body.phone || !body.email) {
@@ -137,29 +108,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},								
-			sendPasswordRecoveryRequest: async (emailInput, setRecoveryMessage, setError) => {
-				try {
-					const response = await fetch(process.env.BACKEND_URL + "api/recovery", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							'Access-Control-Allow-Origin': '*'
-						},
-						body: JSON.stringify({ email: emailInput }),
-					});
-
-					const responseData = await response.json();
-
-					if (response.ok) {
-						setRecoveryMessage(responseData.message);
-					} else {
-						throw new Error(responseData.error || "Error al enviar la solicitud de recuperación de contraseña.");
-					}
-				} catch (error) {
-					console.error("Error al enviar la solicitud de recuperación de contraseña:", error);
-					setError(error.message);
-				}
-			},
 			getUsers: async () => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "api/users", {
@@ -259,7 +207,40 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al actualizar el perfil: ", error)
 					throw error
 				}
-			}
+			},
+			loginUser: async (username, password) => {
+				try {
+					const response = await fetch(process.env.BACKEND_URL + '/api/login', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+						},
+						body: JSON.stringify({
+							username: username,
+							password: password
+						})
+					});					
+					if (!response.ok) {
+						throw new Error('Failed to log in');
+						
+					}					
+					const responseData = await response.json();
+					const token = responseData.token || "";
+					const userRole = responseData.role || "";
+					
+					localStorage.setItem('accessToken', token);
+					console.log("Token almacenado en localStorage:", token);
+					
+					setStore({ isAuthenticated: true, role: userRole });
+					
+					return { success: true, message: responseData.message };
+				} catch (error) {
+					console.error("Error al realizar la solicitud:", error);
+					setStore({ isAuthenticated: false, userRole: "" });
+					return { success: false, error: 'Error de red' };
+				}
+			}						
 		}
 	};
 };
