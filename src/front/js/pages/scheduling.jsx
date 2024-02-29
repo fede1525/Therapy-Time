@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import "../../styles/home.css";
 
-export const Scheduling = () => {
+export const Block = () => {
   const [calendar, setCalendar] = useState([]);
   const [month, setMonth] = useState(0);
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [selectedHour, setSelectedHour] = useState(null);
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
@@ -14,6 +15,7 @@ export const Scheduling = () => {
     let day = 1;
 
     const newCalendar = [];
+
 
     for (let i = 0; i < 6; i++) {
       const row = [];
@@ -29,41 +31,85 @@ export const Scheduling = () => {
         } else {
           // Celdas vacías después del último día del mes
           row.push('');
+          
         }
       }
-
+      console.log(calendar)
+      console.log(row)
       newCalendar.push(row);
     }
 
     setCalendar(newCalendar);
-  }, [month]); // La dependencia incluye 'month'
+  }, [month]); 
 
   const handleDayClick = (day) => {
     setSelectedDay(day);
     setShowModal(true);
+    console.log("se seleccionó el día: ", selectedDay)
+    console.log(calendar)
+    
+  };
+
+  const handleHourClick = (hour) => {
+    setSelectedHour(hour);
+    setShowModal(true)
+    console.log("hora seleccionada", hour, ":00", "del día", selectedDay)
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
+    setSelectedHour(null); // Limpiar la hora seleccionada al cerrar el modal
+  };
+
+  const handleBlockTime = () => {
+    
+    const data = {
+      date: selectedDay,
+      time_id: selectedHour,
+    };
+
+    fetch('http://127.0.0.1:3001/bloquear', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Hora bloqueada exitosamente:', data);
+      const updatedCalendar = calendar.map(row => row.filter(cell => cell !== selectedDay));
+      setCalendar(updatedCalendar);
+      handleCloseModal();
+    })
+    .catch(error => {
+      console.error('Error al bloquear la hora:', error);
+      // Manejar errores según sea necesario
+    });
   };
 
   const renderModalContent = () => {
-    // Lógica para generar las horas (de 8 a 20) en el modal
     const hours = Array.from({ length: 13 }, (_, index) => index + 8);
+    
+    console.log("renderizó el modal")
 
     return (
       <div className="modal-content">
         <h2>Horas disponibles para el día {selectedDay}</h2>
         <ul>
           {hours.map((hour) => (
-            <li key={hour}>{hour}:00 - {hour + 1}:00</li>
+            <li key={hour} onClick={() => handleHourClick(hour)}>
+              {hour}:00 - {hour + 1}:00
+            </li>
           ))}
         </ul>
+        {selectedHour && (
+          <button onClick={handleBlockTime}>Bloquear Hora</button>
+        )}
         <button onClick={handleCloseModal}>Cerrar</button>
       </div>
     );
   };
-
   return (
     <div>
       <h2>Calendario 2024</h2>

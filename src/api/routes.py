@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, BlockedTokenList, Role, seed
+from api.models import db, User, BlockedTokenList, Role, AvailabilityDates, seed
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -33,8 +33,8 @@ def verify_password_reset_token(token, max_age=3600):
         return user_id
     except Exception as e:
         return None
-    
-# Funcion para enviar el mail de recuperación 
+
+# Funcion para enviar el mail de recuperación
 def send_email_recovery_email(recipient_email, link):
     api_key = os.environ['API_KEY']
     domain = os.environ['DOMAIN']
@@ -55,7 +55,7 @@ def send_email_recovery_email(recipient_email, link):
         print("Password reset email sent successfully.")
     else:
         print("Failed to send password reset email.")
-    
+
 # Alta a nuevo usuario
 @api.route('/signup', methods=['POST'])
 def create_user():
@@ -64,7 +64,7 @@ def create_user():
     username = data.get("username")
     name = data.get("name")
     lastname = data.get("lastname")
-    dni = data.get("dni")  
+    dni = data.get("dni")
     phone = data.get("phone")
     email = data.get("email")
     virtual_link = data.get("virtual_link")
@@ -84,10 +84,10 @@ def create_user():
         username=username,
         name=name,
         lastname=lastname,
-        dni=dni, 
+        dni=dni,
         email=email,
         phone=phone,
-        password=default_password, 
+        password=default_password,
         virtual_link=virtual_link
     )
 
@@ -111,7 +111,7 @@ def handle_hello():
 @api.route('/users/<int:user_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user(user_id):
-   
+
     current_user_id = get_jwt_identity()
 
     current_user = User.query.get(current_user_id)
@@ -137,13 +137,13 @@ def list_users():
     return jsonify(serialized_users), 200
 
 #Buscar un solo usuario
-@api.route('/get_user/<int:id>', methods=['GET'])  
+@api.route('/get_user/<int:id>', methods=['GET'])
 def get_user(id):
-    user = User.query.get(id) 
+    user = User.query.get(id)
     if user:
-        return jsonify(user.serialize()), 200  
+        return jsonify(user.serialize()), 200
     else:
-        return jsonify({"message": "Usuario no encontrado"}), 404  
+        return jsonify({"message": "Usuario no encontrado"}), 404
 
 #Editar usuario
 @api.route('/edit_user/<int:id>', methods=['PUT'])
@@ -151,7 +151,7 @@ def edit_user(id):
     user = User.query.get(id)
     if not user:
         return jsonify({"message": "Usuario no encontrado"}), 404
-    
+
     data = request.get_json()
     user.username = data['username']
     user.name = data['name']
@@ -179,7 +179,7 @@ def login():
 
         user.is_active = True
         db.session.commit()
-    
+
         token = create_access_token(identity=user.id)
         return jsonify({"message": "Inicio de sesión exitoso", "token": token}), 200
     else:
@@ -203,7 +203,7 @@ def logout_user():
 def get_profile():
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
-    
+
     if user is None:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
@@ -225,13 +225,13 @@ def edit_profile():
         if key == "password":
             continue
         user[key] = data[key]
-       
+
     """ if 'username' in data:
         user.username = data['username']
 
     if 'name' in data:
         user.name = data['name']
-    
+
     if 'lastname' in data:
         user.lastname = data['lastname']
 
@@ -265,12 +265,40 @@ def handle_password_recovery():
         msg = Message("Reestablecimiento de contraseña", sender="keverapp@gmail.com", recipients=[user.email])
         msg.body = f"Para reestablecer tu contraseña, sigue este enlace: {reset_link}"
         mail.send(msg)
-    except Exception as error: 
+    except Exception as error:
         print(error)
         return jsonify({"error": "No se pudo enviar el correo."}), 500
-    
+
 
     return jsonify({"message": "Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña."}), 200
+
+#bloqueo de fechas
+@app.route('/bloquear', methods=['POST'])
+def bloquear():
+    try:
+        data = request.get_json()
+
+        # Asegúrate de que los datos proporcionados son correctos
+        required_fields = ['date', 'time_id']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'{field} es un campo obligatorio'}), 400
+
+        # Crea una nueva instancia de AvailabilityDates con availability=False
+        nueva_disponibilidad = AvailabilityDates(
+            date=data['date'],
+            time_id=data['time_id'],
+            availability=False
+        )
+
+        # Agrega la nueva instancia a la sesión y realiza un commit
+        db.session.add(nueva_disponibilidad)
+        db.session.commit()
+
+        return jsonify({'mensaje': 'Hora bloqueada exitosamente'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Resetear contraseña
 @api.route('/reset_password/<token>', methods=['POST'])
