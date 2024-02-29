@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, BlockedTokenList
+from api.models import db, User, BlockedTokenList, Role, seed
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -17,12 +17,9 @@ bcrypt = Bcrypt(app)
 mail = Mail(app)
 api = Blueprint('api', __name__)
 
-
 CORS(api)
 
-
 serializer = URLSafeTimedSerializer(os.environ['SECRET_KEY'])
-
 
 # Crear el token
 def generate_password_reset_token(user_id):
@@ -63,20 +60,35 @@ def send_email_recovery_email(recipient_email, link):
 @api.route('/signup', methods=['POST'])
 def create_user():
     data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+    role_id = data.get("role_id", 1)
     username = data.get("username")
-    profile_picture = data.get("profile_picture")
+    name = data.get("name")
+    lastname = data.get("lastname")
+    dni = data.get("dni")  
+    phone = data.get("phone")
+    email = data.get("email")
+    virtual_link = data.get("virtual_link")
 
-    existing_user = User.query.filter_by(email=email).first()
-    if existing_user:
+    existing_email_user = User.query.filter_by(email=email).first()
+    if existing_email_user:
         return jsonify({"error": "Este correo ya está registrado."}), 400
 
+    existing_dni_user = User.query.filter_by(dni=dni).first()
+    if existing_dni_user:
+        return jsonify({"error": "Este DNI ya está registrado."}), 400
+
+    default_password = dni
+
     new_user = User(
-        email=email,
-        password=bcrypt.generate_password_hash(password, 10).decode("utf-8"),
+        role_id=role_id,
         username=username,
-        profile_picture=profile_picture
+        name=name,
+        lastname=lastname,
+        dni=dni, 
+        email=email,
+        phone=phone,
+        password=default_password, 
+        virtual_link=virtual_link
     )
 
     db.session.add(new_user)
@@ -85,6 +97,15 @@ def create_user():
     token = create_access_token(identity=new_user.id)
 
     return jsonify({"message": "Usuario creado exitosamente", "token": token}), 201
+
+# Seeder
+@api.route('/seed', methods=['POST', 'GET'])
+def handle_hello():
+    seed()
+    response_body ={
+        "message": "Data cargada"
+    }
+    return jsonify(response_body, 200)
 
 # Eliminar un usuario
 @api.route('/users/<int:user_id>', methods=['DELETE'])
@@ -114,6 +135,36 @@ def list_users():
     users = User.query.all()
     serialized_users = [user.serialize() for user in users]
     return jsonify(serialized_users), 200
+
+#Buscar un solo usuario
+@api.route('/get_user/<int:id>', methods=['GET'])  
+def get_user(id):
+    user = User.query.get(id) 
+    if user:
+        return jsonify(user.serialize()), 200  
+    else:
+        return jsonify({"message": "Usuario no encontrado"}), 404  
+
+#Editar usuario
+@api.route('/edit_user/<int:id>', methods=['PUT'])
+def edit_user(id):
+    user = User.query.get(id)
+    if not user:
+        return jsonify({"message": "Usuario no encontrado"}), 404
+    
+    data = request.get_json()
+    user.username = data['username']
+    user.name = data['name']
+    user.lastname = data['lastname']
+    user.dni = data['dni']
+    user.phone = data['phone']
+    user.virtual_link = data['virtual_link']
+    user.email = data['email']
+    user.is_active = data['is_active']
+
+    db.session.commit()
+
+    return jsonify({"message": "Usuario actualizado exitosamente"}), 200
 
 # Login de usuario
 @api.route('/login', methods=['POST'])
@@ -145,6 +196,57 @@ def logout_user():
     db.session.add(blocked_token)
     db.session.commit()
     return jsonify({"msg": "Sesión cerrada exitosamente."}), 200
+
+# Para conseguir el perfil de usuario
+@api.route('/profile', methods=['GET'])
+@jwt_required()
+def get_profile():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    
+    if user is None:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    return jsonify(user.serialize()), 200
+
+# Para editar el perfil
+@api.route('/profile_edit', methods=['PUT'])
+@jwt_required()
+def edit_profile():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+
+    if user is None:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    data = request.get_json()
+
+    for key in data:
+        if key == "password":
+            continue
+        user[key] = data[key]
+       
+    """ if 'username' in data:
+        user.username = data['username']
+
+    if 'name' in data:
+        user.name = data['name']
+    
+    if 'lastname' in data:
+        user.lastname = data['lastname']
+
+    if 'birth_date' in data:
+        user.birth_date = data['birth_data']
+
+    if 'phone' in data:
+        user.phone = data['phone'] """
+
+    if 'password' in data:
+        user.password = bcrypt.generate_password_hash(data['password']).decode("utf-8")
+
+    db.session.commit()
+
+    return jsonify({"message": "Perfil actualizado"}), 200
 
 # Link para recupero de contraseña
 @api.route('/recovery', methods=['POST'])
