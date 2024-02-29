@@ -79,7 +79,7 @@ def create_user():
         return jsonify({"error": "Este DNI ya está registrado."}), 400
 
     default_password = bcrypt.generate_password_hash(dni, 10).decode("utf-8")
-
+    
     new_user = User(
         role_id=role_id,
         username=username,
