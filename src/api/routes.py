@@ -7,10 +7,11 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
 from flask import url_for
 from itsdangerous import URLSafeTimedSerializer
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import requests
 import datetime
+
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -153,28 +154,24 @@ def login():
 
     user = User.query.filter_by(username=username).first()
     if user is None:
-        return jsonify({"msg": "Usuario incorrecto"}), 404
+        return jsonify({"error": "Usuario incorrecto"}), 404
     
     if not bcrypt.check_password_hash(user.password, password):
         return jsonify({"error": "Contraseña incorrecta"}), 401  
-    
+
     if bcrypt.check_password_hash(user.password, password):
         token = create_access_token(identity=user.id)
-        return jsonify({"message": "Inicio de sesión exitoso", "token": token, "isAuthenticated": True}), 200
+        return jsonify({
+            "message": "Inicio de sesión exitoso",
+            "token": token,
+            "isAuthenticated": True,
+            "role": user.role.name  
+        }), 200
     else:
-        return jsonify({"error": "Usuario o contraseña incorrectos", "isAuthenticated": False}), 401
-
-  
-
-
-
-
-
-
-
-
-
-
+        return jsonify({
+            "error": "Error en la autenticacion",
+            "isAuthenticated": False
+        }), 500
 
 # Para cerrar sesión
 @api.route('/logout', methods=['POST'])

@@ -14,7 +14,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"password": "",
 					"virtual_link": "",
 					"is_active": "",
-					"isAuthenticated": ""
+					"isAuthenticated": false
 				},
 			],
 		},
@@ -214,31 +214,33 @@ const getState = ({ getStore, getActions, setStore }) => {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin':'*',
+							'Access-Control-Allow-Origin': '*',
 						},
 						body: JSON.stringify({
 							username: username,
 							password: password
 						})
-					});
-			
+					});					
+					if (!response.ok) {
+						throw new Error('Failed to log in');
+						
+					}					
 					const responseData = await response.json();
-			
-					if (response.ok) {
-						localStorage.setItem('accessToken', responseData.token);
-						console.log("Token almacenado en localStorage:", responseData.token);
-						setStore({ isAuthenticated: true });
-						return { success: true, message: responseData.message };
-					} else {
-						setStore({ isAuthenticated: false });
-						return { success: false, error: responseData.error || responseData.msg };
-					}
+					const token = responseData.token || "";
+					const userRole = responseData.role || "";
+					
+					localStorage.setItem('accessToken', token);
+					console.log("Token almacenado en localStorage:", token);
+					
+					setStore({ isAuthenticated: true, role: userRole });
+					
+					return { success: true, message: responseData.message };
 				} catch (error) {
 					console.error("Error al realizar la solicitud:", error);
-					setStore({ isAuthenticated: false });
+					setStore({ isAuthenticated: false, userRole: "" });
 					return { success: false, error: 'Error de red' };
 				}
-			}
+			}						
 		}
 	};
 };
