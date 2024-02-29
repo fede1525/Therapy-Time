@@ -68,7 +68,7 @@ export const Block = () => {
       time_id: selectedHour,
     };
 
-    fetch('http://127.0.0.1:3001/bloquear', {
+    fetch('https://probable-space-parakeet-6jj75v7jgjvf55pv.github.dev/bloquear', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
