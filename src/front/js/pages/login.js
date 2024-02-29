@@ -1,80 +1,61 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 export const Login = () => {
     const { actions } = useContext(Context);
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-    const [showPassword, setShowPassword] = useState(false)
-    const [errorMessage, setErrorMessage] = useState('')
-    const navigate = useNavigate()
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const result = await actions.loginUser(username, password);
-
-            if (result.ok) {
-                const userRole = result.role_id
-                setUsername('')
-                setPassword('')
-                if (userRole === 1) {
-                    navigate("/homePatient")
-                } else if (userRole === 2) {
-                    navigate("/homeTherapist")
-                }
+            const result = await actions.loginUser(email, password);
+            if (result) {
+                navigate("/home");
+                setEmail('');
+                setPassword('');
             }
-        } catch (error) {
+          } catch (error) {
             console.error("Error en el inicio de sesión:", error.message);
-            setErrorMessage("Error al iniciar sesión.");
-        }
+            setErrorMessage(error.message); 
+        }  
     };
 
     const handleInputChange = () => {
         setErrorMessage('');
     };
 
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword)
-    }
-
     return (
         <div className="container login">
             <form onSubmit={handleLogin}>
                 <div className="form-group">
-                    <label htmlFor="username">Nombre de usuario </label>
+                    <label htmlFor="email">Email:</label>
                     <input
-                        type="text"
+                        type="email"
                         className="form-control"
-                        id="username"
-                        name="username"
-                        placeholder="Ingrese su nombre de usuario"
-                        value={username}
-                        onChange={(e) => { setUsername(e.target.value); handleInputChange(); }}
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => {setEmail(e.target.value); handleInputChange(); }}
                         required
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="password">Contraseña </label>
+                    <label htmlFor="password">Password:</label>
                     <input
-                        type={showPassword ? "text" : "password"}
+                        type="password"
                         className="form-control"
                         id="password"
                         name="password"
-                        placeholder="Ingrese su contraseña"
+                        placeholder="Enter your password"
                         value={password}
-                        onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
+                        onChange={(e) => {setPassword(e.target.value); handleInputChange(); }}
                         required
                     />
-                    <button id="toggle-password" type="button" onClick={togglePasswordVisibility}>
-                        <FontAwesomeIcon
-                            icon={showPassword ? faEyeSlash : faEye}
-                            className="eye-icon"
-                        />
-                    </button>
                 </div>
                 {errorMessage && (
                     <div className="alert alert-danger" role="alert">
@@ -82,16 +63,18 @@ export const Login = () => {
                     </div>
                 )}
                 <div className="text-center">
-                    <button type="submit" className="btn btnLogin btn-border-radius">
-                        Ingresar
+                    <button type="submit" className="btn btnLogin">
+                        Login
                     </button>
                 </div>
             </form>
             <div className="mt-3 text-center link">
-                <Link to="/recovery">Recuperar contraseña</Link>
-            </div>
-            <div className="mt-3 text-center link">
-                <Link to="/">← Volver</Link>
+                <p>
+                     Forgot your password? <Link to="/recovery">Recover it here</Link>
+                </p>
+                <p>
+                    <Link to="/">← Go Back</Link>
+                </p>
             </div>
         </div>
     );
