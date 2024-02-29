@@ -21,9 +21,9 @@ export const Login = () => {
                 const userRole = result.role_id
                 setUsername('')
                 setPassword('')
-                if (userRole === 0) {
+                if (userRole === 1) {
                     navigate("/homePatient")
-                } else if (userRole === 1) {
+                } else if (userRole === 2) {
                     navigate("/homeTherapist")
                 }
             }
@@ -69,13 +69,12 @@ export const Login = () => {
                         onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
                         required
                     />
-                    <button id="toggle-password" type="button" className="d-none" onClick={togglePasswordVisibility}>
+                    <button id="toggle-password" type="button" onClick={togglePasswordVisibility}>
                         <FontAwesomeIcon
                             icon={showPassword ? faEyeSlash : faEye}
                             className="eye-icon"
                         />
                     </button>
-
                 </div>
                 {errorMessage && (
                     <div className="alert alert-danger" role="alert">
