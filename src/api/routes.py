@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, BlockedTokenList, Role
+from api.models import db, User, BlockedTokenList, Role, seed
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -70,9 +70,13 @@ def create_user():
     email = data.get("email")
     virtual_link = data.get("virtual_link")
 
-    existing_user = User.query.filter_by(email=email).first()
-    if existing_user:
+    existing_email_user = User.query.filter_by(email=email).first()
+    if existing_email_user:
         return jsonify({"error": "Este correo ya está registrado."}), 400
+
+    existing_dni_user = User.query.filter_by(dni=dni).first()
+    if existing_dni_user:
+        return jsonify({"error": "Este DNI ya está registrado."}), 400
 
     default_password = dni
 
@@ -95,19 +99,14 @@ def create_user():
 
     return jsonify({"message": "Usuario creado exitosamente", "token": token}), 201
 
-# Crear roles de usuario
-@app.route('/roles', methods=['POST'])
-def create_role():
-    data = request.json
-    if 'name' not in data:
-        return jsonify({'error': 'Missing name parameter'}), 400
-
-    name = data['name']
-    new_role = Role(name=name)
-
-    db.session.add(new_role)
-    db.session.commit()
-    return jsonify({'message': 'Role created successfully', 'role': new_role.serialize()}), 201
+# Seeder
+@api.route('/seed', methods=['POST', 'GET'])
+def handle_hello():
+    seed()
+    response_body ={
+        "message": "Data cargada"
+    }
+    return jsonify(response_body, 200)
 
 # Eliminar un usuario
 @api.route('/users/<int:user_id>', methods=['DELETE'])
