@@ -261,7 +261,30 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					throw new Error(error.message || 'Error al enviar la solicitud');
 				}
-			}
+			},
+			handleChangePassword: async (username, token, newPassword) => {
+				try {
+				  const response = await fetch(process.env.BACKEND_URL + '/api/change_password', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin': '*',
+						},
+					body: JSON.stringify({
+						username: username,
+						token: token,
+						new_password: newPassword
+					})
+				  });
+				  const data = await response.json();
+				  if (!response.ok) {
+					  throw new Error(data.error || 'Error al enviar la solicitud');
+				  	}
+				  return data;
+			  	} catch (error) {
+				  throw new Error(error.message || 'Error al enviar la solicitud');
+			  	}
+		  	},
 		}
 	};
 };

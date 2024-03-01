@@ -18,6 +18,7 @@ import { Patients } from "./pages/patients";
 import { Profile } from "./pages/profile";
 import { Payments } from "./pages/payments";
 import { PatientSchedule } from "./pages/patientSchedule";
+import { Reset_password } from "./pages/resetPassword";
 
 const Layout = () => {
     const basename = process.env.BASENAME || "";
@@ -47,6 +48,7 @@ const Layout = () => {
                         <Route element={<AppointmentScheduler />} path="/appointment_scheduling" />
                         <Route element={<IncomeControl />} path="/income_control" />
                         <Route element={<Inbox />} path="/inbox" />
+                        <Route element={<Reset_password />} path="/reset_password" />
                         <Route element={<Patients />} path="/patients" />
                     </Routes>
                     <Footer />

@@ -289,3 +289,21 @@ def reset_password():
 
     return jsonify({"message": "Correo electrónico de recuperación enviado"}), 200
 
+# Endpoint para cambiar la contraseña
+@api.route('/change_password', methods=['POST'])
+def change_password():
+    data = request.get_json()
+    username = data.get('username')
+    token = data.get('token')
+    new_password = data.get('new_password')
+
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({"mensaje": "El usuario ingresado es inválido"}), 404 
+    if bcrypt.check_password_hash(user.reset_token, token):
+        new_password = bcrypt.generate_password_hash(new_password, 10).decode("utf-8")
+        user.password = new_password 
+        db.session.commit()
+        return jsonify({"mensaje": "Contraseña cambiada exitosamente"}), 200
+    else:
+        return jsonify({"mensaje": "El token ingresado es inválido o ha expirado"}), 401
