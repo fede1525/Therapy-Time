@@ -14,7 +14,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"password": "",
 					"virtual_link": "",
 					"is_active": "",
-					"isAuthenticated": false
+					"isAuthenticated": false,
+					"reset_token": ""
 				},
 			],
 		},
@@ -240,7 +241,50 @@ const getState = ({ getStore, getActions, setStore }) => {
 					setStore({ isAuthenticated: false, userRole: "" });
 					return { success: false, error: 'Error de red' };
 				}
-			}						
+			},
+			handleResetPassword: async (email) => {
+				try {
+					const response = await fetch(process.env.BACKEND_URL + '/api/reset_password', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+						},
+						body: JSON.stringify({ email })
+					});
+					
+					const data = await response.json();
+					if (!response.ok) {
+						throw new Error(data.error || 'Error al enviar la solicitud');
+					}
+					return data;
+				} catch (error) {
+					throw new Error(error.message || 'Error al enviar la solicitud');
+				}
+			},
+			handleChangePassword: async (username, token, newPassword) => {
+				try {
+				  const response = await fetch(process.env.BACKEND_URL + '/api/change_password', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin': '*',
+						},
+					body: JSON.stringify({
+						username: username,
+						token: token,
+						new_password: newPassword
+					})
+				  });
+				  const data = await response.json();
+				  if (!response.ok) {
+					  throw new Error(data.error || 'Error al enviar la solicitud');
+				  	}
+				  return data;
+			  	} catch (error) {
+				  throw new Error(error.message || 'Error al enviar la solicitud');
+			  	}
+		  	},
 		}
 	};
 };

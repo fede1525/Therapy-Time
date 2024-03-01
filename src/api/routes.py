@@ -5,21 +5,25 @@ from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
-from flask import url_for
 from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
+import datetime, json, string, random
 import requests
-import datetime
 
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
-mail = Mail(app)
 api = Blueprint('api', __name__)
 
 CORS(api)
 
+EMAILJS_SERVICE_ID = 'service_yrznk4m'
+EMAILJS_TEMPLATE_ID = 'template_ebpnklz'
+EMAILJS_USER_ID = 'sm1cI8ucvO4Tvl_jb'
+ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
+
+# Serializador para generar y verificar tokens
 serializer = URLSafeTimedSerializer(os.environ['SECRET_KEY'])
 
 # Crear el token
@@ -236,17 +240,70 @@ def edit_profile():
 
     return jsonify({"message": "Perfil actualizado"}), 200
 
+# Funcion para el envio de correo electronico
+def enviar_correo_recuperacion(email, token):
+    datos_correo = {
+        'service_id': EMAILJS_SERVICE_ID, 
+        'template_id': EMAILJS_TEMPLATE_ID,  
+        'user_id': EMAILJS_USER_ID ,  
+        'accessToken': ACCES_TOKEN,
+        'template_params': {
+            'email': email,
+            'token': token
+        }
+    }
 
-    user_id = verify_password_reset_token(token)
-    if user_id is None:
-        return jsonify({"error": "El token de restablecimiento de contraseña no es válido o ha caducado."}), 400
+    print("Datos del correo a enviar:")
+    print(json.dumps(datos_correo, indent=4))  
 
+    headers = {'Content-Type': 'application/json'}
+
+    response = requests.post('https://api.emailjs.com/api/v1.0/email/send', json=datos_correo, headers=headers)
+
+    if response.status_code == 200:
+        print("Correo electrónico de recuperación enviado con éxito!")
+    else:
+        print("Error al enviar el correo electrónico de recuperación:", response.text)
+
+# Endpoint restablecimiento de contraseña
+@api.route('/reset_password', methods=['POST'])
+def reset_password():
     data = request.get_json()
-    new_password = data.get("new_password")
+    email = data.get('email')
 
-    # Actualizar la contraseña en la bdd
-    user = User.query.get(user_id)
-    user.password = bcrypt.generate_password_hash(new_password)
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "No se encontró ningún usuario con ese correo electrónico"}), 404
+
+    token = ''.join(random.choices(string.digits, k=8))
+
+    hashed_temp_code = bcrypt.generate_password_hash(token).decode("utf-8")
+
+    token_expiry = datetime.datetime.now() + datetime.timedelta(minutes=30)
+    user.token_expiry = token_expiry
+
+    user.reset_token = hashed_temp_code
     db.session.commit()
 
-    return jsonify({"message": "Contraseña restablecida exitosamente."}), 200
+    enviar_correo_recuperacion(email, token)
+
+    return jsonify({"message": "Correo electrónico de recuperación enviado"}), 200
+
+# Endpoint para cambiar la contraseña
+@api.route('/change_password', methods=['POST'])
+def change_password():
+    data = request.get_json()
+    username = data.get('username')
+    token = data.get('token')
+    new_password = data.get('new_password')
+
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({"mensaje": "El usuario ingresado es inválido"}), 404 
+    if bcrypt.check_password_hash(user.reset_token, token):
+        new_password = bcrypt.generate_password_hash(new_password, 10).decode("utf-8")
+        user.password = new_password 
+        db.session.commit()
+        return jsonify({"mensaje": "Contraseña cambiada exitosamente"}), 200
+    else:
+        return jsonify({"mensaje": "El token ingresado es inválido o ha expirado"}), 401

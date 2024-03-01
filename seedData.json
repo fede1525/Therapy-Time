@@ -14,19 +14,21 @@
         ]
     },
     {   "target_class": "User",
-        "data":[
-            {
-                "role_id": 2, 
-                "username": "SVIGANO",
-                "name": "Sofia",
-                "lastname": "Vigano",
-                "dni": "36353875",  
-                "email": "marmargara.mm@gmail.com",
-                "phone": "3513052538",
-                "password": "$2b$10$ierXFXpwAUHtcbDtKPpAzukEx.w2YnPpifCv8IhdantRejGXJGczG",
-                "virtual_link": "",
-                "is_active": true
-            }
-        ]
+    "data":[
+        {
+            "role_id": 2, 
+            "username": "SVIGANO",
+            "name": "Sofia",
+            "lastname": "Vigano",
+            "dni": "35578170",  
+            "email": "lic.viganosofia@gmail.com",
+            "phone": "3513052538",
+            "password": "$2b$10$az08bFNmSTFjta0uTw5WCu0erhVEhbal8BSAzY606o.gmbLD29LMq",
+            "virtual_link": "",
+            "is_active": "true"
+        }
+    ]
     }
+
 ]
+   
