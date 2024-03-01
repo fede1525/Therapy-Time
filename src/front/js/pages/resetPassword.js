@@ -1,6 +1,5 @@
 import React, { useContext, useState } from "react";
 import { Context } from "../store/appContext";
-import { Link} from "react-router-dom";
 
 export const Reset_password = () => {
     const { actions } = useContext(Context);
@@ -28,52 +27,57 @@ export const Reset_password = () => {
         }
     };
 
+    const handleGoToLogin = () => {
+        // Redireccionar al inicio de sesión
+    };
+
     return (
-        <div className="container">
+        <div className="container d-flex justify-content-center m-5">
             {!showSuccess ? (
-                <div className="token">
-                    <h4>Recupero de contraseña</h4>
-                    <input
-                        type="text"
-                        placeholder="Ingrese su nombre de usuario"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Ingrese tu código de validación"
-                        value={resetToken}
-                        onChange={(e) => setResetToken(e.target.value)}
-                    />
-                    <form onSubmit={handleSubmit}>
-                        <div className="d-flex">
+                <form onSubmit={handleSubmit} className="text-center">
+                    <div className="token">
+                        <div className="form-group mb-3">
                             <input
-                                type="password"
-                                placeholder="Ingrese su nueva contraseña"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
+                                type="text"
+                                placeholder="Ingrese su nombre de usuario"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                             />
-                            <input
-                                type="password"
-                                placeholder="Repita su nueva contraseña"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                            />
-                            <button type="submit">Cambiar</button>
                         </div>
-                        {error && <p style={{ color: 'red' }}>{error}</p>}
-                    </form>
-                </div>
+                        <div className="form-group mb-3">
+                            <input
+                                type="text"
+                                placeholder="Ingrese tu código de validación"
+                                value={resetToken}
+                                onChange={(e) => setResetToken(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="form-group mb-3">
+                        <input
+                            type="password"
+                            placeholder="Ingrese su nueva contraseña"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                    </div>
+                    <div className="form-group mb-3">
+                        <input
+                            type="password"
+                            placeholder="Repita su nueva contraseña"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                    </div>
+                    <button type="submit">Guardar cambios</button>
+                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                </form>
             ) : (
                 <div>
                     <p>La contraseña se ha cambiado exitosamente</p>
-                    <p>
-                    <Link to="/login">← Volver al inicio de sesion</Link>
-                    </p>
+                    <p onClick={handleGoToLogin} style={{ cursor: 'pointer' }}>Volver al inicio de sesión</p>
                 </div>
             )}
         </div>
     );
 };
-
-

@@ -25,7 +25,7 @@
             "phone": "3513052538",
             "password": "$2b$10$az08bFNmSTFjta0uTw5WCu0erhVEhbal8BSAzY606o.gmbLD29LMq",
             "virtual_link": "",
-            "is_active": true
+            "is_active": "true"
         }
     ]
     }
