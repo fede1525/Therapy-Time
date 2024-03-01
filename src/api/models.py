@@ -20,6 +20,7 @@ class User(db.Model):
     password = db.Column(db.String(150), nullable=False) 
     virtual_link = db.Column(db.String(250), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
+    reset_token = db.Column(db.String(150))
 
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)

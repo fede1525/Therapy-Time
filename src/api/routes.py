@@ -8,9 +8,9 @@ from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
+import datetime, json, string, random
 import requests
-import datetime
-import json
+
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -265,7 +265,7 @@ def enviar_correo_recuperacion(email, token):
     else:
         print("Error al enviar el correo electrónico de recuperación:", response.text)
 
-# Ruta para solicitar el restablecimiento de contraseña
+# Endpoint restablecimiento de contraseña
 @api.route('/reset_password', methods=['POST'])
 def reset_password():
     data = request.get_json()
@@ -275,13 +275,17 @@ def reset_password():
     if not user:
         return jsonify({"error": "No se encontró ningún usuario con ese correo electrónico"}), 404
 
-    token = serializer.dumps(user.id, salt='reset-password-salt')
-    token_expiry = datetime.datetime.now() + datetime.timedelta(hours=1)
+    token = ''.join(random.choices(string.digits, k=8))
 
-    user.reset_token = token
+    hashed_temp_code = bcrypt.generate_password_hash(token).decode("utf-8")
+
+    token_expiry = datetime.datetime.now() + datetime.timedelta(minutes=30)
     user.token_expiry = token_expiry
+
+    user.reset_token = hashed_temp_code
     db.session.commit()
 
     enviar_correo_recuperacion(email, token)
 
     return jsonify({"message": "Correo electrónico de recuperación enviado"}), 200
+
