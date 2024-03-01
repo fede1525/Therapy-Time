@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Context } from "../store/appContext";
+import "../styles/navbar.css"
 
 export const Navbar = () => {
 	const { actions } = useContext(Context)
 	const [userData, setUserData] = useState('')
 	const [name, setName] = useState('')
+	const navigate = useNavigate()
 
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -27,6 +30,11 @@ export const Navbar = () => {
 	}, [actions])
 
 
+	const logoutUser = async () => {
+		await actions.logoutUser()
+		navigate("/login")
+	}
+
 	return (
 		<nav className="navbar fixed-top navbar-light bg-light">
 			<div className="container">
@@ -39,18 +47,19 @@ export const Navbar = () => {
 					<Link to="/patient_schedule">
 						<p id="turns-button">Turnero</p>
 					</Link>
+					<div id="separator"></div>
 					<Link to="/payments">
 						<p>Mis Pagos</p>
 					</Link>
 				</div>
 				<div id="profile-button">
 					<div class="dropdown">
-						<button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+						<button className="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
 							{name}
 						</button>
 						<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-							<li><Link class="dropdown-item" to="/profile">Mi perfil</Link></li>
-							<li><Link class="dropdown-item" to="/login">Cerrar sesión</Link></li>
+							<li><Link className="dropdown-item" to="/profile">Mi perfil</Link></li>
+							<li><button className="dropdown-item" onClick={logoutUser}>Cerrar sesión</button></li>
 						</ul>
 					</div>
 				</div>

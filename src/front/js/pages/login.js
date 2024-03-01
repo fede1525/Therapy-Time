@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 export const Login = () => {
     const { actions, store } = useContext(Context);
@@ -11,6 +13,8 @@ export const Login = () => {
         username: "",
         password: "",
     });
+    const [showPassword, setShowPassword] = useState(false)
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -75,6 +79,10 @@ export const Login = () => {
         return errors;
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword)
+    }
+
     return (
         <div className="container login">
             <form onSubmit={handleLogin}>
@@ -93,6 +101,7 @@ export const Login = () => {
                     {errorMessages.username && <p className="text-danger">{errorMessages.username}</p>}
                 </div>
                 <div className="form-group">
+<<<<<<< HEAD
                     <label htmlFor="password">Contraseña :</label>
                     <input
                         type="password"
@@ -104,6 +113,27 @@ export const Login = () => {
                         onChange={handleInputChange}
                         onFocus={() => handleInputFocus("password")}
                     />
+=======
+                    <label htmlFor="password">Password:</label>
+                    <div className="input-group">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            className="form-control"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={handleInputChange}
+                            onFocus={() => handleInputFocus("password")}
+                        />
+                        <button className="btn btn-outline-secondary" id="toggle-password" type="button" onClick={togglePasswordVisibility}>
+                            <FontAwesomeIcon
+                                icon={showPassword ? faEyeSlash : faEye}
+                                className="eye-icon"
+                            />
+                        </button>
+                    </div>
+>>>>>>> 5de70e7e952de318603e138f0724067f22382757
                     {errorMessages.password && <p className="text-danger">{errorMessages.password}</p>}
                 </div>
                 {errorMessage.password && (
@@ -122,7 +152,11 @@ export const Login = () => {
             </form>
             <div className="mt-3 text-center link">
                 <p>
+<<<<<<< HEAD
                     ¿Olvidaste tu contraseña? <Link to="/recovery">Haz click aqui para recuperarla</Link>
+=======
+                    Forgot your password? <Link to="/recovery">Recover it here</Link>
+>>>>>>> 5de70e7e952de318603e138f0724067f22382757
                 </p>
                 <p>
                     <Link to="/">← Volver</Link>
