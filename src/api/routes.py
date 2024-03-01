@@ -240,21 +240,21 @@ def edit_profile():
 
     return jsonify({"message": "Perfil actualizado"}), 200
 
+# Funcion para el envio de correo electronico
 def enviar_correo_recuperacion(email, token):
     datos_correo = {
-        'service_id': EMAILJS_SERVICE_ID,  # Reemplaza con tu ID de servicio
-        'template_id': EMAILJS_TEMPLATE_ID,  # Reemplaza con tu ID de plantilla de correo electrónico
-        'user_id': EMAILJS_USER_ID ,  # Reemplaza con tu clave pública
+        'service_id': EMAILJS_SERVICE_ID, 
+        'template_id': EMAILJS_TEMPLATE_ID,  
+        'user_id': EMAILJS_USER_ID ,  
         'accessToken': ACCES_TOKEN,
         'template_params': {
-            'to_email': email,
+            'email': email,
             'token': token
         }
     }
 
-    # Imprimir los datos del correo antes de enviar la solicitud POST
     print("Datos del correo a enviar:")
-    print(json.dumps(datos_correo, indent=4))  # Imprime los datos del correo en formato JSON
+    print(json.dumps(datos_correo, indent=4))  
 
     headers = {'Content-Type': 'application/json'}
 
@@ -265,28 +265,23 @@ def enviar_correo_recuperacion(email, token):
     else:
         print("Error al enviar el correo electrónico de recuperación:", response.text)
 
-
 # Ruta para solicitar el restablecimiento de contraseña
 @api.route('/reset_password', methods=['POST'])
 def reset_password():
     data = request.get_json()
     email = data.get('email')
 
-    # Verificar si el correo electrónico existe en la base de datos
     user = User.query.filter_by(email=email).first()
     if not user:
         return jsonify({"error": "No se encontró ningún usuario con ese correo electrónico"}), 404
 
-    # Generar un token de restablecimiento de contraseña con un tiempo de expiración de 1 hora
     token = serializer.dumps(user.id, salt='reset-password-salt')
     token_expiry = datetime.datetime.now() + datetime.timedelta(hours=1)
 
-    # Guardar el token y su tiempo de expiración en la base de datos
     user.reset_token = token
     user.token_expiry = token_expiry
     db.session.commit()
 
-    # Enviar correo electrónico de recuperación de contraseña
     enviar_correo_recuperacion(email, token)
 
     return jsonify({"message": "Correo electrónico de recuperación enviado"}), 200
