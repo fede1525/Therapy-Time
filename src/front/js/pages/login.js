@@ -87,7 +87,7 @@ export const Login = () => {
         <div className="container login">
             <form onSubmit={handleLogin}>
                 <div className="form-group">
-                    <label htmlFor="username">Username:</label>
+                    <label htmlFor="username">Usuario :</label>
                     <input
                         type="text"
                         className="form-control"
@@ -101,6 +101,19 @@ export const Login = () => {
                     {errorMessages.username && <p className="text-danger">{errorMessages.username}</p>}
                 </div>
                 <div className="form-group">
+<<<<<<< HEAD
+                    <label htmlFor="password">Contraseña :</label>
+                    <input
+                        type="password"
+                        className="form-control"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={handleInputChange}
+                        onFocus={() => handleInputFocus("password")}
+                    />
+=======
                     <label htmlFor="password">Password:</label>
                     <div className="input-group">
                         <input
@@ -120,6 +133,7 @@ export const Login = () => {
                             />
                         </button>
                     </div>
+>>>>>>> 5de70e7e952de318603e138f0724067f22382757
                     {errorMessages.password && <p className="text-danger">{errorMessages.password}</p>}
                 </div>
                 {errorMessage.password && (
@@ -132,16 +146,20 @@ export const Login = () => {
                 )}
                 <div className="text-center">
                     <button type="submit" className="btn btnLogin">
-                        Login
+                        Ingresar
                     </button>
                 </div>
             </form>
             <div className="mt-3 text-center link">
                 <p>
+<<<<<<< HEAD
+                    ¿Olvidaste tu contraseña? <Link to="/recovery">Haz click aqui para recuperarla</Link>
+=======
                     Forgot your password? <Link to="/recovery">Recover it here</Link>
+>>>>>>> 5de70e7e952de318603e138f0724067f22382757
                 </p>
                 <p>
-                    <Link to="/">← Go Back</Link>
+                    <Link to="/">← Volver</Link>
                 </p>
             </div>
         </div>
