@@ -27,8 +27,9 @@ ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
 serializer = URLSafeTimedSerializer(os.environ['SECRET_KEY'])
 
 # Crear el token
-def generate_password_reset_token(user_id):
-    return serializer.dumps(user_id, salt='password-reset-salt')
+def generate_password_reset_token(user_id, role_id):
+    data = {'user_id': user_id, 'role_id': role_id}
+    return serializer.dumps(data, salt='password-reset-salt')
 
 # Expira en 1 hora (3600 segundos)
 def verify_password_reset_token(token, max_age=3600):
@@ -77,7 +78,7 @@ def create_user():
     db.session.add(new_user)
     db.session.commit()
 
-    token = create_access_token(identity=new_user.id)
+    token = create_access_token(new_user.id, new_user.role_id) 
 
     return jsonify({"message": "Usuario creado exitosamente", "token": token}), 201
 
@@ -98,6 +99,9 @@ def delete_user(user_id):
     current_user_id = get_jwt_identity()
 
     current_user = User.query.get(current_user_id)
+    payload = get_jwt()
+    if payload["role"] != 2:
+        return "Usuario no autorizado", 403
 
     if current_user.email != 'marinasmargara@gmail.com':
         return jsonify({"error": "You are not authorized to delete users"}), 403
@@ -114,14 +118,22 @@ def delete_user(user_id):
 
 #Listar todos los usuarios
 @api.route('/users', methods=['GET'])
+@jwt_required()
 def list_users():
+    payload = get_jwt()
+    if payload["role"] != 2:
+        return "Usuario no autorizado", 403
     users = User.query.all()
     serialized_users = [user.serialize() for user in users]
     return jsonify(serialized_users), 200
 
 #Buscar un solo usuario
-@api.route('/get_user/<int:id>', methods=['GET'])  
+@api.route('/get_user/<int:id>', methods=['GET'])
+@jwt_required()  
 def get_user(id):
+    payload = get_jwt()
+    if payload["role"]!=2:
+        return "Usuario no autorizado", 403
     user = User.query.get(id) 
     if user:
         return jsonify(user.serialize()), 200  
@@ -130,8 +142,12 @@ def get_user(id):
 
 #Editar usuario
 @api.route('/edit_user/<int:id>', methods=['PUT'])
+@jwt_required()
 def edit_user(id):
+    payload = get_jwt()
     user = User.query.get(id)
+    if payload["id"]!= user.id:
+        return "Usuario no autorizado", 403
     if not user:
         return jsonify({"message": "Usuario no encontrado"}), 404
     
@@ -163,13 +179,16 @@ def login():
     if not bcrypt.check_password_hash(user.password, password):
         return jsonify({"error": "Contraseña incorrecta"}), 401  
 
+
+
     if bcrypt.check_password_hash(user.password, password):
-        token = create_access_token(identity=user.id)
+        payload = {"role": user.role_id}
+        token = create_access_token(identity=user.id, additional_claims=payload)
         return jsonify({
             "message": "Inicio de sesión exitoso",
             "token": token,
             "isAuthenticated": True,
-            "role": user.role.name  
+            "role": user.role_id
         }), 200
     else:
         return jsonify({
@@ -185,17 +204,22 @@ def logout_user():
     jti = payload['jti']
     exp = datetime.datetime.fromtimestamp(payload['exp'])
     blocked_token = BlockedTokenList(jti = jti, expires = exp)
+
     db.session.add(blocked_token)
     db.session.commit()
+
     return jsonify({"msg": "Sesión cerrada exitosamente."}), 200
 
 # Para conseguir el perfil de usuario
 @api.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-    
+    payload = get_jwt()
+    user = User.query.get(id)
+
+    if payload["id"] != user.id:
+        return "Usuario no autorizado", 403
+
     if user is None:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
@@ -206,8 +230,11 @@ def get_profile():
 @jwt_required()
 def edit_profile():
     user_id = get_jwt_identity()
-    user = User.query.get(user_id)
+    user = User.query.get(id)
 
+    if user_id != user.id:
+        return "Usuario no autorizado", 403
+        
     if user is None:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
@@ -267,9 +294,12 @@ def enviar_correo_recuperacion(email, token):
 
 # Endpoint restablecimiento de contraseña
 @api.route('/reset_password', methods=['POST'])
+@jwt_required()
 def reset_password():
     data = request.get_json()
     email = data.get('email')
+
+    
 
     user = User.query.filter_by(email=email).first()
     if not user:
