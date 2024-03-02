@@ -11,20 +11,17 @@ import os
 import datetime, json, string, random
 import requests
 
-
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 api = Blueprint('api', __name__)
 
 CORS(api)
 
+#Variables para el envio de correo electronico
 EMAILJS_SERVICE_ID = 'service_yrznk4m'
 EMAILJS_TEMPLATE_ID = 'template_ebpnklz'
 EMAILJS_USER_ID = 'sm1cI8ucvO4Tvl_jb'
 ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
-
-# Serializador para generar y verificar tokens
-serializer = URLSafeTimedSerializer(os.environ['SECRET_KEY'])
 
 # Crear el token
 def generate_password_reset_token(user_id, role_id):
@@ -95,16 +92,13 @@ def handle_hello():
 @api.route('/users/<int:user_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user(user_id):
-   
     current_user_id = get_jwt_identity()
 
     current_user = User.query.get(current_user_id)
+
     payload = get_jwt()
     if payload["role"] != 2:
         return "Usuario no autorizado", 403
-
-    if current_user.email != 'marinasmargara@gmail.com':
-        return jsonify({"error": "You are not authorized to delete users"}), 403
 
     user_to_delete = User.query.get(user_id)
 
@@ -116,7 +110,7 @@ def delete_user(user_id):
 
     return jsonify({"message": "User deleted successfully"}), 200
 
-#Listar todos los usuarios
+#Listar todos los usuarios (terapeuta)
 @api.route('/users', methods=['GET'])
 @jwt_required()
 def list_users():
@@ -127,7 +121,7 @@ def list_users():
     serialized_users = [user.serialize() for user in users]
     return jsonify(serialized_users), 200
 
-#Buscar un solo usuario
+#Buscar un solo usuario (terapeuta)
 @api.route('/get_user/<int:id>', methods=['GET'])
 @jwt_required()  
 def get_user(id):
@@ -140,14 +134,14 @@ def get_user(id):
     else:
         return jsonify({"message": "Usuario no encontrado"}), 404  
 
-#Editar usuario
+#Editar usuario (terapeuta)
 @api.route('/edit_user/<int:id>', methods=['PUT'])
 @jwt_required()
 def edit_user(id):
     payload = get_jwt()
-    user = User.query.get(id)
-    if payload["id"]!= user.id:
+    if payload["role"]!= 2:
         return "Usuario no autorizado", 403
+    user = User.query.get(id)
     if not user:
         return jsonify({"message": "Usuario no encontrado"}), 404
     
@@ -179,8 +173,6 @@ def login():
     if not bcrypt.check_password_hash(user.password, password):
         return jsonify({"error": "Contraseña incorrecta"}), 401  
 
-
-
     if bcrypt.check_password_hash(user.password, password):
         payload = {"role": user.role_id}
         token = create_access_token(identity=user.id, additional_claims=payload)
@@ -196,7 +188,7 @@ def login():
             "isAuthenticated": False
         }), 500
 
-# Para cerrar sesión
+# Cierre de sesión
 @api.route('/logout', methods=['POST'])
 @jwt_required()
 def logout_user():
@@ -210,7 +202,7 @@ def logout_user():
 
     return jsonify({"msg": "Sesión cerrada exitosamente."}), 200
 
-# Para conseguir el perfil de usuario
+# Conseguir el perfil de usuario (paciente)
 @api.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
@@ -225,40 +217,24 @@ def get_profile():
 
     return jsonify(user.serialize()), 200
 
-# Para editar el perfil
+# Editar el perfil (paciente)
 @api.route('/profile_edit', methods=['PUT'])
 @jwt_required()
 def edit_profile():
     user_id = get_jwt_identity()
-    user = User.query.get(id)
+    user = User.query.get(user_id)
+
+    if user is None:
+        return jsonify({"error": "Usuario no encontrado"}), 404
 
     if user_id != user.id:
         return "Usuario no autorizado", 403
         
-    if user is None:
-        return jsonify({"error": "Usuario no encontrado"}), 404
-
     data = request.get_json()
 
     for key in data:
-        if key == "password":
-            continue
-        user[key] = data[key]
-       
-    """ if 'username' in data:
-        user.username = data['username']
-
-    if 'name' in data:
-        user.name = data['name']
-    
-    if 'lastname' in data:
-        user.lastname = data['lastname']
-
-    if 'birth_date' in data:
-        user.birth_date = data['birth_data']
-
-    if 'phone' in data:
-        user.phone = data['phone'] """
+        if key != "password":
+            user[key] = data[key]
 
     if 'password' in data:
         user.password = bcrypt.generate_password_hash(data['password']).decode("utf-8")
@@ -292,14 +268,11 @@ def enviar_correo_recuperacion(email, token):
     else:
         print("Error al enviar el correo electrónico de recuperación:", response.text)
 
-# Endpoint restablecimiento de contraseña
+# Solicitud de restablecimiento de contraseña
 @api.route('/reset_password', methods=['POST'])
-@jwt_required()
 def reset_password():
     data = request.get_json()
     email = data.get('email')
-
-    
 
     user = User.query.filter_by(email=email).first()
     if not user:
@@ -319,7 +292,7 @@ def reset_password():
 
     return jsonify({"message": "Correo electrónico de recuperación enviado"}), 200
 
-# Endpoint para cambiar la contraseña
+# Configuracion de nueva contraseña
 @api.route('/change_password', methods=['POST'])
 def change_password():
     data = request.get_json()
