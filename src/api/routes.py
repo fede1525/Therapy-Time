@@ -119,12 +119,15 @@ def delete_user(user_id):
 @api.route('/users', methods=['GET'])
 @jwt_required()
 def list_users():
-    payload = get_jwt()
-    if payload["role"] != 2:
-        return "Usuario no autorizado", 403
-    users = User.query.all()
-    serialized_users = [user.serialize() for user in users]
-    return jsonify(serialized_users), 200
+    try:
+        payload = get_jwt()
+        if payload["role"] != 2:
+            return "Usuario no autorizado", 403
+        users = User.query.filter(User.role_id != 2).all()
+        serialized_users = [user.serialize() for user in users]
+        return jsonify(serialized_users), 200
+    except Exception as e:
+        return jsonify({"error": "Error al obtener usuarios"}), 500
 
 #Buscar un solo usuario (terapeuta)
 @api.route('/get_user/<int:id>', methods=['GET'])
@@ -183,6 +186,7 @@ def login():
         token = create_access_token(identity=user.id, additional_claims=payload)
         return jsonify({
             "message": "Inicio de sesión exitoso",
+            "user": user.username,
             "token": token,
             "isAuthenticated": True,
             "role": user.role_id

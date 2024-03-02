@@ -64,7 +64,7 @@ export const Patients = () => {
     };
     
     const handleSubmit = async () => {
-        const validationMessages = validateForm(userData);
+        const validationMessages = validateForm(userData, false);
         setErrorMessages(validationMessages);
         
         const hasErrors = Object.values(validationMessages).some(msg => msg !== "");
@@ -100,13 +100,15 @@ export const Patients = () => {
             const data = await actions.getUser(id);
             setUserData(data);
             setShowModalEdit(true);
-        }catch (error) {
+            const validationMessages = validateForm(data, true); 
+            setErrorMessages(validationMessages);
+        } catch (error) {
             console.error("Error al obtener el usuario:", error.message);
         }
     };
-
+    
     const handleSaveChanges = async () => {
-        const validationMessages = validateForm(userData);
+        const validationMessages = validateForm(userData, true);
         setErrorMessages(validationMessages);
         
         const hasErrors = Object.values(validationMessages).some(msg => msg !== "");
@@ -140,7 +142,7 @@ export const Patients = () => {
         }));
     };
     
-    const validateForm = (data) => {
+    const validateForm = (data, isEditing) => {
         const errors = {};
         if (data.username.trim() === "") {
             errors.username = "*El campo es obligatorio";
@@ -179,18 +181,19 @@ export const Patients = () => {
             errors.email = "";
         }
 
-        const existingEmail = store.user.some(user => user.email === data.email);
-        if (existingEmail) {
-            errors.email = "Este correo electrónico ya está registrado.";
+        if (!isEditing) {
+            const existingEmail = store.user.some(user => user.email === data.email);
+            if (existingEmail) {
+                errors.email = "Este correo electrónico ya está registrado.";
+            }
+            const existingDNI = store.user.some(user => user.dni === data.dni);
+            if (existingDNI) {
+                errors.dni = "Este DNI ya está registrado.";
+            }
         }
-        const existingDNI = store.user.some(user => user.dni === data.dni);
-        if (existingDNI) {
-            errors.dni = "Este DNI ya está registrado.";
-        }
-    
         return errors;
     };
-
+    
     const isValidEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
         return emailRegex.test(email);

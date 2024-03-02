@@ -12,10 +12,6 @@ export const Login = () => {
         password: "",
     });
     const navigate = useNavigate();
-    
-    useEffect(() => {
-        actions.getUsers(); 
-    }, []);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -59,7 +55,7 @@ export const Login = () => {
         if (username.trim() === "") {
             errors.username = "*El campo es obligatorio";
         } else {
-            const existingUser = store.user.find(user => user.username === username);
+            const existingUser = store.user.filter(user => user.username === username);
             if (!existingUser) {
                 errors.username = "El usuario no está registrado";
             } else {
