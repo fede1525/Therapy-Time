@@ -24,27 +24,31 @@ const getState = ({ getStore, getActions, setStore }) => {
 				try {
 					let params = {
 						method,
-						headers: {
-							"Content-Type": "application/json",
-							"Access-Control-Allow-Origin": "*",
-						}
+						headers: {}
+					};
+			
+					if (body !== null) {
+						params.body = JSON.stringify(body);
+						params.headers["Content-Type"] = "application/json";
 					}
-					if (body != null) {
-						params.body = JSON.stringify(body)
-					}
+			
 					let resp = await fetch(process.env.BACKEND_URL + "api" + endpoint, params);
+			
 					if (!resp.ok) {
-						console.error(resp.statusText)
-						return { error: resp.statusText }
+						console.error(resp.statusText);
+						return { error: resp.statusText }; 
 					}
-					return await resp.json()
+					
+					return resp;
 				} catch (error) {
-					console.error("Error:", error)
+					return error;
 				}
-			},
+			},			
 			protectedFetch: async (endpoint, method = "GET", body = null) => {
 				const token = localStorage.getItem("token")
-				if (!token) return jsonify({ "error": "Token not found." })
+				if (!token) {
+					throw new Error("Token not found.");
+				}
 				try {
 					let params = {
 						method,
@@ -76,14 +80,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					if (!body.username || !body.name || !body.lastname || !body.dni || !body.phone || !body.email) {
 						throw new Error("Por favor, complete todos los campos requeridos.");
 					}
-					const resp = await fetch(process.env.BACKEND_URL + "api/signup", {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin':'*'
-						},
-						body: JSON.stringify(body),
-					});
+					const resp = await getActions().protectedFetch("/signup", "POST", body);
 			
 					if (resp.ok) {
 						const data = await resp.json();
@@ -108,39 +105,26 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error creating user:", error);
 					throw error;
 				}
-			},								
+			},	
 			getUsers: async () => {
-                try {
-                    const resp = await fetch(process.env.BACKEND_URL + "api/users", {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Access-Control-Allow-Origin': '*',
-                            'Authorization': 'Bearer ' + localStorage.getItem("token")
-                        }
-                    });
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        setStore({ user: data }); 
-                        return data;
-                    } else {
-                        throw new Error("Error al obtener usuarios.");
-                    }
-                } catch (error) {
-                    console.error("Error al obtener usuarios:", error.message);
-                    throw error;
-                }
-            },
+				try {
+					const resp = await getActions().protectedFetch("/users", "GET");
+			
+					if (resp.ok) {
+						const data = await resp.json();
+						setStore({ user: data }); 
+						return data;
+					} else {
+						throw new Error("Error al obtener usuarios.");
+					}
+				} catch (error) {
+					console.error("Error al obtener usuarios:", error.message);
+					throw error;
+				}
+			},	
 			getUser: async (id) => {
 				try {
-					const resp = await fetch(process.env.BACKEND_URL + `api/get_user/${id}`, {
-						method: 'GET',
-						headers: {
-							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin': '*',
-							'Authorization': 'Bearer ' + localStorage.getItem("token")
-						}
-					});
+					const resp = await getActions().protectedFetch(`/get_user/${id}`);
 					if (resp.ok) {
 						const data = await resp.json();
 						return data;
@@ -151,18 +135,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al obtener usuarios:", error.message);
 					throw error;
 				}
-			},
+			},			
 			editUser: async (id, userData) => {
 				try {
-					const resp = await fetch(process.env.BACKEND_URL + `api/edit_user/${id}`, {
-						method: 'PUT',
-						headers: {
-							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin': '*',
-							'Authorization': 'Bearer ' + localStorage.getItem("token")
-						},
-						body: JSON.stringify(userData)
-					});
+					const resp = await getActions().protectedFetch(`/edit_user/${id}`, 'PUT', userData);
 					if (resp.ok) {
 						const userIndex = getStore().user.findIndex(user => user.id === id);
 						if (userIndex !== -1) {
@@ -179,8 +155,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					console.error("Error al editar el usuario:", error.message);
 					throw error; 
-				}	
-			},
+				}   
+			},			
 			getUserData: async () => {
 				try {
 					const resp = await getActions().protectedFetch("/profile", "GET", null)
@@ -211,26 +187,20 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			loginUser: async (username, password) => {
 				try {
-					const response = await fetch(process.env.BACKEND_URL + '/api/login', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin': '*',
-						},
-						body: JSON.stringify({
-							username: username,
-							password: password
-						})
-					});					
+					const response = await getActions().apiFetch('/login', 'POST', {
+						username: username,
+						password: password
+					});
+					
 					if (!response.ok) {
 						throw new Error('Failed to log in');
-						
-					}					
+					}
+					
 					const responseData = await response.json();
 					const token = responseData.token || "";
 					const userRole = responseData.role || "";
 					
-					localStorage.setItem('accessToken', token);
+					localStorage.setItem('token', token);
 					console.log("Token almacenado en localStorage:", token);
 					
 					setStore({ isAuthenticated: true, role: userRole });
@@ -241,27 +211,21 @@ const getState = ({ getStore, getActions, setStore }) => {
 					setStore({ isAuthenticated: false, userRole: "" });
 					return { success: false, error: 'Error de red' };
 				}
-			},
+			},			
 			handleResetPassword: async (email) => {
 				try {
-					const response = await fetch(process.env.BACKEND_URL + '/api/reset_password', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin': '*',
-						},
-						body: JSON.stringify({ email })
-					});
-					
+					const response = await getActions().apiFetch('/reset_password', 'POST', { email });
 					const data = await response.json();
+					
 					if (!response.ok) {
 						throw new Error(data.error || 'Error al enviar la solicitud');
 					}
+					
 					return data;
 				} catch (error) {
 					throw new Error(error.message || 'Error al enviar la solicitud');
 				}
-			},
+			},			
 			handleChangePassword: async (username, token, newPassword) => {
 				try {
 				  const response = await fetch(process.env.BACKEND_URL + '/api/change_password', {
@@ -285,6 +249,24 @@ const getState = ({ getStore, getActions, setStore }) => {
 				  throw new Error(error.message || 'Error al enviar la solicitud');
 			  	}
 		  	},
+			handleChangePassword: async (username, token, newPassword) => {
+				try {
+					const response = await getActions().apiFetch('/change_password', 'POST', {
+						username: username,
+						token: token,
+						new_password: newPassword
+					});
+					
+					const data = await response.json();
+					
+					if (!response.ok) {
+						throw new Error(data.error || 'Error al enviar la solicitud');
+					}
+					return data;
+				} catch (error) {
+					throw new Error(error.message || 'Error al enviar la solicitud');
+				}
+			}
 		}
 	};
 };

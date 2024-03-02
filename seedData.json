@@ -1,6 +1,5 @@
 [
-    {
-        "target_class": "Role",
+    {"target_class": "Role",
         "data":[
             {
                 "id": 1,
@@ -23,12 +22,11 @@
             "dni": "35578170",  
             "email": "lic.viganosofia@gmail.com",
             "phone": "3513052538",
-            "password": "$2b$10$az08bFNmSTFjta0uTw5WCu0erhVEhbal8BSAzY606o.gmbLD29LMq",
+            "password": "$2b$10$vOJtbTagoRdIfn4ssUXyhOkTXOgs5TmKuCPuJ7IIDrE0RnzAC7XGW",
             "virtual_link": "",
-            "is_active": "true"
+            "is_active": true
         }
     ]
-    }
-
+    }  
 ]
    
