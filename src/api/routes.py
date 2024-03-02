@@ -39,7 +39,12 @@ def verify_password_reset_token(token, max_age=3600):
     
 # Alta a nuevo usuario
 @api.route('/signup', methods=['POST'])
+@jwt_required()
 def create_user():
+    payload = get_jwt()
+    if payload["role"] != 2:
+        return "Usuario no autorizado", 403
+        
     data = request.get_json()
     role_id = data.get("role_id", 1)
     username = data.get("username")
