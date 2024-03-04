@@ -217,9 +217,9 @@ def logout_user():
 def get_profile():
     payload = get_jwt()
     current_user_id = get_jwt_identity()
-    user_id = User.query.get(current_user_id)
+    user = User.query.get(current_user_id)
 
-    if payload["id"] != user_id:
+    if payload["id"] != current_user_id:
         return "Usuario no autorizado", 403
 
     if user is None:
