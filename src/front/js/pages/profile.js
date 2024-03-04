@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate } from "react-router-dom";
+import { Navbar } from "../component/navbar"
 
 export const Profile = () => {
     const { actions } = useContext(Context)
@@ -38,6 +39,7 @@ export const Profile = () => {
 
     return (
         <div className="container">
+            <Navbar />
             <div className="row">
                 {error && (
                     <div className="alert alert-danger" role="alert">
@@ -61,17 +63,17 @@ export const Profile = () => {
             </div>
             <div className="row">
                 <div className="col">
-                    <h4>Fecha de nacimiento</h4>
-                    <p>{userData.birthdate}</p>
+                    <h4>Dni</h4>
+                    <p>{userData.dni}</p>
                 </div>
                 <div className="col">
-                    <h4>Número de telefono</h4>
-                    <p>{userData.phone}</p>
+                    <h4>Email</h4>
+                    <p>{userData.email}</p>
                 </div>
             </div>
             <div className="row">
                 <div className="col d-flex justify-content-center p-4">
-                    <button onClick={navigateProfile}>Editar perfil</button>
+                    <button className="btn btn-primary" onClick={navigateProfile}>Editar perfil</button>
                 </div>
             </div>
         </div>
