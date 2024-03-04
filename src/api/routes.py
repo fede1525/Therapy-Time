@@ -272,30 +272,51 @@ def handle_password_recovery():
 
     return jsonify({"message": "Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña."}), 200
 
-#bloqueo de fechas
-@app.route('/bloquear', methods=['POST'])
+# Bloqueo de fechas
+@api.route('/bloquear', methods=['POST'])
 def bloquear():
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+
+            required_fields = ['date', 'time_id']
+            for field in required_fields:
+                if field not in data:
+                    return jsonify({'error': f'{field} es un campo obligatorio'}), 400
+
+            nueva_disponibilidad = AvailabilityDates(
+                date=data['date'],
+                time_id=data['time_id'],
+                availability=False
+            )
+
+            db.session.add(nueva_disponibilidad)
+            db.session.commit()
+
+            return jsonify({'mensaje': 'Hora bloqueada exitosamente'}), 200
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+# Obtener fechas dispponibles
+@api.route('/bloquear', methods=['GET'])
+def unaviable_dates():
+    if request.method == 'GET':
+        try:
+            fechas_no_disponibles = AvailabilityDates.query.filter_by(availability=False).all()
+
+            return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+
     try:
-        data = request.get_json()
+        # Consulta la base de datos para obtener las fechas no disponibles
+        fechas_no_disponibles = AvailabilityDates.query.filter_by(availability=False).all()
 
-        # Asegúrate de que los datos proporcionados son correctos
-        required_fields = ['date', 'time_id']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'{field} es un campo obligatorio'}), 400
-
-        # Crea una nueva instancia de AvailabilityDates con availability=False
-        nueva_disponibilidad = AvailabilityDates(
-            date=data['date'],
-            time_id=data['time_id'],
-            availability=False
-        )
-
-        # Agrega la nueva instancia a la sesión y realiza un commit
-        db.session.add(nueva_disponibilidad)
-        db.session.commit()
-
-        return jsonify({'mensaje': 'Hora bloqueada exitosamente'}), 200
+        # Serializa los resultados en un formato JSON y los devuelve
+        return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

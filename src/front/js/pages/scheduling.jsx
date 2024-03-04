@@ -1,46 +1,58 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useContext } from 'react';
+import { Context } from "../store/appContext";
 import "../../styles/home.css";
 
 export const Block = () => {
+  const { actions } = useContext(Context);
   const [calendar, setCalendar] = useState([]);
   const [month, setMonth] = useState(0);
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedHour, setSelectedHour] = useState(null);
+  const [unavailableDates, setUnavailableDates] = useState([])
 
   useEffect(() => {
+    
+    const fetchUnavailableDates = async () => {
+      try {
+        const response = await actions.apiFetch('/bloquear');
+        setUnavailableDates(response);
+      } catch (error) {
+        console.error('Error al obtener fechas no disponibles:', error);
+      }
+    };
+
+    fetchUnavailableDates();
+  
     const currentYear = new Date().getFullYear();
     const currentDate = new Date(currentYear, month, 1);
     const firstDayOfWeek = currentDate.getDay();
     let day = 1;
-
+  
     const newCalendar = [];
-
-
+  
     for (let i = 0; i < 6; i++) {
       const row = [];
-
+  
       for (let j = 0; j < 7; j++) {
         if (i === 0 && j < firstDayOfWeek) {
           // Celdas vacías antes del primer día del mes
           row.push('');
         } else if (day <= 31) {
-          // Llenar celdas con números del 1 al 31
           row.push(day);
           day++;
         } else {
           // Celdas vacías después del último día del mes
           row.push('');
-          
         }
       }
-      console.log(calendar)
-      console.log(row)
+  
       newCalendar.push(row);
     }
-
     setCalendar(newCalendar);
-  }, [month]); 
+    
+  }, [month, actions ]);
 
   const handleDayClick = (day) => {
     setSelectedDay(day);
@@ -58,7 +70,7 @@ export const Block = () => {
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setSelectedHour(null); // Limpiar la hora seleccionada al cerrar el modal
+    setSelectedHour(null); // Quitar hora del modal
   };
 
   const handleBlockTime = () => {
@@ -67,25 +79,18 @@ export const Block = () => {
       date: selectedDay,
       time_id: selectedHour,
     };
+    console.log(data)
+    actions.apiFetch('/bloquear', 'POST', data)
+      .then(data => {
+        console.log('Hora bloqueada exitosamente:', data);
+        const updatedCalendar = calendar.map(row => row.filter(cell => cell !== selectedDay));
+        setCalendar(updatedCalendar);
+        handleCloseModal();
+      })
+      .catch(error => {
+        console.error('Error al bloquear la hora:', error);
 
-    fetch('https://probable-space-parakeet-6jj75v7jgjvf55pv.github.dev/bloquear', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Hora bloqueada exitosamente:', data);
-      const updatedCalendar = calendar.map(row => row.filter(cell => cell !== selectedDay));
-      setCalendar(updatedCalendar);
-      handleCloseModal();
-    })
-    .catch(error => {
-      console.error('Error al bloquear la hora:', error);
-      // Manejar errores según sea necesario
-    });
+      });
   };
 
   const renderModalContent = () => {
@@ -100,12 +105,12 @@ export const Block = () => {
           {hours.map((hour) => (
             <li key={hour} onClick={() => handleHourClick(hour)}>
               {hour}:00 - {hour + 1}:00
+              <button onClick={handleBlockTime}>Bloquear Hora</button>
+              
             </li>
           ))}
         </ul>
-        {selectedHour && (
-          <button onClick={handleBlockTime}>Bloquear Hora</button>
-        )}
+
         <button onClick={handleCloseModal}>Cerrar</button>
       </div>
     );
@@ -139,7 +144,7 @@ export const Block = () => {
           ))}
         </tbody>
       </table>
-
+      
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           {renderModalContent()}
