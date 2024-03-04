@@ -1,12 +1,14 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
-import { EditProfile } from "../component/editProfile";
+import { useNavigate } from "react-router-dom";
 
 export const Profile = () => {
     const { actions } = useContext(Context)
     const [userData, setUserData] = useState('');
     const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false)
+
+    const navigate = useNavigate()
 
     const toggleModal = () => {
         setShowModal(!showModal)
@@ -30,15 +32,18 @@ export const Profile = () => {
     }, [actions]);
 
 
+    const navigateProfile = () => {
+        navigate("/editProfile")
+    }
+
     return (
-        <div className="container profile">
+        <div className="container">
             <div className="row">
                 {error && (
                     <div className="alert alert-danger" role="alert">
                         {error}
                     </div>
                 )}
-                {showModal ? EditProfile : ""}
                 <div className="col">
                     <h4>Nombre de usuario</h4>
                     <p>{userData.username}</p>
@@ -64,8 +69,11 @@ export const Profile = () => {
                     <p>{userData.phone}</p>
                 </div>
             </div>
-            <button onClick={toggleModal}>Editar perfil</button>
-
+            <div className="row">
+                <div className="col d-flex justify-content-center p-4">
+                    <button onClick={navigateProfile}>Editar perfil</button>
+                </div>
+            </div>
         </div>
     );
 }

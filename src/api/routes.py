@@ -131,7 +131,7 @@ def list_users():
 
 #Buscar un solo usuario (terapeuta)
 @api.route('/get_user/<int:id>', methods=['GET'])
-@jwt_required()  
+@jwt_required()
 def get_user(id):
     payload = get_jwt()
     if payload["role"]!=2:
