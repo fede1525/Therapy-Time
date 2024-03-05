@@ -5,6 +5,7 @@ import { Context } from "../store/appContext";
 export const Landing = () => {
     const { actions, store } = useContext(Context);
     const [showModal, setShowModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
         lastname: "",
@@ -17,8 +18,16 @@ export const Landing = () => {
         setShowModal(true);
     };
 
+    const openSuccessModal = () => {
+        setShowSuccessModal(true);
+    };
+
     const closeModal = () => {
         setShowModal(false);
+    };
+
+    const closeSuccessModal = () => {
+        setShowSuccessModal(false);
     };
 
     const handleChange = (e) => {
@@ -30,6 +39,7 @@ export const Landing = () => {
             const response = await actions.sendMessage(formData.name, formData.lastname, formData.age, formData.phone, formData.consultation);
             console.log(response); 
             closeModal();
+            openSuccessModal();
         } catch (error) {
             console.error("Error al enviar el mensaje:", error);
         }
@@ -88,6 +98,21 @@ export const Landing = () => {
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-primary" onClick={handleSubmit}>Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <button type="button" className="btn-close" onClick={closeSuccessModal} aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <span>¡Su consulta se ha enviado con exito!</span>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={closeSuccessModal}>Cerrar</button>
                         </div>
                     </div>
                 </div>

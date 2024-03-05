@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f395d7a61aa4
+Revision ID: 368764661215
 Revises: 
-Create Date: 2024-03-04 16:23:32.178654
+Create Date: 2024-03-05 18:46:00.211871
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f395d7a61aa4'
+revision = '368764661215'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,13 +26,16 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('jti')
     )
-    op.create_table('message',
+    op.create_table('consultation',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=25), nullable=False),
     sa.Column('lastname', sa.String(length=25), nullable=False),
     sa.Column('age', sa.Integer(), nullable=False),
     sa.Column('phone', sa.String(length=10), nullable=False),
     sa.Column('consultation', sa.String(length=250), nullable=False),
+    sa.Column('is_read', sa.Boolean(), nullable=True),
+    sa.Column('is_deleted', sa.Boolean(), nullable=True),
+    sa.Column('arrival_date', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('role',
@@ -90,6 +93,6 @@ def downgrade():
     op.drop_table('availability_dates')
     op.drop_table('schedules')
     op.drop_table('role')
-    op.drop_table('message')
+    op.drop_table('consultation')
     op.drop_table('blocked_token_list')
     # ### end Alembic commands ###

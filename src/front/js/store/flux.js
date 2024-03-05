@@ -18,14 +18,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"reset_token": ""
 				},
 			],
-			message:[
+			consultations:[
 				{
 					"id": "",
 					"name": "",
 					"lastname": "",
 					"age": "",
 					"phone": "",
-					"consultation": ""
+					"consultation": "",
+					"is_read": false,
+					"is_deleted": false,
+					"arrival_date ":""
 				}
 			]
 		},
@@ -236,27 +239,20 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},			
 			handleChangePassword: async (username, token, newPassword) => {
 				try {
-				  const response = await fetch(process.env.BACKEND_URL + '/api/change_password', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin': '*',
-						},
-					body: JSON.stringify({
+					const response = await getActions().apiFetch('/change_password', 'POST', {
 						username: username,
 						token: token,
 						new_password: newPassword
-					})
-				  });
-				  const data = await response.json();
-				  if (!response.ok) {
-					  throw new Error(data.error || 'Error al enviar la solicitud');
-				  	}
-				  return data;
-			  	} catch (error) {
-				  throw new Error(error.message || 'Error al enviar la solicitud');
-			  	}
-		  	},
+					});
+					if (!response.ok) {
+						const data = await response.json();
+						throw new Error(data.error || 'Error al enviar la solicitud');
+					}
+					return response.json();
+				} catch (error) {
+					throw new Error(error.message || 'Error al enviar la solicitud');
+				}
+			},
 			sendMessage: async (name, lastname, age, phone, consultation) => {
 				try {
 					const response = await getActions().apiFetch('/message', 'POST', {
@@ -275,6 +271,60 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					console.error("Error al realizar la solicitud:", error);
 					throw new Error('Error de red');
+				}
+			},
+			getConsultations: async () => {
+				try {
+					const response = await getActions().protectedFetch('/consultations', 'GET');
+					if (response.ok) {
+						const data = await response.json();
+						setStore({ consultations: data }); 
+						return data;
+					} else {
+						throw new Error("Error al obtener las consultas.");
+					}
+				} catch (error) {
+					console.error("Error al obtener las consultas:", error.message);
+					throw error;
+				}
+			},			
+			changeStatusConsultation: async (id) => {
+				try {
+					const response = await getActions().protectedFetch(`/consultations/${id}/mark_as_unread`, 'PUT');
+					if (response.ok) {
+						return response.json();
+					} else {
+						throw new Error('Error al marcar la consulta como no leída');
+					}
+				} catch (error) {
+					console.error("Error al marcar la consulta como no leída:", error.message);
+					throw error;
+				}
+			},
+			logicalDeletionMessage: async (id) =>{
+				try {
+					const response = await getActions().protectedFetch(`/deleted_consultations/${id}`, 'PUT');
+					if (response.ok) {
+						return response.json();
+					} else {
+						throw new Error('Error al eliminar el mensaje');
+					}
+				} catch (error) {
+					console.error("Error al eliminar el mensaje:", error.message);
+					throw error;
+				}
+			},
+			physicalDeletionMessage: async (id) =>{
+				try {
+					const response = await getActions().protectedFetch(`/deleted_consultations/${id}`, 'DELETE'); 
+					if (response.ok) {
+						return response.json();
+					} else {
+						throw new Error('Error al eliminar el mensaje de forma permanente'); 
+					}
+				} catch (error) {
+					console.error("Error al eliminar el mensaje:", error.message);
+					throw error;
 				}
 			}
 		}

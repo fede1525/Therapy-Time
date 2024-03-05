@@ -4,6 +4,7 @@ import { Context } from "../store/appContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt} from '@fortawesome/free-solid-svg-icons';
 
+
 export const Patients = () => {
     const { store, actions } = useContext(Context);
     const [showModal, setShowModal] = useState(false);

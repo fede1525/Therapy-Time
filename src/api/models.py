@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemyseeder import ResolvingSeeder
-import datetime
+from datetime import datetime
+import arrow
 
 db = SQLAlchemy()
 
@@ -127,9 +128,13 @@ class Consultation(db.Model):
     age = db.Column(db.Integer, nullable=False)
     phone = db.Column(db.String(10), nullable=False)
     consultation = db.Column(db.String(250), nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    is_deleted = db.Column(db.Boolean, default=False)
+    arrival_date = db.Column(db.DateTime, nullable=False, default=arrow.now().datetime)
 
     def __repr__(self):
         return f'<Message{self.id}>'
+
     def serialize(self):
         return {
             "id": self.id,
@@ -137,5 +142,8 @@ class Consultation(db.Model):
             "lastname": self.lastname,
             "age": self.age,
             "phone": self.phone,
-            "consultation": self.consultation
+            "consultation": self.consultation,
+            "is_read": self.is_read,
+            "is_deleted": self.is_deleted,
+            "arrival_date": self.arrival_date.strftime('%d-%B-%Y %H:%M:%S')
         }
