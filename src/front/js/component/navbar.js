@@ -4,19 +4,18 @@ import { Context } from "../store/appContext";
 
 export const Navbar = () => {
 	const { actions } = useContext(Context)
-	const [userData, setUserData] = useState(null)
-	const [name, setName] = useState('')
+	const [userData, setUserData] = useState("")
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				const resp = await actions.getUserData();
+
 				if (resp.error) {
 					console.error("No se pudo cargar datos de usuario");
 				}
 
-				setNameetUserData(resp);
-				setName(userData.name + " " + userData.lastname)
+				setUserData(resp);
 
 			} catch (error) {
 				console.error("No se pudo cargar datos de usuario");
@@ -30,7 +29,7 @@ export const Navbar = () => {
 			<div className="container">
 				<div id="home-link">
 					<Link to="/home">
-						<span className="navbar-brand mb-0 h1">HOME</span>
+						<span className="navbar-brand mb-0 h1">Inicio</span>
 					</Link>
 				</div>
 				<div id="center-nav">
@@ -44,7 +43,7 @@ export const Navbar = () => {
 				<div id="profile-button">
 					<div className="dropdown">
 						<button className="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-							{name ? name : 'Usuario'}
+							{userData.name + " " + userData.lastname}
 						</button>
 						<ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
 							<li><Link className="dropdown-item" to="/profile">Mi perfil</Link></li>

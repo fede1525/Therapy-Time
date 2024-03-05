@@ -15,11 +15,13 @@ export const Profile = () => {
         const fetchData = async () => {
             try {
                 const resp = await actions.getUserData();
+
                 if (resp.error) {
                     setError("No se pudo cargar datos de usuario");
-                } else {
-                    setUserData(resp);
                 }
+
+                setUserData(resp);
+
             } catch (error) {
                 setError("No se pudo cargar datos de usuario");
             }
