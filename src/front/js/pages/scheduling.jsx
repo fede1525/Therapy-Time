@@ -75,7 +75,7 @@ export const Block = () => {
   const handleBlockTime = () => {
     
     const data = {
-      date: `2024-0${month}-${selectedDay}`,
+      date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${selectedHour > 9 ? '' : '0'}${selectedHour}:00:00`,
       time: selectedHour,
     };
     console.log(data)
@@ -86,6 +86,24 @@ export const Block = () => {
       })
       .catch(error => {
         console.error('Error al bloquear la hora:', error);
+
+      });
+  };
+  const handleUnblockTime = () => {
+    
+    const data = {
+      availability: true,
+      time: selectedHour,
+      date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${selectedHour > 9 ? '' : '0'}${selectedHour}:00:00`
+    };
+    console.log(data)
+    actions.apiFetch('/bloquear', 'PUT', data)
+      .then(data => {
+        console.log('Hora desblobloqueada exitosamente:', data);
+        handleCloseModal();
+      })
+      .catch(error => {
+        console.error('Error al desbloquear la hora:', error);
 
       });
   };
@@ -118,6 +136,7 @@ export const Block = () => {
             <li key={hour} onClick={() => handleHourClick(hour)}>
               {hour}:00 - {hour + 1}:00
               <button onClick={handleBlockTime}>Bloquear Hora</button>
+              <button onClick={handleUnblockTime}>Desbloquear Hora</button>
               
             </li>
           ))}
