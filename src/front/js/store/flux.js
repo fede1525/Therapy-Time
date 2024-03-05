@@ -8,7 +8,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"username": "",
 					"name": "",
 					"lastname": "",
-					"dni" :"",
+					"dni": "",
 					"email": "",
 					"phone": "",
 					"password": "",
@@ -26,24 +26,24 @@ const getState = ({ getStore, getActions, setStore }) => {
 						method,
 						headers: {}
 					};
-			
+
 					if (body !== null) {
 						params.body = JSON.stringify(body);
 						params.headers["Content-Type"] = "application/json";
 					}
-			
+
 					let resp = await fetch(process.env.BACKEND_URL + "api" + endpoint, params);
-			
+
 					if (!resp.ok) {
 						console.error(resp.statusText);
-						return { error: resp.statusText }; 
+						return { error: resp.statusText };
 					}
-					
+
 					return resp;
 				} catch (error) {
 					return error;
 				}
-			},			
+			},
 			protectedFetch: async (endpoint, method = "GET", body = null) => {
 				const token = localStorage.getItem("token")
 				if (!token) {
@@ -81,7 +81,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						throw new Error("Por favor, complete todos los campos requeridos.");
 					}
 					const resp = await getActions().protectedFetch("/signup", "POST", body);
-			
+
 					if (resp.ok) {
 						const data = await resp.json();
 						const newUser = {
@@ -98,21 +98,21 @@ const getState = ({ getStore, getActions, setStore }) => {
 						setStore({ user: updatedUserList });
 						return data;
 					} else {
-						const errorMessage = await resp.text(); 
+						const errorMessage = await resp.text();
 						throw new Error(errorMessage || "Error al crear el usuario.");
 					}
 				} catch (error) {
 					console.error("Error creating user:", error);
 					throw error;
 				}
-			},	
+			},
 			getUsers: async () => {
 				try {
 					const resp = await getActions().protectedFetch("/users", "GET");
-			
+
 					if (resp.ok) {
 						const data = await resp.json();
-						setStore({ user: data }); 
+						setStore({ user: data });
 						return data;
 					} else {
 						throw new Error("Error al obtener usuarios.");
@@ -121,7 +121,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al obtener usuarios:", error.message);
 					throw error;
 				}
-			},	
+			},
 			getUser: async (id) => {
 				try {
 					const resp = await getActions().protectedFetch(`/get_user/${id}`);
@@ -135,7 +135,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al obtener usuarios:", error.message);
 					throw error;
 				}
-			},			
+			},
 			editUser: async (id, userData) => {
 				try {
 					const resp = await getActions().protectedFetch(`/edit_user/${id}`, 'PUT', userData);
@@ -143,9 +143,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 						const userIndex = getStore().user.findIndex(user => user.id === id);
 						if (userIndex !== -1) {
 							const updatedUsers = [...getStore().user];
-							updatedUsers[userIndex] = {...userData, id};
+							updatedUsers[userIndex] = { ...userData, id };
 							setStore({ user: updatedUsers });
-							return {...userData, id};
+							return { ...userData, id };
 						} else {
 							throw new Error('Usuario no encontrado');
 						}
@@ -154,9 +154,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				} catch (error) {
 					console.error("Error al editar el usuario:", error.message);
-					throw error; 
-				}   
-			},			
+					throw error;
+				}
+			},
 			getUserData: async () => {
 				try {
 					const resp = await getActions().protectedFetch("/profile", "GET", null)
@@ -164,10 +164,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 						console.error("Error al traer datos de usuario: ", resp)
 						return { error: "Error al traer datos de usuario" }
 					}
-					return await resp.json()
+					return resp.json()
 				} catch (error) {
 					console.error("Error: ", error)
-					return { Error: "Error al traer datos de usuario" }
+					return { error: "Error al traer datos de usuario" }
 				}
 			},
 			editProfile: async (changes) => {
@@ -191,64 +191,64 @@ const getState = ({ getStore, getActions, setStore }) => {
 						username: username,
 						password: password
 					});
-					
+
 					if (!response.ok) {
 						throw new Error('Failed to log in');
 					}
-					
+
 					const responseData = await response.json();
 					const token = responseData.token || "";
 					const userRole = responseData.role || "";
-					
+
 					localStorage.setItem('token', token);
 					console.log("Token almacenado en localStorage:", token);
-					
+
 					setStore({ isAuthenticated: true, role: userRole });
-					
+
 					return { success: true, message: responseData.message };
 				} catch (error) {
 					console.error("Error al realizar la solicitud:", error);
 					setStore({ isAuthenticated: false, userRole: "" });
 					return { success: false, error: 'Error de red' };
 				}
-			},			
+			},
 			handleResetPassword: async (email) => {
 				try {
 					const response = await getActions().apiFetch('/reset_password', 'POST', { email });
 					const data = await response.json();
-					
+
 					if (!response.ok) {
 						throw new Error(data.error || 'Error al enviar la solicitud');
 					}
-					
+
 					return data;
 				} catch (error) {
 					throw new Error(error.message || 'Error al enviar la solicitud');
 				}
-			},			
+			},
 			handleChangePassword: async (username, token, newPassword) => {
 				try {
-				  const response = await fetch(process.env.BACKEND_URL + '/api/change_password', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin': '*',
+					const response = await fetch(process.env.BACKEND_URL + '/api/change_password', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
 						},
-					body: JSON.stringify({
-						username: username,
-						token: token,
-						new_password: newPassword
-					})
-				  });
-				  const data = await response.json();
-				  if (!response.ok) {
-					  throw new Error(data.error || 'Error al enviar la solicitud');
-				  	}
-				  return data;
-			  	} catch (error) {
-				  throw new Error(error.message || 'Error al enviar la solicitud');
-			  	}
-		  	},
+						body: JSON.stringify({
+							username: username,
+							token: token,
+							new_password: newPassword
+						})
+					});
+					const data = await response.json();
+					if (!response.ok) {
+						throw new Error(data.error || 'Error al enviar la solicitud');
+					}
+					return data;
+				} catch (error) {
+					throw new Error(error.message || 'Error al enviar la solicitud');
+				}
+			},
 			handleChangePassword: async (username, token, newPassword) => {
 				try {
 					const response = await getActions().apiFetch('/change_password', 'POST', {
@@ -256,9 +256,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 						token: token,
 						new_password: newPassword
 					});
-					
+
 					const data = await response.json();
-					
+
 					if (!response.ok) {
 						throw new Error(data.error || 'Error al enviar la solicitud');
 					}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ScrollToTop from "./component/scrollToTop";
 import { BackendURL } from "./component/backendURL";
-import { Context} from "./store/appContext";
+import { Context } from "./store/appContext";
 import injectContext from "./store/appContext";
 import { Footer } from "./component/footer";
 import { Landing } from "./pages/landing";
@@ -19,13 +19,14 @@ import { Profile } from "./pages/profile";
 import { Payments } from "./pages/payments";
 import { PatientSchedule } from "./pages/patientSchedule";
 import { Reset_password } from "./pages/resetPassword";
+import { EditProfile } from "./pages/editProfile";
 
 const Layout = () => {
     const basename = process.env.BASENAME || "";
     if (!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL />;
 
     const { store } = useContext(Context);
-    const [role, setRole] = useState(store.role); 
+    const [role, setRole] = useState(store.role);
 
     useEffect(() => {
         setRole(store.role);
@@ -38,10 +39,11 @@ const Layout = () => {
                 <ScrollToTop>
                     <Routes>
                         <Route element={<Landing />} path="/" />
-                        <Route element={role === "Patient" ? <HomePatient/> : <HomeTherapist/>} path="/home" />
+                        <Route element={role === "Patient" ? <HomePatient /> : <HomeTherapist />} path="/home" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Recovery />} path="/recovery" />
                         <Route element={<Profile />} path="/profile" />
+                        <Route element={<EditProfile />} path="/editProfile" />
                         <Route element={<Payments />} path="/payments" />
                         <Route element={<PatientSchedule />} path="/patient_schedule" />
                         <Route element={<Scheduling />} path="/scheduling" />
