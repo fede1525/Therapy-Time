@@ -10,7 +10,7 @@ from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash
 import os
 import requests
-import datetime
+from datetime import datetime
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -279,17 +279,17 @@ def bloquear():
         try:
             data = request.get_json()
 
-            required_fields = ['date', 'time_id']
+            required_fields = ['date', 'time']
             for field in required_fields:
                 if field not in data:
                     return jsonify({'error': f'{field} es un campo obligatorio'}), 400
 
             nueva_disponibilidad = AvailabilityDates(
                 date=data['date'],
-                time_id=data['time_id'],
+                time=data['time'],
                 availability=False
             )
-
+            print(nueva_disponibilidad)
             db.session.add(nueva_disponibilidad)
             db.session.commit()
 

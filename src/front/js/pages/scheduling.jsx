@@ -6,7 +6,7 @@ import "../../styles/home.css";
 export const Block = () => {
   const { actions } = useContext(Context);
   const [calendar, setCalendar] = useState([]);
-  const [month, setMonth] = useState(0);
+  const [month, setMonth] = useState(1); //empieza en enero
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedHour, setSelectedHour] = useState(null);
@@ -26,7 +26,7 @@ export const Block = () => {
     fetchUnavailableDates();
   
     const currentYear = new Date().getFullYear();
-    const currentDate = new Date(currentYear, month, 1);
+    const currentDate = new Date(currentYear, month-1, 1); //-1 para que empiece desde enero
     const firstDayOfWeek = currentDate.getDay();
     let day = 1;
   
@@ -52,7 +52,7 @@ export const Block = () => {
     }
     setCalendar(newCalendar);
     
-  }, [month, actions ]);
+  }, [ ]);
 
   const handleDayClick = (day) => {
     setSelectedDay(day);
@@ -70,27 +70,39 @@ export const Block = () => {
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setSelectedHour(null); // Quitar hora del modal
   };
 
   const handleBlockTime = () => {
     
     const data = {
-      date: selectedDay,
-      time_id: selectedHour,
+      date: `2024-0${month}-${selectedDay}`,
+      time: selectedHour,
     };
     console.log(data)
     actions.apiFetch('/bloquear', 'POST', data)
       .then(data => {
         console.log('Hora bloqueada exitosamente:', data);
-        const updatedCalendar = calendar.map(row => row.filter(cell => cell !== selectedDay));
-        setCalendar(updatedCalendar);
         handleCloseModal();
       })
       .catch(error => {
         console.error('Error al bloquear la hora:', error);
 
       });
+  };
+
+  const meses = {
+    1: 'Enero',
+    2: 'Febrero',
+    3: 'Marzo',
+    4: 'Abril',
+    5: 'Mayo',
+    6: 'Junio',
+    7: 'Julio',
+    8: 'Agosto',
+    9: 'Septiembre',
+    10: 'Octubre',
+    11: 'Noviembre',
+    12: 'Diciembre'
   };
 
   const renderModalContent = () => {
@@ -118,8 +130,9 @@ export const Block = () => {
   return (
     <div>
       <h2>Calendario 2024</h2>
-      <button onClick={() => setMonth(month + 1)}>Mes Siguiente</button>
+      <h2> {meses[month]} </h2>
       <button onClick={() => setMonth(month - 1)}>Mes Anterior</button>
+      <button onClick={() => setMonth(month + 1)}>Mes Siguiente</button>
       <table className="calendar">
         <thead>
           <tr>

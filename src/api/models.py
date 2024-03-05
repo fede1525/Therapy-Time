@@ -68,8 +68,7 @@ class Reservation(db.Model):
     date = db.Column(db.Date, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User")
-    time_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), nullable=False)
-    time = db.relationship("Schedules")
+
 
     def __repr__(self):
         return f'<Reservation {self.id}>'
@@ -85,8 +84,7 @@ class AvailabilityDates(db.Model):
     __tablename__='availability_dates'
     id= db.Column(db.Integer, primary_key=True, autoincrement=True)
     date = db.Column(db.Date, nullable=False)
-    time_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), nullable=False)
-    time = db.relationship("Schedules")
+    time = db.Column(db.Integer, nullable=False)
     availability = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
@@ -95,21 +93,8 @@ class AvailabilityDates(db.Model):
         return{
             "id": self.id,
             "date": self.date,
-            "time_id": self.time_id,
+            "time": self.time,
             "availability": self.availability
-        }
-
-class Schedules(db.Model):
-    __tablename__='schedules'
-    id =db.Column(db.Integer, primary_key=True, autoincrement=True)
-    time = db.Column(db.Date, nullable=False)
-
-    def __repr__(self):
-        return f'<Schedules {self.time}>'
-    def serialize(self):
-        return{
-            "id": self.id,
-            "time": self.time
         }
 
 class BlockedTokenList(db.Model):
