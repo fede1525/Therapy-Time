@@ -305,7 +305,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				try {
 					const response = await getActions().protectedFetch(`/deleted_consultations/${id}`, 'PUT');
 					if (response.ok) {
-						return response.json();
+						return response;
 					} else {
 						throw new Error('Error al eliminar el mensaje');
 					}

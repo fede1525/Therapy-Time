@@ -8,7 +8,8 @@ export const Inbox = () => {
     const [nameFilter, setNameFilter] = useState("");
     const [selectedConsultations, setSelectedConsultations] = useState([]);
     const [modalSuccess, setModalSuccess] = useState(false);
-    const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [showConfirmationModalInbox, setShowConfirmationModalInbox] = useState(false);
+    const [showConfirmationModalDeleted, setShowConfirmationModalDeleted] = useState(false);
     const [activeTab, setActiveTab] = useState("inbox");
 
     useEffect(() => {
@@ -37,65 +38,97 @@ export const Inbox = () => {
         setModalSuccess(false);
     }
 
-    const openConfirmationModal = () => { 
-        setShowConfirmationModal(true);
+    const closeConfirmationModal = () => { 
+        setShowConfirmationModalInbox(false);
     }
 
-    const closeConfirmationModal = () => { 
-        setShowConfirmationModal(false);
+    const openConfirmationModalDeleted = () =>{
+        setShowConfirmationModalDeleted(true)
+    }
+
+    const closeConfirmationModalDeleted = () =>{
+        setShowConfirmationModalDeleted(false)
     }
     
     const handleMarkAsUnread = async () => {
         try {
             await Promise.all(selectedConsultations.map(id => actions.changeStatusConsultation(id)));
-            setSelectedConsultations([]);
             await actions.getConsultations();
+            setSelectedConsultations([...store.consultations.filter(consultation => !consultation.is_deleted).sort((a, b) => new Date(b.arrival_date) - new Date(a.arrival_date))]);
+            setSelectedConsultations([]);
         } catch (error) {
             console.error("Error al marcar las consultas como no leídas:", error.message);
         }
     };
-
+    
     const handleDeleteSelectedConsultations = async () => {
         try {
-            await Promise.all(selectedConsultations.map(id => actions.logicalDeletionMessage(id)));
-            setSelectedConsultations([]);
-            await actions.getConsultations();
-            openModalSuccess();
+            setShowConfirmationModalInbox(true);
         } catch (error) {
             console.error("Error al eliminar las consultas seleccionadas:", error.message);
         }
     };
+    
+    const confirmDeletion = async () => {
+        try {
+            setShowConfirmationModalInbox(false);
+            await Promise.all(selectedConsultations.map(id => actions.logicalDeletionMessage(id)));
+            setSelectedConsultations([]);
+            openModalSuccess();
+            await actions.getConsultations();
+    
+        } catch (error) {
+            console.error("Error al eliminar las consultas seleccionadas:", error.message);
+        }
+    };
+    
+    const confirmPhysicalDeletion = async (ids) => {
+        try {
+            await Promise.all(ids.map(id => actions.physicalDeletionMessage(id)));
+            await actions.getConsultations();
+            closeConfirmationModalDeleted(); 
+            openModalSuccess(); 
+            setSelectedConsultations([]); // Limpiar las consultas seleccionadas
+        } catch (error) {
+            console.error("Error al eliminar permanentemente las consultas seleccionadas:", error.message);
+        }
+    }
 
     const handlePhysicalDeletion = async (id) => {
         try {
-            await actions.physicalDeletionMessage(id);
-            await actions.getConsultations();
-            openConfirmationModal();
+            setSelectedConsultations([id]); // Marcar el registro actual como seleccionado
+            openConfirmationModalDeleted();
         } catch (error) {
             console.error("Error al eliminar el mensaje:", error.message);
         }
     };
 
-    const confirmPhysicalDeletion = async () => {
-        try {
-            await actions.getConsultations(); 
-            closeConfirmationModal(); 
-            openModalSuccess(); 
-        } catch (error) {
-            console.error("Error al confirmar la eliminación:", error.message);
-        }
+    const handlePermanentDeletion = async () => {
+        openConfirmationModalDeleted();
     };
 
-    const filteredConsultations = store.consultations.filter(consultation => {
+    const handleMarkAsUnreadSingle = async (consultationId) => {
+        try {
+            await actions.changeStatusConsultation(consultationId);
+            await actions.getConsultations();
+        } catch (error) {
+            console.error("Error al marcar la consulta como no leída:", error.message);
+        }
+    };
+    
+    const filteredConsultations = store.consultations
+    .filter(consultation => {
         if (activeTab === "inbox") {
             return !consultation.is_deleted;
         } else if (activeTab === "deleted") {
             return consultation.is_deleted;
         }
-    }).filter(consultation =>
+    })
+    .filter(consultation =>
         consultation.name.toLowerCase().includes(nameFilter.toLowerCase()) ||
         consultation.lastname.toLowerCase().includes(nameFilter.toLowerCase())
-    );
+    )
+    .sort((a, b) => new Date(b.arrival_date) - new Date(a.arrival_date));
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -116,18 +149,18 @@ export const Inbox = () => {
                     <input type="text" className="form-control mr-2" placeholder="Buscar por nombre o apellido" value={nameFilter} onChange={handleNameFilterChange} />
                     {activeTab === "inbox" && (
                         <>
-                            <button onClick={handleMarkAsUnread} disabled={selectedConsultations.length === 0}><FontAwesomeIcon icon={faEnvelope} /></button>
-                            <button onClick={handleDeleteSelectedConsultations} disabled={selectedConsultations.length === 0}><FontAwesomeIcon icon={faTrash} /></button>
+                            <button onClick={handleMarkAsUnread} ><FontAwesomeIcon icon={faEnvelope}title="Marcar como no leido"/></button>
+                            <button onClick={handleDeleteSelectedConsultations} ><FontAwesomeIcon icon={faTrash} title="Eliminar" /></button>
                         </>
                     )}
                     {activeTab === "deleted" && (
-                        <a href="#" onClick={confirmPhysicalDeletion}>Eliminar permanentemente</a>
+                        <a href="#" onClick={handlePermanentDeletion}>Eliminar permanentemente</a>
                     )}
                 </div>
                 <table className="table table-hover">
                     <tbody>
                         {filteredConsultations.map((consultation, index) => (
-                            <tr key={index} className={consultation.is_read ? 'bg-light' : ''}>
+                            <tr key={index} className={consultation.is_read ? 'bg-light' : 'bg-white'}>
                                 <td>
                                     <input type="checkbox" checked={selectedConsultations.includes(consultation.id)} onChange={() => handleCheckboxChange(consultation.id)} />
                                 </td>
@@ -142,14 +175,17 @@ export const Inbox = () => {
                                     </td>
                                 )}
                                 {activeTab === "inbox" && (
-                                    <td> <FontAwesomeIcon icon={faTrash} /><FontAwesomeIcon icon={faEnvelope} /></td>
+                                    <td>
+                                        <button><FontAwesomeIcon icon={faTrash} onClick={handleDeleteSelectedConsultations} /></button>
+                                        <button><FontAwesomeIcon icon={faEnvelope} onClick={() => handleMarkAsUnreadSingle(consultation.id)} /></button>
+                                    </td>
                                 )}
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-            <div className={`modal fade ${showConfirmationModal ? 'show d-block' : 'd-none'}`} id="confirmationModal" tabIndex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div className={`modal fade ${showConfirmationModalInbox ? 'show d-block' : 'd-none'}`} id="confirmationModalInbox" tabIndex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-header">
@@ -160,8 +196,25 @@ export const Inbox = () => {
                             ¿Estás seguro de que deseas eliminar este mensaje de forma permanente?
                         </div>
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={closeConfirmationModal}>Cancelar</button>
-                            <button type="button" className="btn btn-danger" onClick={confirmPhysicalDeletion}>Eliminar</button>
+                            <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmationModalInbox(false)}>Cancelar</button>
+                            <button type="button" className="btn btn-danger" onClick={confirmDeletion}>Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className={`modal fade ${showConfirmationModalDeleted ? 'show d-block' : 'd-none'}`} id="confirmationModalDeleted" tabIndex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="confirmationModalLabel">Confirmación</h5>
+                            <button type="button" className="btn-close" onClick={closeConfirmationModal} aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            ¿Estás seguro de que deseas eliminar este mensaje de forma permanente?
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmationModalDeleted(false)}>Cancelar</button>
+                            <button type="button" className="btn btn-danger" onClick={() => confirmPhysicalDeletion(selectedConsultations)}>Eliminar</button>
                         </div>
                     </div>
                 </div>
