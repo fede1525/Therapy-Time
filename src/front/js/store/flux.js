@@ -18,13 +18,24 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"reset_token": ""
 				},
 			],
+			message:[
+				{
+					"id": "",
+					"name": "",
+					"lastname": "",
+					"age": "",
+					"phone": "",
+					"consultation": ""
+				}
+			]
 		},
 		actions: {
 			apiFetch: async (endpoint, method = 'GET', body = null) => {
 				try {
 					let params = {
 						method,
-						headers: {}
+						headers: {
+						}
 					};
 			
 					if (body !== null) {
@@ -215,13 +226,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 			handleResetPassword: async (email) => {
 				try {
 					const response = await getActions().apiFetch('/reset_password', 'POST', { email });
-					const data = await response.json();
-					
 					if (!response.ok) {
-						throw new Error(data.error || 'Error al enviar la solicitud');
+						throw new Error( 'El correo electronico no se encuentra registrado');
 					}
-					
-					return data;
+					return response;
 				} catch (error) {
 					throw new Error(error.message || 'Error al enviar la solicitud');
 				}
@@ -249,22 +257,24 @@ const getState = ({ getStore, getActions, setStore }) => {
 				  throw new Error(error.message || 'Error al enviar la solicitud');
 			  	}
 		  	},
-			handleChangePassword: async (username, token, newPassword) => {
+			sendMessage: async (name, lastname, age, phone, consultation) => {
 				try {
-					const response = await getActions().apiFetch('/change_password', 'POST', {
-						username: username,
-						token: token,
-						new_password: newPassword
+					const response = await getActions().apiFetch('/message', 'POST', {
+						name: name,
+						lastname: lastname,
+						age: age,
+						phone: phone,
+						consultation: consultation
 					});
-					
-					const data = await response.json();
-					
+			
 					if (!response.ok) {
-						throw new Error(data.error || 'Error al enviar la solicitud');
+						throw new Error('Failed to send message');
 					}
-					return data;
+					const responseData = await response.json();
+					return responseData;
 				} catch (error) {
-					throw new Error(error.message || 'Error al enviar la solicitud');
+					console.error("Error al realizar la solicitud:", error);
+					throw new Error('Error de red');
 				}
 			}
 		}

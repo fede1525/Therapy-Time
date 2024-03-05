@@ -1,10 +1,9 @@
-from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, BlockedTokenList, Role, seed
+from flask import Flask, request, jsonify, url_for, Blueprint, json
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_bcrypt import Bcrypt
-from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
@@ -22,11 +21,6 @@ EMAILJS_SERVICE_ID = 'service_yrznk4m'
 EMAILJS_TEMPLATE_ID = 'template_ebpnklz'
 EMAILJS_USER_ID = 'sm1cI8ucvO4Tvl_jb'
 ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
-
-# Crear el token
-def generate_password_reset_token(user_id, role_id):
-    data = {'user_id': user_id, 'role_id': role_id}
-    return serializer.dumps(data, salt='password-reset-salt')
 
 # Expira en 1 hora (3600 segundos)
 def verify_password_reset_token(token, max_age=3600):
@@ -319,3 +313,32 @@ def change_password():
         return jsonify({"mensaje": "Contraseña cambiada exitosamente"}), 200
     else:
         return jsonify({"mensaje": "El token ingresado es inválido o ha expirado"}), 401
+
+# Enviar mensaje de primera consulta
+@api.route('/message', methods=['POST'])
+def create_message():
+
+    data = request.get_json()
+    dataName = data['name']
+    dataLastname = data['lastname']
+    dataAge = data['age']    
+    dataPhone = data['phone']
+    dataConsultation = data['consultation']
+
+    if not all([dataName, dataLastname, dataAge, dataPhone, dataConsultation]):
+        return jsonify({"error": "Todos los campos son obligatorios."}), 400
+    try:
+        new_message = Consultation(
+            name=dataName,
+            lastname=dataLastname,
+            age=dataAge,
+            phone=dataPhone,
+            consultation=dataConsultation
+       )
+        print(data)
+        db.session.add(new_message)
+        db.session.commit()
+
+        return jsonify({"message": "Mensaje creado exitosamente"}), 201
+    except Exception as e:
+        return jsonify({"error": "Error al procesar la solicitud.", "details": str(e)}), 500
