@@ -7,13 +7,8 @@ export const Profile = () => {
     const { actions } = useContext(Context)
     const [userData, setUserData] = useState('');
     const [error, setError] = useState('');
-    const [showModal, setShowModal] = useState(false)
 
     const navigate = useNavigate()
-
-    const toggleModal = () => {
-        setShowModal(!showModal)
-    }
 
     // Traer datos de usuario al cargar la pagina
     useEffect(() => {

@@ -8,26 +8,22 @@ export const Navbar = () => {
 	const [name, setName] = useState('')
 
 	useEffect(() => {
-		const fetchUserData = async () => {
+		const fetchData = async () => {
 			try {
-				const response = await actions.getUserData();
-
-				if (!response.ok) {
-					console.error("Error fetching user data:", response.statusText);
-					throw new Error("Error fetching user data");
+				const resp = await actions.getUserData();
+				if (resp.error) {
+					console.error("No se pudo cargar datos de usuario");
 				}
 
-				const data = await response.json();
-				setUserData(data);
+				setNameetUserData(resp);
+				setName(userData.name + " " + userData.lastname)
+
 			} catch (error) {
-				console.error("Error:", error);
-				setUserData(null);
+				console.error("No se pudo cargar datos de usuario");
 			}
 		};
-
-		fetchUserData();
+		fetchData();
 	}, [actions]);
-
 
 	return (
 		<nav className="navbar navbar-light bg-light">

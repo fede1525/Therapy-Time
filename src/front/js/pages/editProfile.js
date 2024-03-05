@@ -98,6 +98,7 @@ export const EditProfile = () => {
             navigate("/profile")
         } catch (error) {
             console.error("Error actualizando el perfil:", error);
+            navigate("/profile")
         }
 
     }
@@ -228,7 +229,7 @@ export const EditProfile = () => {
                     <div className="col">
                         <div className="form-group">
                             <label htmlFor="dni">DNI</label>
-                            <input type="number"
+                            <input type="text"
                                 className="form-control"
                                 id="dni"
                                 name="dni-input"

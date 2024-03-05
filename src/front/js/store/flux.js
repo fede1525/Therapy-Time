@@ -167,7 +167,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return resp.json()
 				} catch (error) {
 					console.error("Error: ", error)
-					return { Error: "Error al traer datos de usuario" }
+					return { error: "Error al traer datos de usuario" }
 				}
 			},
 			editProfile: async (changes) => {

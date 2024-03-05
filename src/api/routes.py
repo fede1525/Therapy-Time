@@ -22,20 +22,6 @@ EMAILJS_SERVICE_ID = 'service_yrznk4m'
 EMAILJS_TEMPLATE_ID = 'template_ebpnklz'
 EMAILJS_USER_ID = 'sm1cI8ucvO4Tvl_jb'
 ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
-
-# Crear el token
-def generate_password_reset_token(user_id, role_id):
-    data = {'user_id': user_id, 'role_id': role_id}
-    return serializer.dumps(data, salt='password-reset-salt')
-
-# Expira en 1 hora (3600 segundos)
-def verify_password_reset_token(token, max_age=3600):
-    # Deserializar el token para ver el id del usuario
-    try:
-        user_id = serializer.loads(token, salt='password-reset', max_age=max_age)
-        return user_id
-    except Exception as e:
-        return None
     
 # Alta a nuevo usuario
 @api.route('/signup', methods=['POST'])
@@ -215,12 +201,8 @@ def logout_user():
 @api.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
-    payload = get_jwt()
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
-
-    if payload["id"] != current_user_id:
-        return "Usuario no autorizado", 403
 
     if user is None:
         return jsonify({"error": "Usuario no encontrado"}), 404
@@ -242,13 +224,16 @@ def edit_profile():
         
     data = request.get_json()
 
-    for key in data:
-        if key != "password":
-            user[key] = data[key]
+    updated_user_data = {**user.__dict__, **data}
+
 
     if 'password' in data:
-        user.password = bcrypt.generate_password_hash(data['password']).decode("utf-8")
+        updated_user_data["password"] = bcrypt.generate_password_hash(data['password']).decode("utf-8")
 
+    for key, value in updated_user_data.items():
+        if key != "password":
+            setattr(user, key, value)
+            
     db.session.commit()
 
     return jsonify({"message": "Perfil actualizado"}), 200
