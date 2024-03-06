@@ -317,13 +317,13 @@ def change_password():
 # Enviar mensaje de primera consulta
 @api.route('/message', methods=['POST'])
 def create_message():
-
     data = request.get_json()
     dataName = data['name']
     dataLastname = data['lastname']
     dataAge = data['age']    
     dataPhone = data['phone']
     dataConsultation = data['consultation']
+    dataArrival_date = data['arrival_date']  
 
     if not all([dataName, dataLastname, dataAge, dataPhone, dataConsultation]):
         return jsonify({"error": "Todos los campos son obligatorios."}), 400
@@ -333,16 +333,16 @@ def create_message():
             lastname=dataLastname,
             age=dataAge,
             phone=dataPhone,
-            consultation=dataConsultation
-       )
-        print(data)
+            consultation=dataConsultation,
+            arrival_date=dataArrival_date 
+        )
         db.session.add(new_message)
         db.session.commit()
 
         return jsonify({"message": "Mensaje creado exitosamente"}), 201
     except Exception as e:
         return jsonify({"error": "Error al procesar la solicitud.", "details": str(e)}), 500
-    
+   
 #Listar todas las consultas
 @api.route('/consultations', methods=['GET'])
 @jwt_required()
@@ -356,6 +356,22 @@ def get_consultations():
         return jsonify(serialized_consultations), 200
     except Exception as e:
         return jsonify({"error": "Error al obtener usuarios"}), 500
+
+# Traer una sola consulta por su ID
+@api.route('/consultation/<int:id>', methods=['GET'])
+@jwt_required()
+def get_one_consultation(id):
+    payload = get_jwt()
+    if payload['role'] != 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            return jsonify(consultation.serialize()), 200
+        else:
+            return jsonify({"message": "Consulta no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error al obtener la consulta"}), 500
 
 #Marcar las consultas como no leidas
 @api.route('/consultations/<int:id>/mark_as_unread', methods=['PUT'])

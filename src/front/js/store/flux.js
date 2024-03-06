@@ -28,11 +28,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"consultation": "",
 					"is_read": false,
 					"is_deleted": false,
-					"arrival_date ":""
+					"arrival_date ":"",
+					"arrival_date": "",
 				}
 			]
 		},
 		actions: {
+			//Funciones globales
 			apiFetch: async (endpoint, method = 'GET', body = null) => {
 				try {
 					let params = {
@@ -85,10 +87,91 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return error
 				}
 			},
+			//Funciones de login, logout y recupero de contraseña
 			logout: async () => {
 				await getActions().protectedFetch("/logout", "POST", null)
 				localStorage.removeItem("token")
 			},
+			loginUser: async (username, password) => {
+				try {
+					const response = await getActions().apiFetch('/login', 'POST', {
+						username: username,
+						password: password
+					});
+					
+					if (!response.ok) {
+						throw new Error('Failed to log in');
+					}
+					
+					const responseData = await response.json();
+					const token = responseData.token || "";
+					const userRole = responseData.role || "";
+					
+					localStorage.setItem('token', token);
+					console.log("Token almacenado en localStorage:", token);
+					
+					setStore({ isAuthenticated: true, role: userRole });
+					
+					return { success: true, message: responseData.message };
+				} catch (error) {
+					console.error("Error al realizar la solicitud:", error);
+					setStore({ isAuthenticated: false, userRole: "" });
+					return { success: false, error: 'Error de red' };
+				}
+			},	
+			//Funciones para el recupero de contraseña		
+			handleResetPassword: async (email) => {
+				try {
+					const response = await fetch(process.env.BACKEND_URL + '/api/reset_password', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+						},
+						body: JSON.stringify({ email })
+					});
+					
+					const data = await response.json();
+					if (!response.ok) {
+						throw new Error(data.error || 'Error al enviar la solicitud');
+					}
+					return data;
+				} catch (error) {
+					throw new Error(error.message || 'Error al enviar la solicitud');
+				}
+			},
+			handleChangePassword: async (username, token, newPassword) => {
+				try {
+					const response = await fetch(process.env.BACKEND_URL + '/api/change_password', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+						},
+						body: JSON.stringify({
+							username: username,
+							token: token,
+							new_password: newPassword
+						})
+					});
+					const data = await response.json();
+			
+					if (!response.ok) {
+						if (response.status === 401) {
+							throw new Error(data.mensaje || 'El token ingresado es inválido o ha expirado');
+						} else if (response.status === 404) {
+							throw new Error(data.mensaje || 'El usuario ingresado es inválido');
+						} else {
+							throw new Error(data.mensaje || 'Error al cambiar la contraseña');
+						}
+					}
+			
+					return data;
+				} catch (error) {
+					throw new Error(error.message || 'Error al enviar la solicitud');
+				}
+			},		
+			//Funciones para la gestion de pacientes
 			createUser: async (body) => {
 				try {
 					if (!body.username || !body.name || !body.lastname || !body.dni || !body.phone || !body.email) {
@@ -170,7 +253,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al editar el usuario:", error.message);
 					throw error; 
 				}   
-			},			
+			},	
+			//Funciones para la edicion de perfil		
 			getUserData: async () => {
 				try {
 					const resp = await getActions().protectedFetch("/profile", "GET", null)
@@ -199,68 +283,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error
 				}
 			},
-			loginUser: async (username, password) => {
-				try {
-					const response = await getActions().apiFetch('/login', 'POST', {
-						username: username,
-						password: password
-					});
-					
-					if (!response.ok) {
-						throw new Error('Failed to log in');
-					}
-					
-					const responseData = await response.json();
-					const token = responseData.token || "";
-					const userRole = responseData.role || "";
-					
-					localStorage.setItem('token', token);
-					console.log("Token almacenado en localStorage:", token);
-					
-					setStore({ isAuthenticated: true, role: userRole });
-					
-					return { success: true, message: responseData.message };
-				} catch (error) {
-					console.error("Error al realizar la solicitud:", error);
-					setStore({ isAuthenticated: false, userRole: "" });
-					return { success: false, error: 'Error de red' };
-				}
-			},			
-			handleResetPassword: async (email) => {
-				try {
-					const response = await getActions().apiFetch('/reset_password', 'POST', { email });
-					if (!response.ok) {
-						throw new Error( 'El correo electronico no se encuentra registrado');
-					}
-					return response;
-				} catch (error) {
-					throw new Error(error.message || 'Error al enviar la solicitud');
-				}
-			},			
-			handleChangePassword: async (username, token, newPassword) => {
-				try {
-					const response = await getActions().apiFetch('/change_password', 'POST', {
-						username: username,
-						token: token,
-						new_password: newPassword
-					});
-					if (!response.ok) {
-						const data = await response.json();
-						throw new Error(data.error || 'Error al enviar la solicitud');
-					}
-					return response.json();
-				} catch (error) {
-					throw new Error(error.message || 'Error al enviar la solicitud');
-				}
-			},
-			sendMessage: async (name, lastname, age, phone, consultation) => {
+			//Funciones para el envio y lectura de consultas externas
+			sendMessage: async (name, lastname, age, phone, consultation, arrival_date) => {
 				try {
 					const response = await getActions().apiFetch('/message', 'POST', {
 						name: name,
 						lastname: lastname,
 						age: age,
 						phone: phone,
-						consultation: consultation
+						consultation: consultation,
+						arrival_date: arrival_date
 					});
 			
 					if (!response.ok) {
@@ -270,7 +302,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return responseData;
 				} catch (error) {
 					console.error("Error al realizar la solicitud:", error);
-					throw new Error('Error de red');
+					throw new Error(`Error de red: ${error.message}`);
 				}
 			},
 			getConsultations: async () => {
@@ -285,6 +317,20 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				} catch (error) {
 					console.error("Error al obtener las consultas:", error.message);
+					throw error;
+				}
+			},	
+			getOneConsultation: async (id) =>{
+				try {
+					const resp = await getActions().protectedFetch(`/consultation/${id}`);
+					if (resp.ok) {
+						const data = await resp.json();
+						return data;
+					} else {
+						throw new Error("Error al obtener el usuario.");
+					}
+				} catch (error) {
+					console.error("Error al obtener usuarios:", error.message);
 					throw error;
 				}
 			},			

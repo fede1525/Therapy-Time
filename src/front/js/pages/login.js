@@ -12,7 +12,6 @@ export const Login = () => {
         password: "",
     });
     const navigate = useNavigate();
-
     const handleLogin = async (e) => {
         e.preventDefault();
         const errors = validateForm();
@@ -32,7 +31,6 @@ export const Login = () => {
             }
         }
     };
-    
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         if (name === "username") {
@@ -42,14 +40,12 @@ export const Login = () => {
         }
         setErrorMessage(prevState => ({ ...prevState, password: '' }));
     };
-
     const handleInputFocus = (fieldName) => {
         setErrorMessages(prevErrors => ({
             ...prevErrors,
             [fieldName]: ""
         }));
     };
-
     const validateForm = () => {
         const errors = {}; 
         if (username.trim() === "") {
