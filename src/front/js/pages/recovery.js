@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import { Link } from 'react-router-dom';
 import { Context } from "../store/appContext";
 
 export const Recovery = () => {
@@ -8,19 +9,15 @@ export const Recovery = () => {
     const [recoveryMessage, setRecoveryMessage] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!emailRegex.test(emailInput)) {
             setEmailError("Formato de correo electrónico inválido.");
             return;
         } else {
             setEmailError("");
         }
-
         try {
             setLoading(true);
             const response = await actions.handleResetPassword(emailInput);
@@ -31,14 +28,11 @@ export const Recovery = () => {
         } catch (error) {
             setLoading(false);
             setError(error.message || 'Error al enviar la solicitud de recuperación de contraseña.');
-        }
-        
+        }   
     }
-
     const handleEmailChange = (e) => {
         setEmailInput(e.target.value);
     }
-
     const handleEmailFocus = () => {
         setEmailError(""); 
         setError("");
@@ -58,7 +52,14 @@ export const Recovery = () => {
                         <button type="submit" className="btn btn-primary" disabled={loading}>Recuperar contraseña</button>
                     </form>
                 }
-                {recoveryMessage && <p>{recoveryMessage}</p>}
+                {recoveryMessage && (
+                    <div>
+                        <p>{recoveryMessage}</p>
+                        <p>
+                            <Link to="/login">← Volver al inicio de sesion</Link>
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     );

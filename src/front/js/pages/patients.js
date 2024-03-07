@@ -33,36 +33,20 @@ export const Patients = () => {
         actions.getUsers();
     }, []);
 
+    //Apertura y cierre de modales
     const openModal = () => {
         setShowModal(true);
     };
-
     const closeModal = () => {
         setShowModal(false);
         setShowModalEdit(false);
     };
-
     const closeSuccessModal = () => {
         setShowSuccessModal(false);
         actions.getUsers();
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        if (name === "is_active") {
-            setIsActive(value === "activo");
-            setUserData(prevState => ({
-                ...prevState,
-                [name]: value === "activo" ? true : false
-            }));
-        } else {
-            setUserData(prevState => ({
-                ...prevState,
-                [name]: value
-            }));
-        }
-    };
-    
+    //Alta de nuevos usuarios
     const handleSubmit = async () => {
         const validationMessages = validateForm(userData, false);
         setErrorMessages(validationMessages);
@@ -94,7 +78,44 @@ export const Patients = () => {
             console.error("Error al crear usuario:", error.message);
         }
     };
+
+    //Filtros de busqueda/listado
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "is_active") {
+            setIsActive(value === "activo");
+            setUserData(prevState => ({
+                ...prevState,
+                [name]: value === "activo" ? true : false
+            }));
+        } else {
+            setUserData(prevState => ({
+                ...prevState,
+                [name]: value
+            }));
+        }
+    };
+    const toggleShowInactive = () => {
+        setShowInactive(!showInactive);
+    };
+    const handleChangeNameFilter = (e) => {
+        setNameFilter(e.target.value);
+    };  
+    const handleChangeDniFilter = (e) => {
+        setDniFilter(e.target.value);
+    };   
+    const filteredUsers = store.user.filter(user => {
+        const nameMatches = (user.name && user.name.toLowerCase().includes(nameFilter.toLowerCase())) || (user.lastname && user.lastname.toLowerCase().includes(nameFilter.toLowerCase()));
+        const dniMatches = user.dni && user.dni.includes(dniFilter);
+        return nameMatches && dniMatches;
+    });
+    const activeFilteredUsers = filteredUsers.filter(user => user.is_active);
+    const inactiveFilteredUsers = filteredUsers.filter(user => !user.is_active);
+    const sortedActiveFilteredUsers = activeFilteredUsers.sort((a, b) => a.name.localeCompare(b.name));
+    const sortedInactiveFilteredUsers = inactiveFilteredUsers.sort((a, b) => a.name.localeCompare(b.name));
+    const sortedFilteredUsers = [...sortedActiveFilteredUsers, ...sortedInactiveFilteredUsers];
     
+    //Edicion de usuario
     const handleGetUser = async(id) =>{
         try{
             const data = await actions.getUser(id);
@@ -106,7 +127,6 @@ export const Patients = () => {
             console.error("Error al obtener el usuario:", error.message);
         }
     };
-    
     const handleSaveChanges = async () => {
         const validationMessages = validateForm(userData, true);
         setErrorMessages(validationMessages);
@@ -126,6 +146,7 @@ export const Patients = () => {
         }
     };
     
+    //Validaciones
     const [errorMessages, setErrorMessages] = useState({
         username: "",
         name: "",
@@ -134,14 +155,12 @@ export const Patients = () => {
         phone: "",
         email: ""
     });
-
     const handleInputFocus = (fieldName) => {
         setErrorMessages(prevErrors => ({
             ...prevErrors,
             [fieldName]: ""
         }));
     };
-    
     const validateForm = (data, isEditing) => {
         const errors = {};
         if (data.username.trim() === "") {
@@ -193,37 +212,12 @@ export const Patients = () => {
         }
         return errors;
     };
-    
     const isValidEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
         return emailRegex.test(email);
     };
     
-    const toggleShowInactive = () => {
-        setShowInactive(!showInactive);
-    };
-
-    const handleChangeNameFilter = (e) => {
-        setNameFilter(e.target.value);
-    };
-    
-    const handleChangeDniFilter = (e) => {
-        setDniFilter(e.target.value);
-    };
-    
-    const filteredUsers = store.user.filter(user => {
-        const nameMatches = (user.name && user.name.toLowerCase().includes(nameFilter.toLowerCase())) || (user.lastname && user.lastname.toLowerCase().includes(nameFilter.toLowerCase()));
-        const dniMatches = user.dni && user.dni.includes(dniFilter);
-        return nameMatches && dniMatches;
-    });
-
-    const activeFilteredUsers = filteredUsers.filter(user => user.is_active);
-    const inactiveFilteredUsers = filteredUsers.filter(user => !user.is_active);
-
-    const sortedActiveFilteredUsers = activeFilteredUsers.sort((a, b) => a.name.localeCompare(b.name));
-    const sortedInactiveFilteredUsers = inactiveFilteredUsers.sort((a, b) => a.name.localeCompare(b.name));
-    const sortedFilteredUsers = [...sortedActiveFilteredUsers, ...sortedInactiveFilteredUsers];
-    
+    //Paginacion
     const paginate = pageNumber => setCurrentPage(pageNumber);
     const visibleUsers = (showInactive ? sortedFilteredUsers : sortedActiveFilteredUsers);
 
@@ -289,7 +283,6 @@ export const Patients = () => {
                     </li>
                 ))}
             </ul>
-
             <div className={`modal fade ${showModal ? 'show d-block' : 'd-none'}`} id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog">
                     <div className="modal-content">

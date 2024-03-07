@@ -1,10 +1,9 @@
-from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, BlockedTokenList, Role, seed
+from flask import Flask, request, jsonify, url_for, Blueprint, json
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_bcrypt import Bcrypt
-from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
@@ -305,3 +304,117 @@ def change_password():
         return jsonify({"mensaje": "Contraseña cambiada exitosamente"}), 200
     else:
         return jsonify({"mensaje": "El token ingresado es inválido o ha expirado"}), 401
+
+# Enviar mensaje de primera consulta
+@api.route('/message', methods=['POST'])
+def create_message():
+    data = request.get_json()
+    dataName = data['name']
+    dataLastname = data['lastname']
+    dataAge = data['age']    
+    dataPhone = data['phone']
+    dataConsultation = data['consultation']
+    dataArrival_date = data['arrival_date']  
+
+    if not all([dataName, dataLastname, dataAge, dataPhone, dataConsultation]):
+        return jsonify({"error": "Todos los campos son obligatorios."}), 400
+    try:
+        new_message = Consultation(
+            name=dataName,
+            lastname=dataLastname,
+            age=dataAge,
+            phone=dataPhone,
+            consultation=dataConsultation,
+            arrival_date=dataArrival_date 
+        )
+        db.session.add(new_message)
+        db.session.commit()
+
+        return jsonify({"message": "Mensaje creado exitosamente"}), 201
+    except Exception as e:
+        return jsonify({"error": "Error al procesar la solicitud.", "details": str(e)}), 500
+   
+#Listar todas las consultas
+@api.route('/consultations', methods=['GET'])
+@jwt_required()
+def get_consultations():
+    payload = get_jwt()
+    if payload["role"]!= 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultations = Consultation.query.all()
+        serialized_consultations = [consultation.serialize() for consultation in consultations]
+        return jsonify(serialized_consultations), 200
+    except Exception as e:
+        return jsonify({"error": "Error al obtener usuarios"}), 500
+
+# Traer una sola consulta por su ID
+@api.route('/consultation/<int:id>', methods=['GET'])
+@jwt_required()
+def get_one_consultation(id):
+    payload = get_jwt()
+    if payload['role'] != 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            return jsonify(consultation.serialize()), 200
+        else:
+            return jsonify({"message": "Consulta no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error al obtener la consulta"}), 500
+
+#Marcar las consultas como no leidas
+@api.route('/consultations/<int:id>/mark_as_unread', methods=['PUT'])
+@jwt_required()
+def mark_consultation_as_unread(id):
+    payload = get_jwt()
+    if payload["role"]!= 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            consultation.is_read = False
+            db.session.commit()
+            return jsonify({"message": "Consultation marked as unread"}), 200
+        else:
+            return jsonify({"error": "Consultation not found"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error marking consultation as unread"}), 500
+
+#Borrado logico de las consultas
+@api.route('/deleted_consultations/<int:id>', methods=['PUT'])
+@jwt_required()
+def logical_deletion(id):
+    payload = get_jwt()
+    if payload["role"]!=2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            consultation.is_deleted = True
+            db.session.commit()
+            return jsonify({"message": "El mensaje ha sido eliminado"}),200
+        else:
+            return jsonify({"message" : "Error al eliminar el mensaje"}),404
+    except Exception as e:
+        return jsonify({"error": "Error al intentar eliminar el mensaje"}),500
+    
+#Borrado fisico de las consultas
+@api.route('/deleted_consultations/<int:id>', methods=['DELETE'])
+@jwt_required()
+def physical_deletion(id):
+    payload = get_jwt()
+    if payload["role"] != 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            db.session.delete(consultation)  
+            db.session.commit()
+            return jsonify({"message": "El mensaje ha sido eliminado de forma permanente"}), 200
+        else:
+            return jsonify({"message": "La consulta no existe"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error al intentar eliminar la consulta"}), 500
+

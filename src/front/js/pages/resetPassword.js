@@ -1,8 +1,10 @@
 import React, { useContext, useState } from "react";
 import { Context } from "../store/appContext";
+import { useNavigate } from "react-router-dom";
 
 export const Reset_password = () => {
     const { actions } = useContext(Context);
+    const navigate = useNavigate(); // Hook useNavigate
     const [username, setUsername] = useState("");
     const [resetToken, setResetToken] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -12,12 +14,10 @@ export const Reset_password = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (newPassword !== confirmPassword) {
             setError("Las contraseñas no coinciden");
             return;
         }
-
         try {
             setError("");
             const response = await actions.handleChangePassword(username, resetToken, newPassword);
@@ -26,10 +26,9 @@ export const Reset_password = () => {
             setError(error.message || 'Error al restablecer la contraseña');
         }
     };
-
-    const handleGoToLogin = () => {
-        // Redireccionar al inicio de sesión
-    };
+    const handleGoToLogin = () =>{
+        navigate('/login');
+    }
 
     return (
         <div className="container d-flex justify-content-center m-5">

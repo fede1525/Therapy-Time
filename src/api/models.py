@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemyseeder import ResolvingSeeder
-import datetime
+
+import arrow
 
 db = SQLAlchemy()
 
@@ -119,7 +120,30 @@ class BlockedTokenList(db.Model):
     date_time = db.Column(db.DateTime, nullable = True)
     expires = db.Column(db.DateTime, nullable = True)
 
+class Consultation(db.Model):
+    __tablename__='consultation'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(25), nullable=False)
+    lastname = db.Column(db.String(25), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    phone = db.Column(db.String(10), nullable=False)
+    consultation = db.Column(db.String(250), nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    is_deleted = db.Column(db.Boolean, default=False)
+    arrival_date = db.Column(db.DateTime, nullable=False)
 
+    def __repr__(self):
+        return f'<Message{self.id}>'
 
-
-
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "lastname": self.lastname,
+            "age": self.age,
+            "phone": self.phone,
+            "consultation": self.consultation,
+            "is_read": self.is_read,
+            "is_deleted": self.is_deleted,
+            "arrival_date": self.arrival_date.strftime('%d-%B-%Y %H:%M:%S')
+        }
