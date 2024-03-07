@@ -16,7 +16,7 @@ export const Login = () => {
         e.preventDefault();
         const errors = validateForm();
         setErrorMessages(errors);
-    
+
         if (Object.values(errors).every(error => error === "")) {
             try {
                 const result = await actions.loginUser(username, password);
@@ -27,10 +27,11 @@ export const Login = () => {
                 }
             } catch (error) {
                 console.error("Error en el inicio de sesión:", error.message);
-                setErrorMessage(prevState => ({ ...prevState, networkError: "Error de red" })); 
+                setErrorMessage(prevState => ({ ...prevState, networkError: "Error de red" }));
             }
         }
     };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         if (name === "username") {
@@ -47,7 +48,7 @@ export const Login = () => {
         }));
     };
     const validateForm = () => {
-        const errors = {}; 
+        const errors = {};
         if (username.trim() === "") {
             errors.username = "*El campo es obligatorio";
         } else {
@@ -56,42 +57,42 @@ export const Login = () => {
                 errors.username = "El usuario no está registrado";
             } else {
                 errors.username = "";
-            if (password.trim() === "") {
-                errors.password = "*El campo es obligatorio";
-            }
-            else {
-                errors.password=""
+                if (password.trim() === "") {
+                    errors.password = "*El campo es obligatorio";
+                }
+                else {
+                    errors.password = ""
                 }
             }
         }
         return errors;
     };
-    
+
     return (
         <div className="container login">
             <form onSubmit={handleLogin}>
-                <div className="form-group">
-                    <label htmlFor="username">Username:</label>
+                <div className="form-group p-3">
+                    <label htmlFor="username">Nombre de usuario :</label>
                     <input
                         type="text"
                         className="form-control"
                         id="username"
                         name="username"
-                        placeholder="Enter your username"
+                        placeholder="Ingrese su nombre de usuario"
                         value={username}
                         onChange={handleInputChange}
                         onFocus={() => handleInputFocus("username")}
                     />
                     {errorMessages.username && <p className="text-danger">{errorMessages.username}</p>}
                 </div>
-                <div className="form-group">
-                    <label htmlFor="password">Password:</label>
+                <div className="form-group p-3">
+                    <label htmlFor="password">Contraseña :</label>
                     <input
                         type="password"
                         className="form-control"
                         id="password"
                         name="password"
-                        placeholder="Enter your password"
+                        placeholder="Ingrese su contraseña"
                         value={password}
                         onChange={handleInputChange}
                         onFocus={() => handleInputFocus("password")}
@@ -107,17 +108,17 @@ export const Login = () => {
                     </div>
                 )}
                 <div className="text-center">
-                    <button type="submit" className="btn btnLogin">
-                        Login
+                    <button type="submit" className="btn btnLogin pt-3">
+                        Iniciar sesión
                     </button>
                 </div>
             </form>
             <div className="mt-3 text-center link">
                 <p>
-                     Forgot your password? <Link to="/recovery">Recover it here</Link>
+                    ¿Olvidaste tu contraseña? <Link to="/recovery">Haz click aqui para recuperarla</Link>
                 </p>
                 <p>
-                    <Link to="/">← Go Back</Link>
+                    <Link to="/">← Volver</Link>
                 </p>
             </div>
         </div>
