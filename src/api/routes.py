@@ -278,7 +278,7 @@ def bloquear():
     if request.method == 'POST':
         try:
             data = request.get_json()
-
+            print(data)
             required_fields = ['date', 'time']
             for field in required_fields:
                 if field not in data:

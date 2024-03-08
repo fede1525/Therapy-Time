@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { Context } from "../store/appContext";
-import "../../styles/home.css";
+import "../../styles/calendar.css";
 
 export const Block = () => {
   const { actions } = useContext(Context);
@@ -12,17 +12,32 @@ export const Block = () => {
   const [selectedHour, setSelectedHour] = useState(null);
   const [unavailableDates, setUnavailableDates] = useState([])
 
+  const meses = {
+    1: 'Enero',
+    2: 'Febrero',
+    3: 'Marzo',
+    4: 'Abril',
+    5: 'Mayo',
+    6: 'Junio',
+    7: 'Julio',
+    8: 'Agosto',
+    9: 'Septiembre',
+    10: 'Octubre',
+    11: 'Noviembre',
+    12: 'Diciembre'
+  };
+
   useEffect(() => {
     
     const fetchUnavailableDates = async () => {
       try {
-        const response = await actions.apiFetch('/bloquear');
+        const response = await actions.apiFetch('/bloquear', 'GET');
         setUnavailableDates(response);
       } catch (error) {
         console.error('Error al obtener fechas no disponibles:', error);
       }
     };
-
+    console.log(unavailableDates)
     fetchUnavailableDates();
   
     const currentYear = new Date().getFullYear();
@@ -53,6 +68,9 @@ export const Block = () => {
     setCalendar(newCalendar);
     
   }, [ ]);
+  useEffect(() => {
+    console.log(unavailableDates);
+  }, [unavailableDates]); 
 
   const handleDayClick = (day) => {
     setSelectedDay(day);
@@ -61,25 +79,23 @@ export const Block = () => {
     console.log(calendar)
     
   };
-
   const handleHourClick = (hour) => {
     setSelectedHour(hour);
     setShowModal(true)
     console.log("hora seleccionada", hour, ":00", "del día", selectedDay)
   };
-
   const handleCloseModal = () => {
     setShowModal(false);
   };
-
-  const handleBlockTime = () => {
+  const handleBlockTime = async (hour) => {
     
     const data = {
-      date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${selectedHour > 9 ? '' : '0'}${selectedHour}:00:00`,
-      time: selectedHour,
+      date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
+      time: hour,
     };
-    console.log(data)
-    actions.apiFetch('/bloquear', 'POST', data)
+    
+    console.log(data, hour,  " Antes del POST")
+    await actions.apiFetch('/bloquear', 'POST', data)
       .then(data => {
         console.log('Hora bloqueada exitosamente:', data);
         handleCloseModal();
@@ -88,16 +104,17 @@ export const Block = () => {
         console.error('Error al bloquear la hora:', error);
 
       });
+      console.log(data, hour,  " Después del POST")
   };
-  const handleUnblockTime = () => {
+  const handleUnblockTime = async (hour) => {
     
     const data = {
+      time: hour,
       availability: true,
-      time: selectedHour,
-      date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${selectedHour > 9 ? '' : '0'}${selectedHour}:00:00`
+      date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`
     };
     console.log(data)
-    actions.apiFetch('/bloquear', 'PUT', data)
+    await actions.apiFetch('/bloquear', 'PUT', data)
       .then(data => {
         console.log('Hora desblobloqueada exitosamente:', data);
         handleCloseModal();
@@ -106,21 +123,6 @@ export const Block = () => {
         console.error('Error al desbloquear la hora:', error);
 
       });
-  };
-
-  const meses = {
-    1: 'Enero',
-    2: 'Febrero',
-    3: 'Marzo',
-    4: 'Abril',
-    5: 'Mayo',
-    6: 'Junio',
-    7: 'Julio',
-    8: 'Agosto',
-    9: 'Septiembre',
-    10: 'Octubre',
-    11: 'Noviembre',
-    12: 'Diciembre'
   };
 
   const renderModalContent = () => {
@@ -135,9 +137,8 @@ export const Block = () => {
           {hours.map((hour) => (
             <li key={hour} onClick={() => handleHourClick(hour)}>
               {hour}:00 - {hour + 1}:00
-              <button onClick={handleBlockTime}>Bloquear Hora</button>
-              <button onClick={handleUnblockTime}>Desbloquear Hora</button>
-              
+              <button onClick={()=>handleBlockTime(hour)}>Bloquear Hora</button>
+              <button onClick={()=>handleUnblockTime(hour)}>Desbloquear Hora</button>
             </li>
           ))}
         </ul>
@@ -150,8 +151,10 @@ export const Block = () => {
     <div>
       <h2>Calendario 2024</h2>
       <h2> {meses[month]} </h2>
-      <button onClick={() => setMonth(month - 1)}>Mes Anterior</button>
-      <button onClick={() => setMonth(month + 1)}>Mes Siguiente</button>
+      <div className="button-container">
+        <button onClick={() => setMonth(month - 1)}>Mes Anterior</button>
+        <button onClick={() => setMonth(month + 1)}>Mes Siguiente</button>
+      </div>
       <table className="calendar">
         <thead>
           <tr>
