@@ -1,3 +1,137 @@
-/* 
-    General Styles used on every website (Don't Repeat Yourself)
-*/
+/*Landing*/
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jura&display=swap');
+
+.container-fluid {
+  position: relative;
+}
+.texto-sobre-fondo {
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.logo {
+  width: 38vh; 
+  height: auto; 
+  margin-left: 4.5vh;
+  margin-top: 1.8vh;
+}
+.linksNav a{
+  margin-top:5.3vh;
+  margin-left: 9vh;
+  margin-right: 9vh;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 2.3vh;
+  color:#d8bab8 !important;
+}
+.columna-izquierda-top {
+  height: 14vh;
+  background-color:#EDE9E9;
+}
+.columna-derecha-top {
+  height: 14vh;
+  background-color: #FAFAFA; 
+}
+.columna-izquierda-bottom {
+  height: 68vh;
+  background-color:#EDE9E9;
+}
+.columna-derecha-bottom {
+  height: 68vh;
+  background-color: #FAFAFA; 
+}
+.textAbout{
+  color:#C47C7A;
+  width: 100vh;
+  margin-left: 26vh;
+  margin-top: 11vh;
+  font-family: 'Nanum Gothic', sans-serif;
+}
+.btn_about{
+  margin-left: -2vh !important;
+}
+.profile{
+  border-top-left-radius: 80px;
+  border-bottom-right-radius: 80px;
+  border: solid white 1.2vh;
+  margin-top: 6vh;
+  position: absolute;
+  left: 33vh;
+  top: 0;
+  transform: translateY(25%); 
+}
+.services{
+  background-color: #FAFAFA;
+  height: 50vh;
+  color:#C47C7A;
+  font-family: 'Nanum Gothic', sans-serif;
+}
+.textServices{
+  border-right: #C47C7A solid 1vh;
+  line-height: 0.5;
+  padding-left: 7.2vh;
+}
+.titleService{
+  font-size: 4.2vh;
+}
+.contentServices{
+  width: 100vh;
+  margin-left: 26vh;
+}
+.right_sidebar {
+  position: absolute;
+  right: 0;
+  top: 82vh; 
+  width: 10vh;
+  height: 50vh;
+  background-color:#B2A79F;
+  border-top-left-radius: 10vh; 
+}
+.turnos{
+  height: 57vh;
+  background-color:#EDE9E9;
+  padding: 10vh 40vh;
+}
+.textTurnos{
+  background-color: white;
+  padding: 5vh;
+  font-family: 'Nanum Gothic', sans-serif;
+  color:#C47C7A;
+}
+.btn{
+  color: #C47C7A;
+}
+.btn:hover{
+  color:#B2A79F;
+}
+.textContact{
+  line-height: 0.4;
+  margin-top: 3vh;
+  font-family: 'Jura', sans-serif;
+}
+.contact{
+  background-color: #FAFAFA;
+  color:#C47C7A;
+}
+.contactTitle{
+  font-family: 'Jura', sans-serif;
+  letter-spacing: 0.8vh;
+}
+.pService{
+  font-family: 'Jura', sans-serif;
+}
+a{
+  color:#C47C7A; 
+  text-decoration: none;
+}
+a:hover{
+  color:#C47C7A
+}
+

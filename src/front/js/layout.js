@@ -4,7 +4,6 @@ import ScrollToTop from "./component/scrollToTop";
 import { BackendURL } from "./component/backendURL";
 import { Context } from "./store/appContext";
 import injectContext from "./store/appContext";
-import { Footer } from "./component/footer";
 import { Landing } from "./pages/landing";
 import { Login } from "./pages/login"
 import { Recovery } from "./pages/recovery";
@@ -53,7 +52,6 @@ const Layout = () => {
                         <Route element={<Reset_password />} path="/reset_password" />
                         <Route element={<Patients />} path="/patients" />
                     </Routes>
-                    <Footer />
                 </ScrollToTop>
             </BrowserRouter>
         </div>

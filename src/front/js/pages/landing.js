@@ -1,11 +1,13 @@
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { Context } from "../store/appContext";
+import "../../styles/index.css";
 
 export const Landing = () => {
     const { actions, store } = useContext(Context);
     const [showModal, setShowModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showAboutModal, setShowAboutModal] = useState(false)
     const [formData, setFormData] = useState({
         name: "",
         lastname: "",
@@ -26,6 +28,12 @@ export const Landing = () => {
     };
     const closeSuccessModal = () => {
         setShowSuccessModal(false);
+    };
+    const openShowAboutModal = () =>{
+        setShowAboutModal(true)
+    };
+    const closeShowAboutModal = () =>{
+        setShowAboutModal(false)
     };
 
     //Envio del formulario
@@ -115,13 +123,69 @@ export const Landing = () => {
     };
     
     return (
-        <div className="container">
-            <h1>Kever</h1>
-            <h3>Matches, Mates, Movies</h3>
-            <Link to="/login">
-                <button>Soy paciente</button>
-            </Link>
-            <button onClick={openModal}>Primer contacto</button>
+        <div className="container-fluid">
+            <div className="row">
+                <div className="columna-izquierda-top col-3">
+                    <img className="logo" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/navbar.png?raw=true" alt="Logo" />
+                </div>
+                <div className="columna-derecha-top col-9">
+                    <div className="d-flex justify-content-between linksNav">
+                        <a href="#about"><p>SOBRE MI</p></a>
+                        <a href="#services"><p>SERVICIOS</p></a>
+                        <a href="#turnos"><p>TURNOS</p></a>
+                        <Link to="/login"><p>INGRESAR</p></Link>
+                    </div>  
+                </div>
+            </div>
+            <div className="row">
+                <div className="columna-izquierda-bottom col-3">
+                    <img className="profile" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/profile.png?raw=true" alt="Profile"/>
+                </div>
+                <div className="columna-derecha-bottom col-9">
+                    <div className="textAbout" id="about">
+                        <h1 className="mb-3">Lic. Vigano Sofia</h1>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet. Quisque ut erat non nisi consequat gravida. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas posuere aliquam mauris eget congue. Proin eu sapien non quam sollicitudin efficitur. Donec nec augue id risus tincidunt consectetur.</p>
+                        <a onClick={openShowAboutModal} className="btn btn_about">[ Leer mas ]</a>
+                    </div>  
+                </div>
+            </div>
+            <div className="row services align-items-center" id='services'>
+                <div className="col-3 textServices" >
+                    <h4 className="titleService">Servicios terapeuticos</h4>
+                    <p className="pService">Con enfoque conductual contextual</p>
+                </div>
+                <div className="col-8 contentServices">
+                    <ul>
+                        <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet.</li>
+                        <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet.</li>
+                        <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet.</li>
+                        <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet.</li>
+                    </ul>
+                </div>
+                <div className="col-1 right_sidebar"></div>
+            </div>
+            <div className="row turnos align-items-center">
+                <div className="col textTurnos d-flex flex-column justify-content-center align-items-center text-center">
+                    <div>
+                        <h1 id='turnos'>Solicitud de turnos</h1>
+                        <p>Si ya sos paciente, ingresa a tu cuenta para reservar tu cita en el boton ingresar. De lo contrario, si queres programar un primer encuentro ingresa al boton contactar para coordinar una cita</p>
+                    </div>
+                    <div className="d-flex justify-content-around">
+                        <Link to="/login"><button class="btn">[ Ingresar ]</button></Link>
+                        <button onClick={openModal} class="btn">[ Contactar ]</button>
+                    </div>
+                </div>
+            </div>
+            <div className="row d-flex align-items-center justify-content-center text-center contact">
+                <div className="col p-4">
+                    <h5 className="contactTitle"><b>CONTACTO</b></h5>
+                    <div className="textContact">
+                        <p><b>Email:<a href="mailto:lic.vigano@gmail.com">lic.vigano@gmail.com</a></b></p>
+                        <p><b>Teléfono: 3513052538</b></p>
+                        <p><b>Instagram: <a href="https://www.instagram.com/psico.sofiavigano/" target="_blank">psico.sofivigano</a></b></p>
+                    </div>
+                </div>
+            </div>
             <div className={`modal fade ${showModal ? 'show d-block' : 'd-none'}`} id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog">
                     <div className="modal-content">
@@ -191,8 +255,24 @@ export const Landing = () => {
                     </div>
                 </div>
             </div>
+            <div className={`modal fade ${showAboutModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <button type="button" className="btn-close" onClick={closeShowAboutModal} aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <span>¡Su consulta se ha enviado con exito!</span>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={closeShowAboutModal}>Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
+    
 };
 
 export default Landing;
