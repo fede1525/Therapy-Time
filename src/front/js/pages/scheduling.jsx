@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import { Context } from "../store/appContext";
 import "../../styles/calendar.css";
@@ -10,7 +9,8 @@ export const Block = () => {
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedHour, setSelectedHour] = useState(null);
-  const [unavailableDates, setUnavailableDates] = useState([])
+  const [unavailableDates, setUnavailableDates] = useState([]);
+  const [extractedInfo, setExtractedInfo] = useState([]);
 
   const meses = {
     1: 'Enero',
@@ -37,7 +37,6 @@ export const Block = () => {
         console.error('Error al obtener fechas no disponibles:', error);
       }
     };
-    console.log(unavailableDates)
     fetchUnavailableDates();
   
     const currentYear = new Date().getFullYear();
@@ -67,9 +66,23 @@ export const Block = () => {
     }
     setCalendar(newCalendar);
     
-  }, [ ]);
+  }, [ month ]);
   useEffect(() => {
-    console.log(unavailableDates);
+    function extractDateInfo(dateString) {
+      const dateObject = new Date(dateString);
+      const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
+      const year = dateObject.getFullYear();
+      const day = dateObject.getDate();
+      const hour = dateObject.getHours() +5;
+      console.log(hour)
+      return { month, year, day, hour };
+    }
+    const extractedInfo = unavailableDates.map(item => {
+      const { month, year, day, hour } = extractDateInfo(item.date);
+      return {year, month, day,hour};
+    });   
+
+    console.log("extractedInfo: ", extractedInfo)
   }, [unavailableDates]); 
 
   const handleDayClick = (day) => {
@@ -124,29 +137,37 @@ export const Block = () => {
 
       });
   };
-
   const renderModalContent = () => {
     const hours = Array.from({ length: 13 }, (_, index) => index + 8);
-    
-    console.log("renderizó el modal")
-
+  
+    console.log("renderizó el modal");
     return (
       <div className="modal-content">
         <h2>Horas disponibles para el día {selectedDay}</h2>
         <ul>
-          {hours.map((hour) => (
-            <li key={hour} onClick={() => handleHourClick(hour)}>
-              {hour}:00 - {hour + 1}:00
-              <button onClick={()=>handleBlockTime(hour)}>Bloquear Hora</button>
-              <button onClick={()=>handleUnblockTime(hour)}>Desbloquear Hora</button>
-            </li>
-          ))}
+          {hours.map((hour) => {
+            
+      
+            
+            return (
+              <li
+                key={hour}
+                onClick={() => handleHourClick(hour)}
+                
+              >
+                {hour}:00 - {hour + 1}:00
+                <button onClick={() => handleBlockTime(hour)}>Bloquear Hora</button>
+                <button onClick={() => handleUnblockTime(hour)}>Desbloquear Hora</button>
+              </li>
+            );
+          })}
         </ul>
-
+  
         <button onClick={handleCloseModal}>Cerrar</button>
       </div>
     );
   };
+  
   return (
     <div>
       <h2>Calendario 2024</h2>

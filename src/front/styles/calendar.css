@@ -91,3 +91,6 @@ transition: background-color 0.3s, border-radius 0.3s;
 background-color: #8F9779; /* Color caqui */
 color: #fff; /* Color del texto en hover */
 }
+.matching-hour{
+  background-color: red;
+}
