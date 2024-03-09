@@ -38,7 +38,21 @@ export const Block = () => {
       }
     };
     fetchUnavailableDates();
-  
+    function extractDateInfo(dateString) {
+      const dateObject = new Date(dateString);
+      const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
+      const year = dateObject.getFullYear();
+      const day = dateObject.getDate();
+      const hour = dateObject.getHours() +5;
+      //console.log(hour)
+      return { month, year, day, hour };
+    }
+    const extractedInfo = unavailableDates.map(item => {
+      const { month, year, day, hour } = extractDateInfo(item.date);
+      return {year, month, day,hour};
+    });   
+    setExtractedInfo(extractedInfo)
+
     const currentYear = new Date().getFullYear();
     const currentDate = new Date(currentYear, month-1, 1); //-1 para que empiece desde enero
     const firstDayOfWeek = currentDate.getDay();
@@ -66,24 +80,8 @@ export const Block = () => {
     }
     setCalendar(newCalendar);
     
-  }, [ month, ]);
-  useEffect(() => {
-    function extractDateInfo(dateString) {
-      const dateObject = new Date(dateString);
-      const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
-      const year = dateObject.getFullYear();
-      const day = dateObject.getDate();
-      const hour = dateObject.getHours() +5;
-      //console.log(hour)
-      return { month, year, day, hour };
-    }
-    const extractedInfo = unavailableDates.map(item => {
-      const { month, year, day, hour } = extractDateInfo(item.date);
-      return {year, month, day,hour};
-    });   
-    setExtractedInfo(extractedInfo)
-    //console.log("extractedInfo: ", extractedInfo)
-  }, [unavailableDates]); 
+  }, [ month, unavailableDates]);
+
 
   const handleDayClick = (day) => {
     setSelectedDay(day);
