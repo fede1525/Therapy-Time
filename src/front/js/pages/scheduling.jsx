@@ -37,7 +37,7 @@ export const Block = () => {
         console.error('Error al obtener fechas no disponibles:', error);
       }
     };
-    fetchUnavailableDates();
+    
     function extractDateInfo(dateString) {
       const dateObject = new Date(dateString);
       const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
@@ -79,6 +79,7 @@ export const Block = () => {
       newCalendar.push(row);
     }
     setCalendar(newCalendar);
+    fetchUnavailableDates();
     
   }, [ month, unavailableDates]);
 
@@ -86,14 +87,13 @@ export const Block = () => {
   const handleDayClick = (day) => {
     setSelectedDay(day);
     setShowModal(true);
-    console.log("se seleccionó el día: ", selectedDay)
-    console.log(calendar)
+    //console.log("se seleccionó el día: ", selectedDay)
     
   };
   const handleHourClick = (hour) => {
     setSelectedHour(hour);
     setShowModal(true)
-    console.log("hora seleccionada", hour, ":00", "del día", selectedDay)
+    //console.log("hora seleccionada", hour, ":00", "del día", selectedDay)
   };
   const handleCloseModal = () => {
     setShowModal(false);
@@ -103,9 +103,10 @@ export const Block = () => {
     const data = {
       date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
       time: hour,
+      id: `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`,
     };
     
-    console.log(data, hour,  " Antes del POST")
+    //console.log(data, hour,  " Antes del POST")
     await actions.apiFetch('/bloquear', 'POST', data)
       .then(data => {
         console.log('Hora bloqueada exitosamente:', data);
@@ -115,14 +116,15 @@ export const Block = () => {
         console.error('Error al bloquear la hora:', error);
 
       });
-      console.log(data, hour,  " Después del POST")
+      //console.log(data, hour,  " Después del POST")
   };
   const handleUnblockTime = async (hour) => {
     
     const data = {
       time: hour,
       availability: true,
-      date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`
+      date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
+      id: `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`
     };
     console.log(data)
     await actions.apiFetch('/bloquear', 'PUT', data)

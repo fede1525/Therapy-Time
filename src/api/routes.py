@@ -279,7 +279,7 @@ def bloquear():
         try:
             data = request.get_json()
             print(data)
-            required_fields = ['date', 'time']
+            required_fields = ['date', 'time', 'id']
             for field in required_fields:
                 if field not in data:
                     return jsonify({'error': f'{field} es un campo obligatorio'}), 400
@@ -287,6 +287,7 @@ def bloquear():
             nueva_disponibilidad = AvailabilityDates(
                 date=data['date'],
                 time=data['time'],
+                id=data['id'],
                 availability=False
             )
             print(nueva_disponibilidad)
