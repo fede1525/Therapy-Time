@@ -54,11 +54,11 @@ export const NavbarTherapist = () => {
 			</div>
 			<div id="profile-button">
 				<div className="dropdown">
-					<button className="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style={{color:'#8A97A6'}}>
+					<button className="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style={{color:'#8A97A6', fontSize: '3vh' }}>
 						{userData.name + " " + userData.lastname}
 					</button>
 					<ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-						<li><Link className="dropdown-item navTherapist" to="/profile" style={{ color: '#CA857D',  fontSize: '3vh' }}>Mi perfil</Link></li>
+						<li><Link className="dropdown-item navTherapist" to="/profile" style={{ color: '#CA857D'}}>Mi perfil</Link></li>
 						<li><button className="dropdown-item btn" onClick={logoutFunction} style={{ color: '#CA857D' }}>Cerrar sesión</button></li>
 					</ul>
 				</div>
