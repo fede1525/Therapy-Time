@@ -94,3 +94,36 @@ color: #fff; /* Color del texto en hover */
 .matching-hour{
   background-color: red;
 }
+td {
+  position: relative;
+}
+
+/* Estilo de la pestañita */
+.pestanita {
+  position: relative;
+  display: inline-block;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.botones {
+  justify-content: space-evenly;
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+.botones > button{
+  font-size: small;
+}
+
+.pestanita:hover .botones {
+  display: flex;
+  flex-direction: row;
+}

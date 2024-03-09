@@ -74,15 +74,15 @@ export const Block = () => {
       const year = dateObject.getFullYear();
       const day = dateObject.getDate();
       const hour = dateObject.getHours() +5;
-      console.log(hour)
+      //console.log(hour)
       return { month, year, day, hour };
     }
     const extractedInfo = unavailableDates.map(item => {
       const { month, year, day, hour } = extractDateInfo(item.date);
       return {year, month, day,hour};
     });   
-
-    console.log("extractedInfo: ", extractedInfo)
+    setExtractedInfo(extractedInfo)
+    //console.log("extractedInfo: ", extractedInfo)
   }, [unavailableDates]); 
 
   const handleDayClick = (day) => {
@@ -146,14 +146,18 @@ export const Block = () => {
         <h2>Horas disponibles para el día {selectedDay}</h2>
         <ul>
           {hours.map((hour) => {
-            
-      
-            
+            const matchingHour = extractedInfo.some((item) => (
+              item.year === 2024 &&
+              item.month === month &&
+              item.day === selectedDay &&
+              item.hour === hour
+            ));
+
             return (
               <li
                 key={hour}
                 onClick={() => handleHourClick(hour)}
-                
+                className={matchingHour ? "bg-danger" : ""}
               >
                 {hour}:00 - {hour + 1}:00
                 <button onClick={() => handleBlockTime(hour)}>Bloquear Hora</button>
@@ -192,8 +196,12 @@ export const Block = () => {
           {calendar.map((row, rowIndex) => (
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) => (
-                <td key={cellIndex} onClick={() => handleDayClick(cell)}>
+                <td key={cellIndex} className='pestanita' onClick={() => handleDayClick(cell)}>
                   {cell}
+                  <div className="botones">
+                    <button className='pestañita'>Botón 1</button>
+                    <button className='pestañita'>Botón 2</button>
+                  </div>
                 </td>
               ))}
             </tr>
@@ -206,6 +214,13 @@ export const Block = () => {
           {renderModalContent()}
         </div>
       )}
+      <div className="pestanita">
+        Contenido de la pestañita
+        <div className="botones">
+          <button>Bloquear día</button>
+          <button>Desbloquear día</button>
+        </div>
+      </div>
     </div>
   );
 };
