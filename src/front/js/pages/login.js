@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import logo_login from "../../img/logo_login.png"
+import "../../styles/login.css";
 
 export const Login = () => {
     const { actions, store } = useContext(Context);
@@ -83,10 +83,10 @@ export const Login = () => {
 
     return (
         <div className="d-flex justify-content-center vh-100">
-            <div className="col-6 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#E6DADA' }}>
+            <div className="col-6 d-flex flex-column align-items-center justify-content-center formLogin" style={{ backgroundColor: '#EDE9E9' }}>
                 <form onSubmit={handleLogin}>
-                    <div className="form-group p-3">
-                        <label htmlFor="username">Nombre de usuario :</label>
+                    <div className="form-group mb-4">
+                        <label htmlFor="username" className="labelLogin">Nombre de usuario :</label>
                         <input
                             type="text"
                             className="form-control"
@@ -99,25 +99,25 @@ export const Login = () => {
                         />
                         {errorMessages.username && <p className="text-danger">{errorMessages.username}</p>}
                     </div>
-                    <div className="form-group p-3">
-                        <label htmlFor="password">Contraseña :</label>
+                    <div className="form-group">
+                        <label htmlFor="password" className="labelLogin">Contraseña :</label>
                         <div className="input-group">
                             <input
                                 type={showPassword ? "text" : "password"}
                                 className="form-control"
                                 id="password"
                                 name="password"
-                                placeholder="Ingrese su contraseña"
                                 value={password}
+                                placeholder="Ingrese su contraseña"
                                 onChange={handleInputChange}
                                 onFocus={() => handleInputFocus("password")}
+                                style={{ paddingRight: '40px' }} 
                             />
-                            <button className="btn" type="button" id="button-addon-password"
-                                onClick={toggleShowPassword}>
-                                <FontAwesomeIcon
-                                    icon={showPassword ? faEyeSlash : faEye}
-                                    className="eye-icon"
-                                /></button>
+                            <div className="input-group-append" style={{ position: 'absolute', right: 0, top: 0 }}>
+                                <button className="btn" type="button" id="button-addon-password" onClick={toggleShowPassword}>
+                                    <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} className="eye-icon" style={{color:'#B2A79F'}}/>
+                                </button>
+                            </div>
                         </div>
                         {errorMessages.password && <p className="text-danger">{errorMessages.password}</p>}
                     </div>
@@ -129,19 +129,24 @@ export const Login = () => {
                             {errorMessage.networkError}
                         </div>
                     )}
-                    <div className="text-center">
-                        <button type="submit" className="btn rounded-pill" style={{ backgroundColor: '#8A97A6' }}>
-                            Ingresar
-                        </button>
+                    <div className="text-start link mb-4">
+                        <Link to="/recovery" style={{color:'#a76f6d', fontSize: '14px'}}>Recuperar contraseña</Link>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                            <Link to='/' style={{color:'#8A97A6'}}>&#x27F5; Volver</Link>
+                        </div>
+                        <div className="text-end">
+                            <button type="submit" className="btn" style={{ backgroundColor: '#8A97A6', color: 'whitesmoke' }}>
+                                Ingresar
+                            </button>
+                        </div>
                     </div>
                 </form>
-                <div className="mt-3 text-center link">
-                    <Link to="/recovery">Recuperar contraseña</Link>
-                </div>
             </div>
-            <div className="col-6 d-flex flex-column align-items-center justify-content-center">
-                <img className="animate__backInRight" src={logo_login} />
+            <div className="col-6 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#FAFAFA' }}>
+                <img className="animate__backInRight" style={{width: '75vh', maxWidth: '90%', height: 'auto'}} src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/logo_login.png?raw=true" />
             </div>
-        </div>
+        </div>  
     );
 };
