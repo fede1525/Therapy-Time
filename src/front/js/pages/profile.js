@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate } from "react-router-dom";
-import { Navbar } from "../component/navbar"
+import { NavbarPatient } from "../component/navbar_patient"
 
 export const Profile = () => {
     const { actions } = useContext(Context)
@@ -36,7 +36,7 @@ export const Profile = () => {
 
     return (
         <div>
-            <Navbar />
+            <NavbarPatient />
             <div className="container">
                 <div className="row">
                     {error && (

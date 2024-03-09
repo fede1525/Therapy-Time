@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import { Navbar } from "../component/navbar"
+import { NavbarPatient } from "../component/navbar_patient"
 
 export const EditProfile = () => {
     const { actions } = useContext(Context)
@@ -128,7 +128,7 @@ export const EditProfile = () => {
  
     return (
         <div className="container">
-            <Navbar />
+            <NavbarPatient />
             <form onSubmit={handleSubmit}>
                 <div className="row">
                     <div className="col">
