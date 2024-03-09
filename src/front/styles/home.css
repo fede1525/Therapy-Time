@@ -10,8 +10,8 @@
     gap: 10px; 
     padding-left:50vh;
     padding-right: 50vh;
-    padding-top: 8vh;
-    padding-bottom: 11vh;
+    padding-top: 6vh;
+    padding-bottom: 10vh;
 }
 .grid-item {
     width: calc(33.33% - 10px); 
