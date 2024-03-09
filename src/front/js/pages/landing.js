@@ -29,10 +29,10 @@ export const Landing = () => {
     const closeSuccessModal = () => {
         setShowSuccessModal(false);
     };
-    const openShowAboutModal = () =>{
+    const openShowAboutModal = () => {
         setShowAboutModal(true)
     };
-    const closeShowAboutModal = () =>{
+    const closeShowAboutModal = () => {
         setShowAboutModal(false)
     };
 
@@ -54,19 +54,19 @@ export const Landing = () => {
         setErrorMessages(validationMessages);
         const hasErrors = Object.values(validationMessages).some(msg => msg !== "");
         if (hasErrors) {
-            return; 
+            return;
         }
         try {
             const arrival_date = getCurrentDateTime();
             const response = await actions.sendMessage(
-                formData.name, 
-                formData.lastname, 
-                formData.age, 
-                formData.phone, 
-                formData.consultation, 
-                arrival_date 
+                formData.name,
+                formData.lastname,
+                formData.age,
+                formData.phone,
+                formData.consultation,
+                arrival_date
             );
-            console.log(response); 
+            console.log(response);
             closeModal();
             openSuccessModal();
         } catch (error) {
@@ -94,7 +94,7 @@ export const Landing = () => {
             errors.name = "*El campo es obligatorio";
         } else {
             errors.name = "";
-        }      
+        }
         if (!data.lastname || data.lastname.trim() === "") {
             errors.lastname = "*El campo es obligatorio";
         } else {
@@ -106,7 +106,7 @@ export const Landing = () => {
             errors.age = "La edad debe ser un valor numérico.";
         } else {
             errors.age = "";
-        }        
+        }
         if (!data.phone || data.phone.trim() === "") {
             errors.phone = "*El campo es obligatorio";
         } else if (!/^\d{10}$/.test(data.phone)) {
@@ -121,10 +121,10 @@ export const Landing = () => {
         }
         return errors;
     };
-    
+
     return (
         <div className="container-fluid">
-            <div className={showModal || showAboutModal? "content-behind-modal" : ""}>
+            <div className={showModal || showAboutModal ? "content-behind-modal" : ""}>
                 <div className="row">
                     <div className="columna-izquierda-top col-3">
                         <img className="logo" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/navbar.png?raw=true" alt="Logo" />
@@ -135,19 +135,19 @@ export const Landing = () => {
                             <a href="#services"><p>SERVICIOS</p></a>
                             <a href="#turnos"><p>TURNOS</p></a>
                             <Link to="/login"><p>INGRESAR</p></Link>
-                        </div>  
+                        </div>
                     </div>
                 </div>
                 <div className="row">
                     <div className="columna-izquierda-bottom col-3">
-                        <img className="profile" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/profile.png?raw=true" alt="Profile"/>
+                        <img className="profile" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/profile.png?raw=true" alt="Profile" />
                     </div>
                     <div className="columna-derecha-bottom col-9">
                         <div className="textAbout" id="about">
                             <h1 className="mb-3">Lic. Vigano Sofia</h1>
                             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet. Quisque ut erat non nisi consequat gravida. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas posuere aliquam mauris eget congue. Proin eu sapien non quam sollicitudin efficitur. Donec nec augue id risus tincidunt consectetur.</p>
-                            <a onClick={openShowAboutModal} className="btn btn_about">[ Leer mas ]</a>
-                        </div>  
+                            <a onClick={openShowAboutModal} className="btn btn_about" style={{ color: '#C57D7A' }}>[ Leer mas ]</a>
+                        </div>
                     </div>
                 </div>
                 <div className="row services align-items-center" id='services'>
@@ -172,8 +172,8 @@ export const Landing = () => {
                             <p>Si ya sos paciente, ingresa a tu cuenta para reservar tu cita en el boton ingresar. De lo contrario, si queres programar un primer encuentro ingresa al boton contactar para coordinar una cita</p>
                         </div>
                         <div className="d-flex justify-content-around">
-                            <Link to="/login"><button class="btn">[ Ingresar ]</button></Link>
-                            <button onClick={openModal} class="btn">[ Contactar ]</button>
+                            <Link to="/login"><button className="btn" style={{ color: '#C57D7A' }}>[ Ingresar ]</button></Link>
+                            <button onClick={openModal} className="btn" style={{ color: '#C57D7A' }}>[ Contactar ]</button>
                         </div>
                     </div>
                 </div>
@@ -181,7 +181,7 @@ export const Landing = () => {
                     <div className="col p-4">
                         <h5 className="contactTitle"><b>CONTACTO</b></h5>
                         <div className="textContact">
-                            <p><b>Email:<a href="mailto:lic.vigano@gmail.com">lic.vigano@gmail.com</a></b></p>
+                            <p><b>Email:<a href="mailto:lic.vigano@gmail.com"> lic.vigano@gmail.com</a></b></p>
                             <p><b>Teléfono: 3513052538</b></p>
                             <p><b>Instagram: <a href="https://www.instagram.com/psico.sofiavigano/" target="_blank">psico.sofivigano</a></b></p>
                         </div>
@@ -193,7 +193,7 @@ export const Landing = () => {
                     <div className="modal-content" id='contactModal'>
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="exampleModalLabel">Formulario de contacto</h1>
-                            <button type="button" className="btn-close btn_close_contact" onClick={closeModal} aria-label="Close"></button>
+                            <button type="button" className="btn-close btn_close_contact" onClick={closeModal} aria-label="Close" ></button>
                         </div>
                         <div className="modal-body">
                             <div className="row">
@@ -277,7 +277,7 @@ export const Landing = () => {
             </div>
         </div>
     );
-    
+
 };
 
 export default Landing;

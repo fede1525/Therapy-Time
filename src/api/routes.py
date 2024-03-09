@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, url_for, Blueprint, json
+from flask import Flask, request, jsonify, url_for, Blueprint, json, redirect, url_for
 from api.models import db, User, BlockedTokenList, Role, seed, Consultation
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
@@ -201,6 +201,7 @@ def logout_user():
 @jwt_required()
 def get_profile():
     current_user_id = get_jwt_identity()
+    
     user = User.query.get(current_user_id)
 
     if user is None:
