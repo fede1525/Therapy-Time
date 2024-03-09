@@ -48,7 +48,7 @@ export const NavbarTherapist = () => {
 				</Link>
 			</div>
 			<div id="home-link">
-				<Link to="/patient_schedule" style={{ color: '#8A97A6', fontSize: '3vh' }}>
+				<Link to="/home" style={{ color: '#8A97A6', fontSize: '3vh'}}>
 					<p id="turns-button" className="navTherapist mt-3">HOME</p>
 				</Link>
 			</div>
