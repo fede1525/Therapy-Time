@@ -66,7 +66,7 @@ export const Block = () => {
     }
     setCalendar(newCalendar);
     
-  }, [ month ]);
+  }, [ month, ]);
   useEffect(() => {
     function extractDateInfo(dateString) {
       const dateObject = new Date(dateString);
@@ -140,10 +140,10 @@ export const Block = () => {
   const renderModalContent = () => {
     const hours = Array.from({ length: 13 }, (_, index) => index + 8);
   
-    console.log("renderizó el modal");
     return (
       <div className="modal-content">
         <h2>Horas disponibles para el día {selectedDay}</h2>
+        <button onClick={handleCloseModal}>Cerrar</button>
         <ul>
           {hours.map((hour) => {
             const matchingHour = extractedInfo.some((item) => (
@@ -152,22 +152,23 @@ export const Block = () => {
               item.day === selectedDay &&
               item.hour === hour
             ));
-
+            
             return (
               <li
                 key={hour}
                 onClick={() => handleHourClick(hour)}
-                className={matchingHour ? "bg-danger" : ""}
+                className={`pestanita ${matchingHour ? "bg-danger" : ""}`}
               >
                 {hour}:00 - {hour + 1}:00
-                <button onClick={() => handleBlockTime(hour)}>Bloquear Hora</button>
-                <button onClick={() => handleUnblockTime(hour)}>Desbloquear Hora</button>
+                <div className="botones">
+                  <button className='blockDate' onClick={() => handleBlockTime(hour)}>Bloquear Hora</button>
+                  <button className='unblockDate' onClick={() => handleUnblockTime(hour)}>Desbloquear Hora</button>
+                </div>
               </li>
             );
           })}
         </ul>
-  
-        <button onClick={handleCloseModal}>Cerrar</button>
+        
       </div>
     );
   };
@@ -199,8 +200,8 @@ export const Block = () => {
                 <td key={cellIndex} className='pestanita' onClick={() => handleDayClick(cell)}>
                   {cell}
                   <div className="botones">
-                    <button className='pestañita'>Botón 1</button>
-                    <button className='pestañita'>Botón 2</button>
+                    <button className='blockDate'>bloquear</button>
+                    <button className='unblockDate'>Besbloquear</button>
                   </div>
                 </td>
               ))}
@@ -214,13 +215,6 @@ export const Block = () => {
           {renderModalContent()}
         </div>
       )}
-      <div className="pestanita">
-        Contenido de la pestañita
-        <div className="botones">
-          <button>Bloquear día</button>
-          <button>Desbloquear día</button>
-        </div>
-      </div>
     </div>
   );
 };
