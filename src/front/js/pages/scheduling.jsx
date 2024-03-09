@@ -119,24 +119,17 @@ export const Block = () => {
       //console.log(data, hour,  " Después del POST")
   };
   const handleUnblockTime = async (hour) => {
-    
-    const data = {
-      time: hour,
-      availability: true,
-      date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
-      id: `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`
-    };
-    console.log(data)
-    await actions.apiFetch('/bloquear', 'PUT', data)
-      .then(data => {
-        console.log('Hora desblobloqueada exitosamente:', data);
-        handleCloseModal();
-      })
-      .catch(error => {
-        console.error('Error al desbloquear la hora:', error);
-
-      });
+    const id = `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`;
+  
+    try {
+      await actions.apiFetch(`/bloquear/${id}`, 'DELETE');
+      console.log('Hora desbloqueada exitosamente');
+      handleCloseModal();
+    } catch (error) {
+      console.error('Error al desbloquear la hora:', error);
+    }
   };
+  
   const renderModalContent = () => {
     const hours = Array.from({ length: 13 }, (_, index) => index + 8);
   

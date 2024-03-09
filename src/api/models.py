@@ -85,7 +85,6 @@ class AvailabilityDates(db.Model):
     id= db.Column(db.Integer, primary_key=True, autoincrement=True)
     date = db.Column(db.DateTime, nullable=False)
     time = db.Column(db.Integer, nullable=False)
-    availability = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
         return f'<Availability_dates {self.id}>'
@@ -94,7 +93,6 @@ class AvailabilityDates(db.Model):
             "id": self.id,
             "date": self.date,
             "time": self.time,
-            "availability": self.availability
         }
 
 class BlockedTokenList(db.Model):

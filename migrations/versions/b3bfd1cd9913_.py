@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: cfdb90058f80
+Revision ID: b3bfd1cd9913
 Revises: 
-Create Date: 2024-03-07 04:12:12.273744
+Create Date: 2024-03-09 03:27:33.865771
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'cfdb90058f80'
+revision = 'b3bfd1cd9913'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,7 +22,6 @@ def upgrade():
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('date', sa.DateTime(), nullable=False),
     sa.Column('time', sa.Integer(), nullable=False),
-    sa.Column('availability', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('blocked_token_list',

@@ -288,7 +288,7 @@ def bloquear():
                 date=data['date'],
                 time=data['time'],
                 id=data['id'],
-                availability=False
+                
             )
             print(nueva_disponibilidad)
             db.session.add(nueva_disponibilidad)
@@ -306,7 +306,7 @@ def desbloquear():
         try:
             data = request.get_json()
 
-            required_fields = ['availability', 'date']
+            required_fields = ['id', 'date']
             for field in required_fields:
                 if field not in data:
                     return jsonify({'error': f'{field} es un campo obligatorio'}), 400
@@ -319,7 +319,6 @@ def desbloquear():
 
             if disponibilidad_a_desbloquear:
                 # Actualizar la disponibilidad a True
-                disponibilidad_a_desbloquear.availability = True
                 db.session.commit()
 
                 return jsonify({'mensaje': 'Hora desbloqueada exitosamente'}), 200
@@ -329,12 +328,29 @@ def desbloquear():
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+@api.route('/bloquear/<string:id>', methods=['DELETE'])
+def delete_blocked_time(id):
+    try:
+        # Supongamos que tienes un modelo llamado BlockedTime
+        blocked_time = AvailabilityDates.query.get(id)
+
+        if blocked_time:
+            # Eliminar el registro de la base de datos
+            db.session.delete(blocked_time)
+            db.session.commit()
+
+            return jsonify({"message": "Hora desbloqueada exitosamente"})
+        else:
+            return jsonify({"message": "La hora no existe"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
 # Obtener fechas dispponibles
 @api.route('/bloquear', methods=['GET'])
 def unaviable_dates():
     if request.method == 'GET':
         try:
-            fechas_no_disponibles = AvailabilityDates.query.filter_by(availability=False).all()
+            fechas_no_disponibles = AvailabilityDates.query.all()
 
             return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200
 
@@ -344,7 +360,7 @@ def unaviable_dates():
 
     try:
         # Consulta la base de datos para obtener las fechas no disponibles
-        fechas_no_disponibles = AvailabilityDates.query.filter_by(availability=False).all()
+        fechas_no_disponibles = AvailabilityDates.query.all()
 
         # Serializa los resultados en un formato JSON y los devuelve
         return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200

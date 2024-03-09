@@ -23,7 +23,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 					let params = {
 						method,
 						headers: {
-							
 							"Access-Control-Allow-Origin": "*"
 						}
 					}
