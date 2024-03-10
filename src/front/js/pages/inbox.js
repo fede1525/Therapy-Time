@@ -1,7 +1,9 @@
+import "../../styles/inbox.css";
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faEnvelope, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { NavbarTherapist } from "../component/navbar"
 
 export const Inbox = () => {
     const { store, actions } = useContext(Context);
@@ -164,75 +166,91 @@ export const Inbox = () => {
     };
 
     return (
-        <div className="container mt-5">
-            <ul className="nav nav-tabs">
+        <div style={{backgroundColor: '#EDE9E9', minHeight: '100vh', minWidth: '100vw'}}>
+            <NavbarTherapist />
+            <div className="container mt-5">
+            <ul className="nav nav-tabs" >
                 <li className="nav-item">
-                    <button className={`nav-link ${activeTab === "inbox" ? "active" : ""}`} onClick={() => handleTabChange("inbox")}>Bandeja de entrada</button>
+                    <button className={`nav-link ${activeTab === "inbox" ? "active" : "text-muted"}`} onClick={() => handleTabChange("inbox")}>Bandeja de entrada</button>
                 </li>
                 <li className="nav-item">
-                    <button className={`nav-link ${activeTab === "deleted" ? "active" : ""}`} onClick={() => handleTabChange("deleted")}>Papelera</button>
+                    <button className={`nav-link ${activeTab === "deleted" ? "active" : "text-muted"}`} onClick={() => handleTabChange("deleted")}>Papelera</button>
                 </li>
             </ul>
             <div>
                 <div className="container-fluid mt-3 mb-3">
-                    <div className="row">
-                        <div className="col-md-4">
+                    <div className="row aling-items-center">
+                        <div className="col-md-3">
                             <input type="text" className="form-control" placeholder="Buscar por nombre o apellido" value={nameFilter} onChange={handleNameFilterChange} />
                         </div>
                         <div className="col-md-3">
                             <div className="form-check">
-                                <input className="form-check-input" type="checkbox" checked={showUnreadOnly} onChange={() => setShowUnreadOnly(!showUnreadOnly)} id="showUnreadOnly" />
-                                <label className="form-check-label" htmlFor="showUnreadOnly">
+                                <input className="form-check-input mt-2" type="checkbox" checked={showUnreadOnly} onChange={() => setShowUnreadOnly(!showUnreadOnly)} id="showUnreadOnly" />
+                                <label className="form-check-label mt-1" htmlFor="showUnreadOnly" style={{color:'grey'}}>
                                     Mostrar solo no leídos
                                 </label>
                             </div>
                         </div>
-                        <div className="col-md-5 d-flex justify-content-end">
+                        <div className="col-md-6 d-flex justify-content-end">
                             {activeTab === "inbox" && (
                                 <>
-                                    <button onClick={handleMarkAsUnread}><FontAwesomeIcon icon={faEnvelope} title="Marcar como no leído"/></button>
-                                    <button onClick={handleDeleteSelectedConsultations}><FontAwesomeIcon icon={faTrash} title="Eliminar" /></button>
+                                    <button style={{border: 'none', backgroundColor: 'transparent'}} onClick={handleMarkAsUnread}>
+                                        <FontAwesomeIcon icon={faEnvelope} title="Marcar como no leído" style={{color: 'grey', fontSize:'3vh'}} />
+                                    </button>
+                                    <button style={{border: 'none', backgroundColor: 'transparent'}} onClick={handleDeleteSelectedConsultations}>
+                                        <FontAwesomeIcon icon={faTrash} title="Eliminar" style={{color: 'grey', fontSize:'3vh', marginLeft:'3vh'}} />
+                                    </button>
                                 </>
                             )}
                             {activeTab === "deleted" && (
-                                <a href="#" onClick={handlePermanentDeletion}>Eliminar permanentemente</a>
+                                <a href="#" onClick={handlePermanentDeletion} style={{color:'grey'}}>Eliminar permanentemente</a>
                             )}
                         </div>
                     </div>
                 </div>
-                <table className="table table-hover">
+                {filteredConsultations.length > 0 ? (
+                    <table className="table table-hover">
                     <tbody>
                         {currentConsultations.map((consultation, index) => (
-                            <tr key={index} className={consultation.is_read ? 'bg-light' : 'bg-white'}  onClick={() => handleConsultationClick(consultation.id, event)}>
-                                <td>
-                                    <input type="checkbox" checked={selectedConsultations.includes(consultation.id)} onChange={() => handleCheckboxChange(consultation.id)} />
+                            <tr key={index} style={{ backgroundColor: consultation.is_read ? '#f2f2f2' : 'white' }} onClick={() => handleConsultationClick(consultation.id)}>
+                                <td className="align-middle">
+                                    <input type="checkbox" style={{marginLeft:'2vh'}} checked={selectedConsultations.includes(consultation.id)} onChange={() => handleCheckboxChange(consultation.id)} />
                                 </td>
-                                <td>{consultation.arrival_date}</td>
-                                <td>{consultation.name} {consultation.lastname}</td>
-                                <td>{consultation.consultation.substring(0, 50)}...</td>
+                                <td className="align-middle">{consultation.arrival_date}</td>
+                                <td className="align-middle" style={{ width: '20%' }}>{consultation.name} {consultation.lastname}</td>
+                                <td className="align-middle" style={{ width: '40%' }}>{consultation.consultation.substring(0, 50)}...</td>
                                 {activeTab === "deleted" && (
-                                    <td>
-                                        <button onClick={() => handlePhysicalDeletion(consultation.id)}>
-                                            <FontAwesomeIcon icon={faTrash}/>
+                                    <td className="align-middle">
+                                        <button className="btn" style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => handlePhysicalDeletion(consultation.id)}>
+                                            <FontAwesomeIcon icon={faTrash} style={{ color: '#6c757d' }} />
                                         </button>
                                     </td>
                                 )}
                                 {activeTab === "inbox" && (
-                                    <td>
-                                        <button><FontAwesomeIcon icon={faTrash} onClick={handleDeleteSelectedConsultations} /></button>
-                                        <button><FontAwesomeIcon icon={faEnvelope} onClick={() => handleMarkAsUnreadSingle(consultation.id)} /></button>
+                                    <td className="align-middle text-end">
+                                       <button className="btn me-2" style={{ backgroundColor: 'transparent', border: 'none' }} onClick={handleDeleteSelectedConsultations}>
+                                            <FontAwesomeIcon icon={faTrash} style={{ color: '#6c757d' }} />
+                                        </button>
+                                        <button className="btn" style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => handleMarkAsUnreadSingle(consultation.id)}>
+                                            <FontAwesomeIcon icon={faEnvelope} style={{ color: '#6c757d' }} />
+                                        </button>
                                     </td>
                                 )}
                             </tr>
                         ))}
                     </tbody>
-                </table>
+                </table>                
+                ) : (
+                <div className="alert" role="alert" style={{backgroundColor:'#FAFAFA', color: '#7E7E7E'}}>
+                        No hay registros disponibles.
+                </div>
+                )}
             </div>
             <nav>
                 <ul className="pagination">
                     {Array.from({length: Math.ceil(filteredConsultations.length / consultationPerPage)}, (_, i) => (
                         <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                            <button className="page-link" onClick={() => paginate(i + 1)}>{i + 1}</button>
+                            <button style={{backgroundColor:'#B2A79F', color:'white',   border: '1px solid transparent', outline: 'none'}} className="page-link" onClick={() => paginate(i + 1)}>{i + 1}</button>
                         </li>
                     ))}
                 </ul>
@@ -305,6 +323,7 @@ export const Inbox = () => {
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );
