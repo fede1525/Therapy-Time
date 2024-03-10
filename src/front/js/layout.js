@@ -10,7 +10,7 @@ import { Login } from "./pages/login"
 import { Recovery } from "./pages/recovery";
 import { HomePatient } from "./pages/homePatient";
 import { HomeTherapist } from "./pages/homeTherapist";
-import { Scheduling } from "./pages/scheduling";
+import { Block } from "./pages/scheduling.jsx";
 import { AppointmentScheduler } from "./pages/appointmentScheduler";
 import { IncomeControl } from "./pages/incomeControl";
 import { Inbox } from "./pages/inbox";
@@ -46,7 +46,7 @@ const Layout = () => {
                         <Route element={<EditProfile />} path="/editProfile" />
                         <Route element={<Payments />} path="/payments" />
                         <Route element={<PatientSchedule />} path="/patient_schedule" />
-                        <Route element={<Scheduling />} path="/scheduling" />
+                        <Route element={<Block />} path="/bloquear" />
                         <Route element={<AppointmentScheduler />} path="/appointment_scheduling" />
                         <Route element={<IncomeControl />} path="/income_control" />
                         <Route element={<Inbox />} path="/inbox" />

@@ -40,6 +40,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					let params = {
 						method,
 						headers: {
+							"Access-Control-Allow-Origin": "*"
 						}
 					};
 
@@ -47,7 +48,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 						params.body = JSON.stringify(body);
 						params.headers["Content-Type"] = "application/json";
 					}
-
+					if (body != null) {
+						params.body = JSON.stringify(body)
+					}
 					let resp = await fetch(process.env.BACKEND_URL + "api" + endpoint, params);
 
 					if (!resp.ok) {
@@ -57,7 +60,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 					return resp;
 				} catch (error) {
-					return error;
+					console.error("Error:", error)
 				}
 			},
 			protectedFetch: async (endpoint, method = "GET", body = null) => {

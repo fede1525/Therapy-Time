@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, url_for, Blueprint, json
-from api.models import db, User, BlockedTokenList, Role, seed, Consultation
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -9,6 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import datetime, json, string, random
 import requests
+import datetime
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -35,7 +36,7 @@ def create_user():
     username = data.get("username")
     name = data.get("name")
     lastname = data.get("lastname")
-    dni = data.get("dni")  
+    dni = data.get("dni")
     phone = data.get("phone")
     email = data.get("email")
     virtual_link = data.get("virtual_link")
@@ -55,10 +56,10 @@ def create_user():
         username=username,
         name=name,
         lastname=lastname,
-        dni=dni, 
+        dni=dni,
         email=email,
         phone=phone,
-        password=default_password, 
+        password=default_password,
         virtual_link=virtual_link
     )
 
@@ -123,9 +124,9 @@ def get_user(id):
         return "Usuario no autorizado", 403
     user = User.query.get(id) 
     if user:
-        return jsonify(user.serialize()), 200  
+        return jsonify(user.serialize()), 200
     else:
-        return jsonify({"message": "Usuario no encontrado"}), 404  
+        return jsonify({"message": "Usuario no encontrado"}), 404
 
 #Editar usuario (terapeuta)
 @api.route('/edit_user/<int:id>', methods=['PUT'])
@@ -137,7 +138,7 @@ def edit_user(id):
     user = User.query.get(id)
     if not user:
         return jsonify({"message": "Usuario no encontrado"}), 404
-    
+
     data = request.get_json()
     user.username = data['username']
     user.name = data['name']
@@ -417,4 +418,100 @@ def physical_deletion(id):
             return jsonify({"message": "La consulta no existe"}), 404
     except Exception as e:
         return jsonify({"error": "Error al intentar eliminar la consulta"}), 500
+
+# Bloqueo de fechas
+@api.route('/bloquear', methods=['POST'])
+def bloquear():
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            print(data)
+            required_fields = ['date', 'time', 'id']
+            for field in required_fields:
+                if field not in data:
+                    return jsonify({'error': f'{field} es un campo obligatorio'}), 400
+
+            nueva_disponibilidad = AvailabilityDates(
+                date=data['date'],
+                time=data['time'],
+                id=data['id'],
+                
+            )
+            print(nueva_disponibilidad)
+            db.session.add(nueva_disponibilidad)
+            db.session.commit()
+
+            return jsonify({'mensaje': 'Hora bloqueada exitosamente'}), 200
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        
+#Desbloquear hora
+@api.route('/bloquear', methods=['PUT'])
+def desbloquear():
+    if request.method == 'PUT':
+        try:
+            data = request.get_json()
+
+            required_fields = ['id', 'date']
+            for field in required_fields:
+                if field not in data:
+                    return jsonify({'error': f'{field} es un campo obligatorio'}), 400
+
+            # Suponiendo que tienes un identificador único para las fechas y horas bloqueadas
+            date_to_unlock = data.get('date')  # Asegúrate de tener el campo date en el payload
+
+            # Buscar la entrada en la base de datos
+            disponibilidad_a_desbloquear = AvailabilityDates.query.filter_by(date=date_to_unlock).first()
+
+            if disponibilidad_a_desbloquear:
+                # Actualizar la disponibilidad a True
+                db.session.commit()
+
+                return jsonify({'mensaje': 'Hora desbloqueada exitosamente'}), 200
+            else:
+                return jsonify({'error': 'Fecha no encontrada'}), 404
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+@api.route('/bloquear/<string:id>', methods=['DELETE'])
+def delete_blocked_time(id):
+    try:
+        # Supongamos que tienes un modelo llamado BlockedTime
+        blocked_time = AvailabilityDates.query.get(id)
+
+        if blocked_time:
+            # Eliminar el registro de la base de datos
+            db.session.delete(blocked_time)
+            db.session.commit()
+
+            return jsonify({"message": "Hora desbloqueada exitosamente"})
+        else:
+            return jsonify({"message": "La hora no existe"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+# Obtener fechas dispponibles
+@api.route('/bloquear', methods=['GET'])
+def unaviable_dates():
+    if request.method == 'GET':
+        try:
+            fechas_no_disponibles = AvailabilityDates.query.all()
+
+            return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+
+    try:
+        # Consulta la base de datos para obtener las fechas no disponibles
+        fechas_no_disponibles = AvailabilityDates.query.all()
+
+        # Serializa los resultados en un formato JSON y los devuelve
+        return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
