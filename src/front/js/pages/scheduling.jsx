@@ -26,18 +26,17 @@ export const Block = () => {
     11: 'Noviembre',
     12: 'Diciembre'
   };
-
+  const fetchUnavailableDates = async () => {
+    try {
+      const response = await actions.apiFetch('/bloquear', 'GET');
+      console.log(response)
+      setUnavailableDates(response);
+    } catch (error) {
+      console.error('Error al obtener fechas no disponibles:', error);
+    }
+  };
   useEffect(() => {
-    
-    const fetchUnavailableDates = async () => {
-      try {
-        const response = await actions.apiFetch('/bloquear', 'GET');
-        setUnavailableDates(response);
-      } catch (error) {
-        console.error('Error al obtener fechas no disponibles:', error);
-      }
-    };
-    
+    fetchUnavailableDates();
     function extractDateInfo(dateString) {
       const dateObject = new Date(dateString);
       const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
@@ -79,9 +78,8 @@ export const Block = () => {
       newCalendar.push(row);
     }
     setCalendar(newCalendar);
-    fetchUnavailableDates();
-    
-  }, [ month, unavailableDates]);
+    fetchUnavailableDates()
+  }, [ month, showModal===false]);
 
 
   const handleDayClick = (day) => {
