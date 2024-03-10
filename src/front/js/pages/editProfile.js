@@ -191,7 +191,7 @@ export const EditProfile = () => {
                                         />
                                     </div>
                                     {dniError && (
-                                        <div role="alert">
+                                        <div className="text-danger">
                                             {dniError}
                                         </div>
                                     )}
@@ -207,7 +207,7 @@ export const EditProfile = () => {
                                             onChange={(e) => { setEmail(e.target.value); handleInputChange() }}
                                         />
                                         {emailError && (
-                                            <div className="alert alert-danger" role="alert">
+                                            <div className="text-danger">
                                                 {emailError}
                                             </div>
                                         )}
@@ -234,7 +234,7 @@ export const EditProfile = () => {
                                                 /></button>
                                         </div>
                                         {passwordError && (
-                                            <div className="alert alert-danger" role="alert">
+                                            <div className="text-danger">
                                                 {passwordError}
                                             </div>
                                         )}
@@ -259,7 +259,7 @@ export const EditProfile = () => {
                                                 /></button>
                                         </div>
                                         {confirmError && (
-                                            <div className="alert alert-danger" role="alert">
+                                            <div className="text-danger">
                                                 {confirmError}
                                             </div>
                                         )}
