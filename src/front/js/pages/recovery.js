@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import { Link } from 'react-router-dom';
 import { Context } from "../store/appContext";
 
 export const Recovery = () => {
@@ -7,50 +8,59 @@ export const Recovery = () => {
     const [emailError, setEmailError] = useState("");
     const [recoveryMessage, setRecoveryMessage] = useState("");
     const [error, setError] = useState("");
-
+    const [loading, setLoading] = useState(false);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!emailRegex.test(emailInput)) {
-            setEmailError("Formato de correo electronico inválido.");
+            setEmailError("Formato de correo electrónico inválido.");
             return;
         } else {
             setEmailError("");
         }
-
         try {
-            await actions.sendPasswordRecoveryRequest(emailInput, setRecoveryMessage);
+            setLoading(true);
+            const response = await actions.handleResetPassword(emailInput);
+            setLoading(false);
+            if (response && response.message) {
+                setRecoveryMessage(response.message);
+            }
         } catch (error) {
-            setError("Error al enviar la solicitud de recuperación de contraseña.");
-        }
+            setLoading(false);
+            setError(error.message || 'Error al enviar la solicitud de recuperación de contraseña.');
+        }   
     }
-
     const handleEmailChange = (e) => {
         setEmailInput(e.target.value);
-        if (!emailRegex.test(e.target.value)) {
-            setEmailError("Formato de correo electronico inválido.");
-        } else {
-            setEmailError("");
-        }
+    }
+    const handleEmailFocus = () => {
+        setEmailError(""); 
+        setError("");
     }
 
     return (
         <div className="container">
             <div>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
-                        <label htmlFor="emailInput" className="form-label">Ingresa la dirección de tu correo electrónico, te enviaremos un mail para que recuperes tu contraseña</label>
-                        <input type="email" className="form-control" id="emailInput" value={emailInput} onChange={handleEmailChange} required />
-                        {emailError && <p style={{ color: 'red' }}>{emailError}</p>}
+                {!recoveryMessage &&
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-3">
+                            <label htmlFor="emailInput" className="form-label">Ingresa la dirección de tu correo electrónico, te enviaremos un mail para que recuperes tu contraseña</label>
+                            <input type="text" className="form-control" id="emailInput" value={emailInput} onChange={handleEmailChange} onFocus={handleEmailFocus} required />
+                            {emailError && <p style={{ color: 'red' }}>{emailError}</p>}
+                        </div>
+                        {error && <p style={{ color: 'red' }}>{error}</p>}
+                        <button type="submit" className="btn btn-primary" disabled={loading}>Recuperar contraseña</button>
+                    </form>
+                }
+                {recoveryMessage && (
+                    <div>
+                        <p>{recoveryMessage}</p>
+                        <p>
+                            <Link to="/login">← Volver al inicio de sesion</Link>
+                        </p>
                     </div>
-                    <button type="submit" className="btn btn-primary">Recuperar contraseña</button>
-                </form>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {recoveryMessage && <p>{recoveryMessage}</p>}
+                )}
             </div>
         </div>
     );
 }
-

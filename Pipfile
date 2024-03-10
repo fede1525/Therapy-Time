@@ -23,6 +23,7 @@ flask-bcrypt = "*"
 flask-mail = "*"
 requests = "*"
 sqlalchemy-seeder = "*"
+arrow = "*"
 
 [requires]
 python_version = "3.10"

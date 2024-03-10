@@ -1,64 +1,36 @@
-from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, BlockedTokenList, Role, AvailabilityDates, seed
+from flask import Flask, request, jsonify, url_for, Blueprint, json
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_bcrypt import Bcrypt
-from flask_mail import Mail, Message
-from flask import url_for
 from itsdangerous import URLSafeTimedSerializer
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 import os
+import datetime, json, string, random
 import requests
-from datetime import datetime
+import datetime
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
-mail = Mail(app)
 api = Blueprint('api', __name__)
 
 CORS(api)
 
-serializer = URLSafeTimedSerializer(os.environ['SECRET_KEY'])
-
-# Crear el token
-def generate_password_reset_token(user_id):
-    return serializer.dumps(user_id, salt='password-reset-salt')
-
-# Expira en 1 hora (3600 segundos)
-def verify_password_reset_token(token, max_age=3600):
-    # Deserializar el token para ver el id del usuario
-    try:
-        user_id = serializer.loads(token, salt='password-reset', max_age=max_age)
-        return user_id
-    except Exception as e:
-        return None
-
-# Funcion para enviar el mail de recuperación
-def send_email_recovery_email(recipient_email, link):
-    api_key = os.environ['API_KEY']
-    domain = os.environ['DOMAIN']
-    url = f"https://api.mailgun.net/v3/{domain}/messages"
-
-    text = f"Click the link below to reset your password:\n{link}"
-
-    payload = {
-        "from": "keverapp@gmail.com",
-        "to": recipient_email,
-        "subject": "Kever password reset.",
-        "text": text
-    }
-
-    response = requests.post(url, auth=("api", api_key), data=payload)
-
-    if response.status_code == 200:
-        print("Password reset email sent successfully.")
-    else:
-        print("Failed to send password reset email.")
-
+#Variables para el envio de correo electronico
+EMAILJS_SERVICE_ID = 'service_yrznk4m'
+EMAILJS_TEMPLATE_ID = 'template_ebpnklz'
+EMAILJS_USER_ID = 'sm1cI8ucvO4Tvl_jb'
+ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
+    
 # Alta a nuevo usuario
 @api.route('/signup', methods=['POST'])
+@jwt_required()
 def create_user():
+    payload = get_jwt()
+    if payload["role"] != 2:
+        return "Usuario no autorizado", 403
+        
     data = request.get_json()
     role_id = data.get("role_id", 1)
     username = data.get("username")
@@ -77,7 +49,7 @@ def create_user():
     if existing_dni_user:
         return jsonify({"error": "Este DNI ya está registrado."}), 400
 
-    default_password = dni
+    default_password = bcrypt.generate_password_hash(dni, 10).decode("utf-8")
 
     new_user = User(
         role_id=role_id,
@@ -94,7 +66,7 @@ def create_user():
     db.session.add(new_user)
     db.session.commit()
 
-    token = create_access_token(identity=new_user.id)
+    token = create_access_token(new_user.id, new_user.role_id) 
 
     return jsonify({"message": "Usuario creado exitosamente", "token": token}), 201
 
@@ -111,13 +83,13 @@ def handle_hello():
 @api.route('/users/<int:user_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user(user_id):
-
     current_user_id = get_jwt_identity()
 
     current_user = User.query.get(current_user_id)
 
-    if current_user.email != 'marinasmargara@gmail.com':
-        return jsonify({"error": "You are not authorized to delete users"}), 403
+    payload = get_jwt()
+    if payload["role"] != 2:
+        return "Usuario no autorizado", 403
 
     user_to_delete = User.query.get(user_id)
 
@@ -129,25 +101,40 @@ def delete_user(user_id):
 
     return jsonify({"message": "User deleted successfully"}), 200
 
-#Listar todos los usuarios
+#Listar todos los usuarios (terapeuta)
 @api.route('/users', methods=['GET'])
+@jwt_required()
 def list_users():
-    users = User.query.all()
-    serialized_users = [user.serialize() for user in users]
-    return jsonify(serialized_users), 200
+    try:
+        payload = get_jwt()
+        if payload["role"] != 2:
+            return "Usuario no autorizado", 403
+        users = User.query.filter(User.role_id != 2).all()
+        serialized_users = [user.serialize() for user in users]
+        return jsonify(serialized_users), 200
+    except Exception as e:
+        return jsonify({"error": "Error al obtener usuarios"}), 500
 
-#Buscar un solo usuario
+#Buscar un solo usuario (terapeuta)
 @api.route('/get_user/<int:id>', methods=['GET'])
+@jwt_required()
 def get_user(id):
-    user = User.query.get(id)
+    payload = get_jwt()
+    if payload["role"]!=2:
+        return "Usuario no autorizado", 403
+    user = User.query.get(id) 
     if user:
         return jsonify(user.serialize()), 200
     else:
         return jsonify({"message": "Usuario no encontrado"}), 404
 
-#Editar usuario
+#Editar usuario (terapeuta)
 @api.route('/edit_user/<int:id>', methods=['PUT'])
+@jwt_required()
 def edit_user(id):
+    payload = get_jwt()
+    if payload["role"]!= 2:
+        return "Usuario no autorizado", 403
     user = User.query.get(id)
     if not user:
         return jsonify({"message": "Usuario no encontrado"}), 404
@@ -170,22 +157,33 @@ def edit_user(id):
 @api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    email = data.get("email")
+    username = data.get("username")
     password = data.get("password")
 
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return jsonify({"error": "Usuario incorrecto"}), 404
+    
+    if not bcrypt.check_password_hash(user.password, password):
+        return jsonify({"error": "Contraseña incorrecta"}), 401  
 
-    if user and bcrypt.check_password_hash(user.password, password):
-
-        user.is_active = True
-        db.session.commit()
-
-        token = create_access_token(identity=user.id)
-        return jsonify({"message": "Inicio de sesión exitoso", "token": token}), 200
+    if bcrypt.check_password_hash(user.password, password):
+        payload = {"role": user.role_id}
+        token = create_access_token(identity=user.id, additional_claims=payload)
+        return jsonify({
+            "message": "Inicio de sesión exitoso",
+            "user": user.username,
+            "token": token,
+            "isAuthenticated": True,
+            "role": user.role_id
+        }), 200
     else:
-        return jsonify({"error": "Credenciales inválidas"}), 401
+        return jsonify({
+            "error": "Error en la autenticacion",
+            "isAuthenticated": False
+        }), 500
 
-# Para cerrar sesión
+# Cierre de sesión
 @api.route('/logout', methods=['POST'])
 @jwt_required()
 def logout_user():
@@ -193,23 +191,25 @@ def logout_user():
     jti = payload['jti']
     exp = datetime.datetime.fromtimestamp(payload['exp'])
     blocked_token = BlockedTokenList(jti = jti, expires = exp)
+
     db.session.add(blocked_token)
     db.session.commit()
+
     return jsonify({"msg": "Sesión cerrada exitosamente."}), 200
 
-# Para conseguir el perfil de usuario
+# Conseguir el perfil de usuario (paciente)
 @api.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
 
     if user is None:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
     return jsonify(user.serialize()), 200
 
-# Para editar el perfil
+# Editar el perfil (paciente)
 @api.route('/profile_edit', methods=['PUT'])
 @jwt_required()
 def edit_profile():
@@ -219,58 +219,205 @@ def edit_profile():
     if user is None:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
+    if user_id != user.id:
+        return "Usuario no autorizado", 403
+        
     data = request.get_json()
 
-    for key in data:
-        if key == "password":
-            continue
-        user[key] = data[key]
+    updated_user_data = {**user.__dict__, **data}
 
-    """ if 'username' in data:
-        user.username = data['username']
-
-    if 'name' in data:
-        user.name = data['name']
-
-    if 'lastname' in data:
-        user.lastname = data['lastname']
-
-    if 'birth_date' in data:
-        user.birth_date = data['birth_data']
-
-    if 'phone' in data:
-        user.phone = data['phone'] """
 
     if 'password' in data:
-        user.password = bcrypt.generate_password_hash(data['password']).decode("utf-8")
+        updated_user_data["password"] = bcrypt.generate_password_hash(data['password']).decode("utf-8")
 
+    for key, value in updated_user_data.items():
+        if key != "password":
+            setattr(user, key, value)
+            
     db.session.commit()
 
     return jsonify({"message": "Perfil actualizado"}), 200
 
-# Link para recupero de contraseña
-@api.route('/recovery', methods=['POST'])
-def handle_password_recovery():
+# Funcion para el envio de correo electronico
+def enviar_correo_recuperacion(email, token):
+    datos_correo = {
+        'service_id': EMAILJS_SERVICE_ID, 
+        'template_id': EMAILJS_TEMPLATE_ID,  
+        'user_id': EMAILJS_USER_ID ,  
+        'accessToken': ACCES_TOKEN,
+        'template_params': {
+            'email': email,
+            'token': token
+        }
+    }
+
+    print("Datos del correo a enviar:")
+    print(json.dumps(datos_correo, indent=4))  
+
+    headers = {'Content-Type': 'application/json'}
+
+    response = requests.post('https://api.emailjs.com/api/v1.0/email/send', json=datos_correo, headers=headers)
+
+    if response.status_code == 200:
+        print("Correo electrónico de recuperación enviado con éxito!")
+    else:
+        print("Error al enviar el correo electrónico de recuperación:", response.text)
+
+# Solicitud de restablecimiento de contraseña
+@api.route('/reset_password', methods=['POST'])
+def reset_password():
     data = request.get_json()
-    email = data.get("email")
+    email = data.get('email')
+
     user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "No se encontró ningún usuario con ese correo electrónico"}), 404
 
-    if user is None:
-        return jsonify({"error": "Usuario no encontrado"}), 404
+    token = ''.join(random.choices(string.digits, k=8))
 
+    hashed_temp_code = bcrypt.generate_password_hash(token).decode("utf-8")
+
+    token_expiry = datetime.datetime.now() + datetime.timedelta(minutes=30)
+    user.token_expiry = token_expiry
+
+    user.reset_token = hashed_temp_code
+    db.session.commit()
+
+    enviar_correo_recuperacion(email, token)
+
+    return jsonify({"message": "Correo electrónico de recuperación enviado"}), 200
+
+# Configuracion de nueva contraseña
+@api.route('/change_password', methods=['POST'])
+def change_password():
+    data = request.get_json()
+    username = data.get('username')
+    token = data.get('token')
+    new_password = data.get('new_password')
+
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({"mensaje": "El usuario ingresado es inválido"}), 404 
+    if bcrypt.check_password_hash(user.reset_token, token):
+        new_password = bcrypt.generate_password_hash(new_password, 10).decode("utf-8")
+        user.password = new_password 
+        db.session.commit()
+        return jsonify({"mensaje": "Contraseña cambiada exitosamente"}), 200
+    else:
+        return jsonify({"mensaje": "El token ingresado es inválido o ha expirado"}), 401
+
+# Enviar mensaje de primera consulta
+@api.route('/message', methods=['POST'])
+def create_message():
+    data = request.get_json()
+    dataName = data['name']
+    dataLastname = data['lastname']
+    dataAge = data['age']    
+    dataPhone = data['phone']
+    dataConsultation = data['consultation']
+    dataArrival_date = data['arrival_date']  
+
+    if not all([dataName, dataLastname, dataAge, dataPhone, dataConsultation]):
+        return jsonify({"error": "Todos los campos son obligatorios."}), 400
     try:
-        reset_token = generate_password_reset_token(user.id)
-        reset_link = url_for('api.reset_password', token=reset_token, _external=True)
+        new_message = Consultation(
+            name=dataName,
+            lastname=dataLastname,
+            age=dataAge,
+            phone=dataPhone,
+            consultation=dataConsultation,
+            arrival_date=dataArrival_date 
+        )
+        db.session.add(new_message)
+        db.session.commit()
 
-        msg = Message("Reestablecimiento de contraseña", sender="keverapp@gmail.com", recipients=[user.email])
-        msg.body = f"Para reestablecer tu contraseña, sigue este enlace: {reset_link}"
-        mail.send(msg)
-    except Exception as error:
-        print(error)
-        return jsonify({"error": "No se pudo enviar el correo."}), 500
+        return jsonify({"message": "Mensaje creado exitosamente"}), 201
+    except Exception as e:
+        return jsonify({"error": "Error al procesar la solicitud.", "details": str(e)}), 500
+   
+#Listar todas las consultas
+@api.route('/consultations', methods=['GET'])
+@jwt_required()
+def get_consultations():
+    payload = get_jwt()
+    if payload["role"]!= 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultations = Consultation.query.all()
+        serialized_consultations = [consultation.serialize() for consultation in consultations]
+        return jsonify(serialized_consultations), 200
+    except Exception as e:
+        return jsonify({"error": "Error al obtener usuarios"}), 500
 
+# Traer una sola consulta por su ID
+@api.route('/consultation/<int:id>', methods=['GET'])
+@jwt_required()
+def get_one_consultation(id):
+    payload = get_jwt()
+    if payload['role'] != 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            return jsonify(consultation.serialize()), 200
+        else:
+            return jsonify({"message": "Consulta no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error al obtener la consulta"}), 500
 
-    return jsonify({"message": "Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña."}), 200
+#Marcar las consultas como no leidas
+@api.route('/consultations/<int:id>/mark_as_unread', methods=['PUT'])
+@jwt_required()
+def mark_consultation_as_unread(id):
+    payload = get_jwt()
+    if payload["role"]!= 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            consultation.is_read = False
+            db.session.commit()
+            return jsonify({"message": "Consultation marked as unread"}), 200
+        else:
+            return jsonify({"error": "Consultation not found"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error marking consultation as unread"}), 500
+
+#Borrado logico de las consultas
+@api.route('/deleted_consultations/<int:id>', methods=['PUT'])
+@jwt_required()
+def logical_deletion(id):
+    payload = get_jwt()
+    if payload["role"]!=2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            consultation.is_deleted = True
+            db.session.commit()
+            return jsonify({"message": "El mensaje ha sido eliminado"}),200
+        else:
+            return jsonify({"message" : "Error al eliminar el mensaje"}),404
+    except Exception as e:
+        return jsonify({"error": "Error al intentar eliminar el mensaje"}),500
+    
+#Borrado fisico de las consultas
+@api.route('/deleted_consultations/<int:id>', methods=['DELETE'])
+@jwt_required()
+def physical_deletion(id):
+    payload = get_jwt()
+    if payload["role"] != 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            db.session.delete(consultation)  
+            db.session.commit()
+            return jsonify({"message": "El mensaje ha sido eliminado de forma permanente"}), 200
+        else:
+            return jsonify({"message": "La consulta no existe"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error al intentar eliminar la consulta"}), 500
 
 # Bloqueo de fechas
 @api.route('/bloquear', methods=['POST'])
@@ -368,19 +515,3 @@ def unaviable_dates():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Resetear contraseña
-@api.route('/reset_password/<token>', methods=['POST'])
-def reset_password(token):
-    user_id = verify_password_reset_token(token)
-    if user_id is None:
-        return jsonify({"error": "El token de restablecimiento de contraseña no es válido o ha caducado."}), 400
-
-    data = request.get_json()
-    new_password = data.get("new_password")
-
-    # Actualizar la contraseña en la bdd
-    user = User.query.get(user_id)
-    user.password = bcrypt.generate_password_hash(new_password)
-    db.session.commit()
-
-    return jsonify({"message": "Contraseña restablecida exitosamente."}), 200

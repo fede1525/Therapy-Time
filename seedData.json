@@ -1,6 +1,5 @@
 [
-    {
-        "target_class": "Role",
+    {"target_class": "Role",
         "data":[
             {
                 "id": 1,
@@ -14,18 +13,20 @@
         ]
     },
     {   "target_class": "User",
-        "data":{
+    "data":[
+        {
             "role_id": 2, 
             "username": "SVIGANO",
             "name": "Sofia",
             "lastname": "Vigano",
-            "dni": "36353875",  
-            "email": "marmargara.mm@gmail.com",
+            "dni": "35578170",  
+            "email": "lic.viganosofia@gmail.com",
             "phone": "3513052538",
-            "password": "",
+            "password": "$2b$10$vOJtbTagoRdIfn4ssUXyhOkTXOgs5TmKuCPuJ7IIDrE0RnzAC7XGW",
             "virtual_link": "",
             "is_active": true
         }
-        
-    }
+    ]
+    }  
 ]
+   
