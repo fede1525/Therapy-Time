@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,35 +6,29 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import "../../styles/login.css";
 
 export const Login = () => {
-    const { actions, store } = useContext(Context);
+    const { actions } = useContext(Context);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState({ password: '', networkError: '' });
-    const [errorMessages, setErrorMessages] = useState({
-        username: "",
-        password: "",
-    });
+    const [errorMessage, setErrorMessage] = useState('');
 
     const [showPassword, setShowPassword] = useState(false);
-
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         const errors = validateForm();
-        setErrorMessages(errors);
 
-        if (Object.values(errors).every(error => error === "")) {
+        if (errors) {
             try {
                 const result = await actions.loginUser(username, password);
                 if (result.success) {
                     navigate("/home");
                 } else {
-                    setErrorMessage(prevState => ({ ...prevState, password: "La contraseña es invalida" }));
+                    setErrorMessage("El usuario o la contraseña son incorrectos");
                 }
             } catch (error) {
                 console.error("Error en el inicio de sesión:", error.message);
-                setErrorMessage(prevState => ({ ...prevState, networkError: "Error de red" }));
+                setErrorMessage("Error de red");
             }
         }
     };
@@ -46,35 +40,15 @@ export const Login = () => {
         } else if (name === "password") {
             setPassword(value);
         }
-        setErrorMessage(prevState => ({ ...prevState, password: '' }));
-    };
-
-    const handleInputFocus = (fieldName) => {
-        setErrorMessages(prevErrors => ({
-            ...prevErrors,
-            [fieldName]: ""
-        }));
+        setErrorMessage('');
     };
 
     const validateForm = () => {
-        const errors = {};
-        if (username.trim() === "") {
-            errors.username = "*El campo es obligatorio";
-        } else {
-            const existingUser = store.user.filter(user => user.username === username);
-            if (!existingUser) {
-                errors.username = "El usuario no está registrado";
-            } else {
-                errors.username = "";
-                if (password.trim() === "") {
-                    errors.password = "*El campo es obligatorio";
-                }
-                else {
-                    errors.password = ""
-                }
-            }
+        if (username.trim() === "" || password.trim() === "") {
+            setErrorMessage("*Complete todos los campos");
+            return false;
         }
-        return errors;
+        return true;
     };
 
     const toggleShowPassword = () => {
@@ -95,9 +69,7 @@ export const Login = () => {
                             placeholder="Ingrese su nombre de usuario"
                             value={username}
                             onChange={handleInputChange}
-                            onFocus={() => handleInputFocus("username")}
                         />
-                        {errorMessages.username && <p className="text-danger">{errorMessages.username}</p>}
                     </div>
                     <div className="form-group">
                         <label htmlFor="password" className="labelLogin">Contraseña :</label>
@@ -110,7 +82,6 @@ export const Login = () => {
                                 value={password}
                                 placeholder="Ingrese su contraseña"
                                 onChange={handleInputChange}
-                                onFocus={() => handleInputFocus("password")}
                                 style={{ paddingRight: '40px' }} 
                             />
                             <div className="input-group-append" style={{ position: 'absolute', right: 0, top: 0 }}>
@@ -119,15 +90,9 @@ export const Login = () => {
                                 </button>
                             </div>
                         </div>
-                        {errorMessages.password && <p className="text-danger">{errorMessages.password}</p>}
                     </div>
-                    {errorMessage.password && (
-                        <span className="text-danger">{errorMessage.password}</span>
-                    )}
-                    {errorMessage.networkError && (
-                        <div className="alert alert-danger" role="alert">
-                            {errorMessage.networkError}
-                        </div>
+                    {errorMessage && (
+                        <p className="text-danger">{errorMessage}</p>
                     )}
                     <div className="text-start link mb-4">
                         <Link to="/recovery" style={{color:'#a76f6d', fontSize: '14px'}}>Recuperar contraseña</Link>

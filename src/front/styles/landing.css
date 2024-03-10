@@ -243,6 +243,15 @@ a:hover{
   width: 20vh;
 }
 .btn-guardar-contact:hover{
+  background-color: #e4d9d9 ;
+  color: white;
+}
+.btn-guardar{
+  background-color:  #b89897;
+  color:white;
+  width: 20vh;
+}
+.btn-guardar:hover{
   background-color: #C47C7A;
   color: white;
 }

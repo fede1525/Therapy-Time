@@ -67,15 +67,10 @@ export const Profile = () => {
                                         <p className="textProfile">{userData.email}</p>
                                     </div>
                                     <div>
-                                        <button className="btn_editar" onClick={navigateProfile}>Editar perfil</button>
+                                        <button className="btn_editar" style={{width: '40vh'}} onClick={navigateProfile}>Editar perfil</button>
                                     </div>
                                 </div>
                             </div>
-                            {error && (
-                                    <div className="alert alert-danger" role="alert">
-                                        {error}
-                                    </div>
-                            )}
                     </div>
                 </div>
             </div>

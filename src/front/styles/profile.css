@@ -7,13 +7,13 @@
 .textProfile{
     font-family: 'Jura', sans-serif;
     font-size: larger;
+    font-style: oblique;
 }
 .btn_editar{
     background-color:  #bebbb9 ;
     border:none;
     color:white;
     padding: 1vh;
-    width: 40vh;
     margin-top: 2vh;
     font-family: 'Nanum Gothic', sans-serif;
 }
@@ -23,6 +23,7 @@
 .profileData{
     line-height: 0.5;
 }
-p{
-    font-style: oblique;
+.titleEdit{
+    font-family: 'Nanum Gothic', sans-serif;
+    color:  gray;
 }

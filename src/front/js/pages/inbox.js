@@ -1,4 +1,5 @@
 import "../../styles/inbox.css";
+import "../../styles/landing.css";
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -102,6 +103,14 @@ export const Inbox = () => {
     };
     
     //Funciones para tab inbox
+    const handleDeleteSingleConsultation = async (id) => {
+        try {
+            setShowConfirmationModalInbox(true);
+            setSelectedConsultations([id]);
+        } catch (error) {
+            console.error("Error al eliminar la consulta:", error.message);
+        }
+    };    
     const confirmDeletion = async () => {
         try {
             setShowConfirmationModalInbox(false);
@@ -216,9 +225,9 @@ export const Inbox = () => {
                                     <td className="align-middle">
                                         <input type="checkbox" style={{marginLeft:'2vh'}} checked={selectedConsultations.includes(consultation.id)} onChange={() => handleCheckboxChange(consultation.id)} />
                                     </td>
-                                    <td className="align-middle">{consultation.arrival_date}</td>
-                                    <td className="align-middle" style={{ width: '20%' }}>{consultation.name} {consultation.lastname}</td>
-                                    <td className="align-middle" style={{ width: '40%' }}>{consultation.consultation.substring(0, 50)}...</td>
+                                    <td className="align-middle" onClick={() => handleConsultationClick(consultation.id, event)}>{consultation.arrival_date}</td>
+                                    <td className="align-middle" onClick={() => handleConsultationClick(consultation.id, event)}style={{ width: '20%' }}>{consultation.name} {consultation.lastname}</td>
+                                    <td className="align-middle" onClick={() => handleConsultationClick(consultation.id, event)} style={{ width: '40%' }}>{consultation.consultation.substring(0, 50)}...</td>
                                     {activeTab === "deleted" && (
                                         <td className="align-middle">
                                             <button className="btn" style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => handlePhysicalDeletion(consultation.id)}>
@@ -228,7 +237,7 @@ export const Inbox = () => {
                                     )}
                                     {activeTab === "inbox" && (
                                         <td className="align-middle text-end">
-                                        <button className="btn me-2" style={{ backgroundColor: 'transparent', border: 'none' }} onClick={handleDeleteSelectedConsultations}>
+                                        <button className="btn me-2" style={{ backgroundColor: 'transparent', border: 'none' }}onClick={() => handleDeleteSingleConsultation(consultation.id)}>
                                                 <FontAwesomeIcon icon={faTrash} style={{ color: '#6c757d' }} />
                                             </button>
                                             <button className="btn" style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => handleMarkAsUnreadSingle(consultation.id)}>
@@ -256,44 +265,44 @@ export const Inbox = () => {
                     </ul>
                 </nav>
                 <div className={`modal fade ${showConfirmationModalInbox ? 'show d-block' : 'd-none'}`} id="confirmationModalInbox" tabIndex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content" id='contactModal'>
                             <div className="modal-header">
                                 <h5 className="modal-title" id="confirmationModalLabel">Confirmación</h5>
-                                <button type="button" className="btn-close" onClick={closeConfirmationModal} aria-label="Close"></button>
+                                <button type="button" className="btn_close_contact" onClick={closeConfirmationModal} aria-label="Close">X</button>
                             </div>
                             <div className="modal-body">
                                 ¿Estás seguro de continuar?
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmationModalInbox(false)}>Cancelar</button>
-                                <button type="button" className="btn btn-danger" onClick={confirmDeletion}>Eliminar</button>
+                                <button type="button" className="btn btn-guardar" onClick={() => setShowConfirmationModalInbox(false)}>Cancelar</button>
+                                <button type="button" className="btn btn-guardar-contact" onClick={confirmDeletion}>Eliminar</button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className={`modal fade ${showConfirmationModalDeleted ? 'show d-block' : 'd-none'}`} id="confirmationModalDeleted" tabIndex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content" id='contactModal'>
                             <div className="modal-header">
                                 <h5 className="modal-title" id="confirmationModalLabel">Confirmación</h5>
-                                <button type="button" className="btn-close" onClick={closeConfirmationModal} aria-label="Close"></button>
+                                <button type="button" className="btn_close_contact" onClick={closeConfirmationModalDeleted} aria-label="Close">X</button>
                             </div>
                             <div className="modal-body">
                                 Los mensajes seran eliminados de forma permanente. ¿Estás seguro de que deseas continuar?
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmationModalDeleted(false)}>Cancelar</button>
-                                <button type="button" className="btn btn-danger" onClick={() => confirmPhysicalDeletion(selectedConsultations)}>Eliminar</button>
+                                <button type="button" className="btn btn-guardar" onClick={() => setShowConfirmationModalDeleted(false)}>Cancelar</button>
+                                <button type="button" className="btn btn-guardar-contact" onClick={() => confirmPhysicalDeletion(selectedConsultations)}>Eliminar</button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className={`modal fade ${modalSuccess ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <button type="button" className="btn-close" onClick={closeModalSuccess} aria-label="Close"></button>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content" id='contactModal'>
+                            <div className="modal-header d-flex justify-content-end">
+                                <button type="button" className="btn_close_contact" onClick={closeModalSuccess} aria-label="Close">X</button>
                             </div>
                             <div className="modal-body d-flex justify-content-center">
                                 <span>Eliminación exitosa.</span>
@@ -302,8 +311,8 @@ export const Inbox = () => {
                     </div>
                 </div>
                 <div className={`modal fade ${showModalConsultation ? 'show d-block' : 'd-none'}`} id="showConsultation" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content" id='contactModal'>
                             <div className="modal-header d-flex justify-content-between align-items-center">
                                 <FontAwesomeIcon icon={faArrowLeft} className="mr-2" onClick={closeModalConsultation}/>
                                 <div className="d-flex align-items-center">
@@ -319,7 +328,7 @@ export const Inbox = () => {
                                     </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={closeModalConsultation}>Cerrar</button>
+                                <button type="button" className="btn btn-guardar-contact" data-bs-dismiss="modal" onClick={closeModalConsultation}>Cerrar</button>
                             </div>
                         </div>
                     </div>

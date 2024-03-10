@@ -115,8 +115,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: true, message: responseData.message };
 				} catch (error) {
 					console.error("Error al realizar la solicitud:", error);
-					setStore({ isAuthenticated: false, userRole: "" });
-					return { success: false, error: 'Error de red' };
+					const errorMessage = error.message || 'Error de red';
+					if (error.response && error.response.status === 404) {
+						return { success: false, error: 'El usuario no está registrado' };
+					} else if (error.response && error.response.status === 401) {
+						return { success: false, error: 'La contraseña es incorrecta' };
+					} else {
+						return { success: false, error: errorMessage };
+					}
 				}
 			},
 			//Funciones para el recupero de contraseña		

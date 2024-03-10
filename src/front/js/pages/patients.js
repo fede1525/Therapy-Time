@@ -320,7 +320,7 @@ export const Patients = () => {
                                         <div className="mb-3">
                                             <label htmlFor="userName" className="col-form-label">Nombre de usuario:</label>
                                             <input type="text" className="form-control" id="userName" name="username" value={userData.username} onChange={handleChange}  onFocus={() => handleInputFocus("username")} />
-                                            <span className="error-message">{errorMessages.username}</span>
+                                            <span className="text-danger">{errorMessages.username}</span>
                                         </div>
                                     </div>
                                     <div className="row">
@@ -328,14 +328,14 @@ export const Patients = () => {
                                             <div className="mb-3">
                                                 <label htmlFor="name" className="col-form-label">Nombre:</label>
                                                 <input type="text" className="form-control" id="name" name="name" value={userData.name} onChange={handleChange}  onFocus={() => handleInputFocus("name")} />
-                                                <span className="error-message">{errorMessages.name}</span>
+                                                <span className="text-danger">{errorMessages.name}</span>
                                             </div>
                                         </div>
                                         <div className="col-6">
                                             <div className="mb-3">
                                                 <label htmlFor="lastName" className="col-form-label">Apellido:</label>
                                                 <input type="text" className="form-control" id="lastName" name="lastname" value={userData.lastname} onChange={handleChange}  onFocus={() => handleInputFocus("lastname")} />
-                                                <span className="error-message">{errorMessages.lastname}</span>
+                                                <span className="text-danger">{errorMessages.lastname}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -344,14 +344,14 @@ export const Patients = () => {
                                             <div className="mb-3">
                                                 <label htmlFor="dni" className="col-form-label">DNI:</label>
                                                 <input type="text" className="form-control" id="dni" name="dni" value={userData.dni} onChange={handleChange}  onFocus={() => handleInputFocus("dni")}  />
-                                                <span className="error-message">{errorMessages.dni}</span>
+                                                <span className="text-danger">{errorMessages.dni}</span>
                                             </div>
                                         </div>
                                         <div className="col-6">
                                             <div className="mb-3">
                                                 <label htmlFor="phone" className="col-form-label">Telefono de contacto:</label>
                                                 <input type="text" className="form-control" id="phone" name="phone" value={userData.phone} onChange={handleChange}  onFocus={() => handleInputFocus("phone")} />
-                                                <span className="error-message">{errorMessages.phone}</span>
+                                                <span className="text-danger">{errorMessages.phone}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -360,7 +360,7 @@ export const Patients = () => {
                                             <div className="mb-3">
                                                 <label htmlFor="email" className="col-form-label">Email:</label>
                                                 <input type="text" className="form-control" id="email" name="email" value={userData.email} onChange={handleChange}  onFocus={() => handleInputFocus("email")}  /> 
-                                                <span className="error-message">{errorMessages.email}</span>
+                                                <span className="text-danger">{errorMessages.email}</span>
                                             </div>
                                         </div>
                                         <div className="col-6">
@@ -381,7 +381,7 @@ export const Patients = () => {
                 <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
                     <div className="modal-dialog">
                         <div className="modal-content" id="contactModal">
-                            <div className="modal-header">
+                            <div className="modal-header justify-content-end">
                                 <button type="button" className="btn_close_contact" onClick={closeSuccessModal} aria-label="Close">X</button>
                             </div>
                             <div className="modal-body">
@@ -410,7 +410,7 @@ export const Patients = () => {
                                         <div className="mb-2">
                                             <label htmlFor="userName" className="col-form-label">Nombre de usuario:</label>
                                             <input type="text" className="form-control" id="userName" name="username" value={userData.username} onChange={handleChange} onFocus={() => handleInputFocus("username")} />
-                                            <span className="error-message">{errorMessages.username}</span>
+                                            <span className="text-danger">{errorMessages.username}</span>
                                         </div>
                                     </div>
                                     <div className="row">
@@ -418,14 +418,14 @@ export const Patients = () => {
                                             <div className="mb-2">
                                                 <label htmlFor="name" className="col-form-label">Nombre:</label>
                                                 <input type="text" className="form-control" id="name" name="name" value={userData.name} onChange={handleChange}  onFocus={() => handleInputFocus("name")}  />
-                                                <span className="error-message">{errorMessages.name}</span>
+                                                <span className="text-danger">{errorMessages.name}</span>
                                             </div>
                                         </div>
                                         <div className="col-6">
                                             <div className="mb-2">
                                                 <label htmlFor="lastName" className="col-form-label">Apellido:</label>
                                                 <input type="text" className="form-control" id="lastName" name="lastname" value={userData.lastname} onChange={handleChange}  onFocus={() => handleInputFocus("lastname")} />
-                                                <span className="error-message">{errorMessages.lastname}</span>
+                                                <span className="text-danger">{errorMessages.lastname}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -434,14 +434,14 @@ export const Patients = () => {
                                             <div className="mb-2">
                                                 <label htmlFor="dni" className="col-form-label">DNI:</label>
                                                 <input type="text" className="form-control" id="dni" name="dni" value={userData.dni} onChange={handleChange}  onFocus={() => handleInputFocus("dni")}  />
-                                                <span className="error-message">{errorMessages.dni}</span>
+                                                <span className="text-danger">{errorMessages.dni}</span>
                                             </div>
                                         </div>
                                         <div className="col-6">
                                             <div className="mb-2">
                                                 <label htmlFor="phone" className="col-form-label">Telefono de contacto:</label>
                                                 <input type="text" className="form-control" id="phone" name="phone" value={userData.phone} onChange={handleChange}  onFocus={() => handleInputFocus("phone")}  />
-                                                <span className="error-message">{errorMessages.phone}</span>
+                                                <span className="text-danger">{errorMessages.phone}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -450,7 +450,7 @@ export const Patients = () => {
                                             <div className="mb-2">
                                                 <label htmlFor="email" className="col-form-label">Email:</label>
                                                 <input type="email" className="form-control" id="email" name="email" value={userData.email} onChange={handleChange}  onFocus={() => handleInputFocus("email")}  /> 
-                                                <span className="error-message">{errorMessages.email}</span>
+                                                <span className="text-danger">{errorMessages.email}</span>
                                             </div>
                                         </div>
                                         <div className="col-6">
