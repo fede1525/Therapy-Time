@@ -1,7 +1,9 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate } from "react-router-dom";
-import { NavbarPatient } from "../component/navbar_patient"
+import { NavbarTherapist } from "../component/navbar"
+import "../../styles/profile.css";
+
 
 export const Profile = () => {
     const { actions } = useContext(Context)
@@ -36,42 +38,44 @@ export const Profile = () => {
 
     return (
         <div>
-            <NavbarPatient />
-            <div className="container">
-                <div className="row">
-                    {error && (
-                        <div className="alert alert-danger" role="alert">
-                            {error}
-                        </div>
-                    )}
-                    <div className="col">
-                        <h4>Nombre de usuario</h4>
-                        <p>{userData.username}</p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col">
-                        <h4>Nombre</h4>
-                        <p>{userData.name}</p>
-                    </div>
-                    <div className="col">
-                        <h4>Apellido</h4>
-                        <p>{userData.lastname}</p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col">
-                        <h4>Dni</h4>
-                        <p>{userData.dni}</p>
-                    </div>
-                    <div className="col">
-                        <h4>Email</h4>
-                        <p>{userData.email}</p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col d-flex justify-content-center p-4">
-                        <button className="btn btn-primary" onClick={navigateProfile}>Editar perfil</button>
+            <NavbarTherapist/>
+            <div style={{backgroundColor:'white', height: '85vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                <div className="container p-3" style={{borderTopRightRadius: '5vh', borderLeft: '#EDE9E9 solid 0.5vh', borderBottom:'#EDE9E9 solid 0.5vh', margin:'50vh'}} >
+                    <div className="p-5 " style={{backgroundColor:'#F8F5F5'}}>       
+                            <div className="row">
+                                <div className="col">
+                                    <div className="mb-5 profileData">
+                                        <h4 className="titleProfile">Nombre de usuario</h4>
+                                        <p className="textProfile">{userData.username}</p>
+                                    </div>
+                                    <div className="mb-5 profileData"> 
+                                        <h4 className="titleProfile">Nombre</h4>
+                                        <p className="textProfile">{userData.name}</p>
+                                    </div>
+                                    <div className="profileData">
+                                        <h4 className="titleProfile">Apellido</h4>
+                                        <p className="textProfile">{userData.lastname}</p>
+                                    </div>
+                                </div>
+                                <div className="col">
+                                    <div className="mb-5 profileData">
+                                        <h4 className="titleProfile">Dni</h4>
+                                        <p className="textProfile">{userData.dni}</p>
+                                    </div>
+                                    <div className="mb-5 profileData">  
+                                        <h4 className="titleProfile">Email</h4>
+                                        <p className="textProfile">{userData.email}</p>
+                                    </div>
+                                    <div>
+                                        <button className="btn_editar" onClick={navigateProfile}>Editar perfil</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {error && (
+                                    <div className="alert alert-danger" role="alert">
+                                        {error}
+                                    </div>
+                            )}
                     </div>
                 </div>
             </div>

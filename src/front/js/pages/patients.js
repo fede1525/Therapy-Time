@@ -237,9 +237,9 @@ export const Patients = () => {
     const visibleUsers = (showInactive ? sortedFilteredUsers : sortedActiveFilteredUsers);
 
     return (
-        <div style={{backgroundColor: '#EDE9E9', minHeight: '100vh', minWidth: '100vw'}}>
+        <div style={{backgroundColor: 'white', minHeight: '100vh', minWidth: '100vw'}}>
             <NavbarTherapist />
-            <div className="container mt-5">
+            <div className="container mt-5 border" style={{paddingTop:'2vh'}}>
                 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" />
                 <div className="d-flex justify-content-start align-items-center mb-3" style={{fontFamily: 'Nanum Gothic, sans-serif'}}>
                     <div className="input-group flex-grow-1 ">
@@ -298,7 +298,7 @@ export const Patients = () => {
                         )}
                     </tbody>
                 </table>
-                <ul className="pagination justify-content-center">
+                <ul className="pagination justify-content-start">
                     {Array.from({ length: Math.ceil(visibleUsers.length / patientsPerPage) }, (_, index) => (
                         <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
                             <button onClick={() => paginate(index + 1)} className="page-link" style={{backgroundColor:'#B2A79F', color:'white',   border: '1px solid transparent', outline: 'none'}}>

@@ -35,7 +35,7 @@ export const NavbarPatient = () => {
 		}
 
 		console.log("Cierre de sesión exitoso")
-		navigate("/login")
+		navigate("/")
 		return { token: localStorage.getItem("token") }
 	}
 
