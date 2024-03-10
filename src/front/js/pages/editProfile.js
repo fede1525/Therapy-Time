@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Context } from "../store/appContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,21 +8,81 @@ import "../../styles/profile.css";
 
 export const EditProfile = () => {
     const { actions } = useContext(Context)
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-    const [showPassword, setShowPassword] = useState(false)
-    const [passwordError, setPasswordError] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
-    const [showConfirm, setShowConfirm] = useState(false)
-    const [confirmError, setConfirmError] = useState('')
-    const [name, setName] = useState('')
-    const [lastname, setLastname] = useState('')
-    const [dni, setDni] = useState('')
-    const [dniError, setDniError] = useState('')
-    const [email, setEmail] = useState('')
-    const [emailError, setEmailError] = useState('')
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [confirmError, setConfirmError] = useState('');
+    const [name, setName] = useState('');
+    const [lastname, setLastname] = useState('');
+    const [dni, setDni] = useState('');
+    const [dniError, setDniError] = useState('');
+    const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState('');
 
     const navigate = useNavigate()
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const resp = await actions.getUserData();
+                if (resp.error) {
+                    throw new Error("No se pudieron cargar los datos del usuario");
+                }
+                setUsername(resp.username);
+                setName(resp.name);
+                setLastname(resp.lastname);
+                setDni(resp.dni);
+                setEmail(resp.email);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        fetchData();
+    }, [actions]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        switch (name) {
+            case "username":
+                setUsername(value);
+                break;
+            case "name":
+                setName(value);
+                break;
+            case "lastname":
+                setLastname(value);
+                break;
+            case "dni":
+                setDni(value);
+                break;
+            case "email":
+                setEmail(value);
+                break;
+            case "password":
+                setPassword(value);
+                break;
+            case "confirmPassword":
+                setConfirmPassword(value);
+                break;
+            default:
+                break;
+        }
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword)
+    }
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirm(!showConfirm)
+    }
+
+    const isNumber = (input) => {
+        return !isNaN(input)
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -104,35 +164,12 @@ export const EditProfile = () => {
 
     }
 
-    const handleInputChange = () => {
-        setPasswordError('');
-        setConfirmError('');
-        setEmailError('')
-        setDniError('')
-    };
-
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword)
-    }
-
-    const toggleConfirmPasswordVisibility = () => {
-        setShowConfirm(!showConfirm)
-    }
-
-    const isNumber = (input) => {
-        return !isNan(input)
-    }
-
-    const navigateProfile = () => {
-        navigate("/profile")
-    }
- 
     return (
         <div>
-            <NavbarTherapist/>
-            <div style={{backgroundColor:'white', height: '85vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <div className="container p-3" style={{borderTopRightRadius: '5vh', borderLeft: '#EDE9E9 solid 0.5vh', borderBottom:'#EDE9E9 solid 0.5vh', margin:'50vh'}} >
-                    <div className="p-5 " style={{backgroundColor:'#F8F5F5'}}> 
+            <NavbarTherapist />
+            <div style={{ backgroundColor: 'white', height: '85vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div className="container p-3" style={{ borderTopRightRadius: '5vh', borderLeft: '#EDE9E9 solid 0.5vh', borderBottom: '#EDE9E9 solid 0.5vh', margin: '50vh' }} >
+                    <div className="p-5 " style={{ backgroundColor: '#F8F5F5' }}>
                         <form onSubmit={handleSubmit}>
                             <div className="row mb-2">
                                 <div className="col">
@@ -141,10 +178,10 @@ export const EditProfile = () => {
                                         <input type="text"
                                             className="form-control"
                                             id="username"
-                                            name="username-input"
-                                            value={username}
+                                            name="username"
+                                            value={username} 
                                             maxLength={50}
-                                            onChange={(e) => { setUsername(e.target.value); handleInputChange() }}
+                                            onChange={handleInputChange}
                                         />
                                     </div>
                                 </div>
@@ -156,10 +193,10 @@ export const EditProfile = () => {
                                         <input type="text"
                                             className="form-control"
                                             id="name"
-                                            name="name-input"
-                                            value={name}
+                                            name="name"
+                                            value={name} 
                                             maxLength={25}
-                                            onChange={(e) => { setName(e.target.value); handleInputChange() }}
+                                            onChange={handleInputChange}
                                         />
                                     </div>
                                 </div>
@@ -169,10 +206,10 @@ export const EditProfile = () => {
                                         <input type="text"
                                             className="form-control"
                                             id="lastname"
-                                            name="lastname-input"
-                                            value={lastname}
+                                            name="lastname"
+                                            value={lastname} 
                                             maxLength={25}
-                                            onChange={(e) => { setLastname(e.target.value); handleInputChange() }}
+                                            onChange={handleInputChange}
                                         />
                                     </div>
                                 </div>
@@ -184,10 +221,10 @@ export const EditProfile = () => {
                                         <input type="text"
                                             className="form-control"
                                             id="dni"
-                                            name="dni-input"
-                                            value={dni}
+                                            name="dni"
+                                            value={dni} 
                                             maxLength={8}
-                                            onChange={(e) => { setDni(e.target.value); handleInputChange() }}
+                                            onChange={handleInputChange}
                                         />
                                     </div>
                                     {dniError && (
@@ -202,9 +239,9 @@ export const EditProfile = () => {
                                         <input type="email"
                                             className="form-control"
                                             id="email"
-                                            name="email-input"
-                                            value={email}
-                                            onChange={(e) => { setEmail(e.target.value); handleInputChange() }}
+                                            name="email"
+                                            value={email} 
+                                            onChange={handleInputChange}
                                         />
                                         {emailError && (
                                             <div className="text-danger">
@@ -222,16 +259,17 @@ export const EditProfile = () => {
                                             <input type={showPassword ? "password" : "text"}
                                                 className="form-control"
                                                 id="password"
-                                                name="password-input"
+                                                name="password"
                                                 value={password}
-                                                onChange={(e) => { setPassword(e.target.value); handleInputChange() }}
+                                                onChange={handleInputChange}
                                             />
                                             <button className="btn btn-outline-secondary" type="button" id="button-addon-password"
                                                 onClick={togglePasswordVisibility}>
                                                 <FontAwesomeIcon
                                                     icon={showPassword ? faEyeSlash : faEye}
                                                     className="eye-icon"
-                                                /></button>
+                                                />
+                                            </button>
                                         </div>
                                         {passwordError && (
                                             <div className="text-danger">
@@ -247,16 +285,17 @@ export const EditProfile = () => {
                                             <input type={showConfirm ? "password" : "text"}
                                                 className="form-control"
                                                 id="confirm"
-                                                name="confirm-input"
+                                                name="confirmPassword"
                                                 value={confirmPassword}
-                                                onChange={(e) => { setConfirmPassword(e.target.value); handleInputChange() }}
+                                                onChange={handleInputChange}
                                             />
                                             <button className="btn btn-outline-secondary" type="button" id="button-addon-confirm"
                                                 onClick={toggleConfirmPasswordVisibility}>
                                                 <FontAwesomeIcon
                                                     icon={showConfirm ? faEyeSlash : faEye}
                                                     className="eye-icon"
-                                                /></button>
+                                                />
+                                            </button>
                                         </div>
                                         {confirmError && (
                                             <div className="text-danger">
@@ -271,10 +310,10 @@ export const EditProfile = () => {
                                 </div>
                                 <div className="col d-flex justify-content-between">
                                     <div className="form-group d-flex align-items-center">
-                                        <Link to='/profile' style={{color:'#8A97A6'}}>&#x27F5; Volver</Link>
+                                        <Link to='/profile' style={{ color: '#8A97A6' }}>&#x27F5; Volver</Link>
                                     </div>
                                     <div className="form-group d-flex align-items-center">
-                                        <button className="btn_editar p-2" style={{width:'25vh'}} type="submit">Guardar</button>
+                                        <button className="btn_editar p-2" style={{ width: '25vh' }} type="submit">Guardar</button>
                                     </div>
                                 </div>
                             </div>

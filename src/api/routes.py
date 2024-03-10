@@ -223,12 +223,13 @@ def edit_profile():
         return "Usuario no autorizado", 403
         
     data = request.get_json()
+    print("Data received:", data)
 
     updated_user_data = {**user.__dict__, **data}
 
-
     if 'password' in data:
-        updated_user_data["password"] = bcrypt.generate_password_hash(data['password']).decode("utf-8")
+        new_password_hash = bcrypt.generate_password_hash(data['password']).decode("utf-8")
+        user.password = new_password_hash
 
     for key, value in updated_user_data.items():
         if key != "password":
