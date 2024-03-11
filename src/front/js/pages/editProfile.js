@@ -1,6 +1,9 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { Navbar } from "../component/navbar"
 
 export const EditProfile = () => {
     const { actions } = useContext(Context)
@@ -13,12 +16,16 @@ export const EditProfile = () => {
     const [confirmError, setConfirmError] = useState('')
     const [name, setName] = useState('')
     const [lastname, setLastname] = useState('')
-    const [birthdate, setBirthdate] = useState('')
-    const [phone, setPhone] = useState('')
-    const [phoneError, setPhoneError] = useState('')
+    const [dni, setDni] = useState('')
+    const [dniError, setDniError] = useState('')
+    const [email, setEmail] = useState('')
+    const [emailError, setEmailError] = useState('')
+
+    const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+
 
         const changes = {
 
@@ -38,8 +45,12 @@ export const EditProfile = () => {
                 changes.lastname = lastname
             }
 
-            if (birthdate !== '') {
-                changes.birthdate = birthdate
+            if (dni !== '') {
+                if(!isNumber(dni)){
+                    setDniError("Solo se permiten números")
+                    return
+                } 
+                changes.dni = dni
             }
 
             if (password !== '') {
@@ -58,13 +69,15 @@ export const EditProfile = () => {
 
             }
 
-            if (phone !== '') {
-                if (phone.length() !== 10) {
-                    setPhoneError("El número de teléfono debe contener 10 dígitos.")
+            if (email !== '') {
+                const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+                if (!emailRegex.test(email) ) {
+                    setEmailError("Debe ingresar una casilla de mail valida")
                     return;
                 }
 
-                changes.phone = phone
+                changes.email = email
             }
 
             const result = await actions.editProfile(changes);
@@ -75,15 +88,17 @@ export const EditProfile = () => {
             setConfirmPassword('');
             setName('');
             setLastname('');
-            setBirthdate('');
-            setPhone('');
+            setDni('');
+            setEmail('');
             setPasswordError('');
             setConfirmError('');
-            setPhoneError('');
+            setEmailError('');
+            setDniError('')
 
-            useNavigate("/profile")
+            navigate("/profile")
         } catch (error) {
-            console.error("Error updating profile:", error);
+            console.error("Error actualizando el perfil:", error);
+            navigate("/profile")
         }
 
     }
@@ -91,7 +106,8 @@ export const EditProfile = () => {
     const handleInputChange = () => {
         setPasswordError('');
         setConfirmError('');
-        setPhoneError('')
+        setEmailError('')
+        setDniError('')
     };
 
     const togglePasswordVisibility = () => {
@@ -102,12 +118,22 @@ export const EditProfile = () => {
         setShowConfirm(!showConfirm)
     }
 
+    const isNumber = (input) => {
+        return !isNan(input)
+    }
+
+    const navigateProfile = () => {
+        navigate("/profile")
+    }
+ 
     return (
-        <div className="container edit">
+        <div className="container">
+            <Navbar />
             <form onSubmit={handleSubmit}>
                 <div className="row">
                     <div className="col">
                         <div className="form-group">
+                            <label htmlFor="username">Nombre de usuario</label>
                             <input type="text"
                                 className="form-control"
                                 id="username"
@@ -122,6 +148,7 @@ export const EditProfile = () => {
                 <div className="row">
                     <div className="col">
                         <div className="form-group">
+                            <label htmlFor="name">Nombre</label>
                             <input type="text"
                                 className="form-control"
                                 id="name"
@@ -131,25 +158,27 @@ export const EditProfile = () => {
                                 onChange={(e) => { setName(e.target.value); handleInputChange() }}
                             />
                         </div>
-                        <div className="col">
-                            <div className="form-group">
-                                <input type="text"
-                                    className="form-control"
-                                    id="lastname"
-                                    name="lastname-input"
-                                    value={lastname}
-                                    maxLength={25}
-                                    onChange={(e) => { setLastname(e.target.value); handleInputChange() }}
-                                />
-                            </div>
+                    </div>
+                    <div className="col">
+                        <div className="form-group">
+                            <label htmlFor="lastname">Apellido</label>
+                            <input type="text"
+                                className="form-control"
+                                id="lastname"
+                                name="lastname-input"
+                                value={lastname}
+                                maxLength={25}
+                                onChange={(e) => { setLastname(e.target.value); handleInputChange() }}
+                            />
                         </div>
                     </div>
                 </div>
                 <div className="row">
                     <div className="col">
                         <div className="form-group">
+                            <label htmlFor="password">Contraseña</label>
                             <div className="input-group">
-                                <input type="password"
+                                <input type={showPassword ? "text" : "password"}
                                     className="form-control"
                                     id="password"
                                     name="password-input"
@@ -172,8 +201,9 @@ export const EditProfile = () => {
                     </div>
                     <div className="col">
                         <div className="form-group">
+                            <label htmlFor="confirm">Confirmar contraseña</label>
                             <div className="input-group">
-                                <input type="password"
+                                <input type={showConfirm ? "text" : "password"}
                                     className="form-control"
                                     id="confirm"
                                     name="confirm-input"
@@ -198,27 +228,35 @@ export const EditProfile = () => {
                 <div className="row">
                     <div className="col">
                         <div className="form-group">
-                            <input type="date"
+                            <label htmlFor="dni">DNI</label>
+                            <input type="text"
                                 className="form-control"
-                                id="birthdate"
-                                name="birthdate-input"
-                                value={birthdate}
-                                onChange={(e) => { setBirthdate(e.target.value); handleInputChange() }}
+                                id="dni"
+                                name="dni-input"
+                                value={dni}
+                                maxLength={8}
+                                onChange={(e) => { setDni(e.target.value); handleInputChange() }}
                             />
                         </div>
+                        {dniError && (
+                            <div className="alert alert-danger" role="alert">
+                                {dniError}
+                            </div>
+                        )}
                     </div>
                     <div className="col">
                         <div className="form-group">
-                            <input type="tel"
+                            <label htmlFor="email">Email</label>
+                            <input type="email"
                                 className="form-control"
-                                id="phonenumber"
-                                name="phonenumber-input"
-                                value={phone}
-                                onChange={(e) => { setPhone(e.target.value); handleInputChange() }}
+                                id="email"
+                                name="email-input"
+                                value={email}
+                                onChange={(e) => { setEmail(e.target.value); handleInputChange() }}
                             />
-                            {phoneError && (
+                            {emailError && (
                                 <div className="alert alert-danger" role="alert">
-                                    {phoneError}
+                                    {emailError}
                                 </div>
                             )}
                         </div>
@@ -226,8 +264,13 @@ export const EditProfile = () => {
                 </div>
                 <div className="row">
                     <div className="col">
-                        <div className="form-group">
-                            <button type="submit">Guardar</button>
+                        <div className="form-group justify-content-center d-flex p-3">
+                            <button className="btn btn-primary" type="submit">Guardar</button>
+                        </div>
+                    </div>
+                    <div className="col">
+                        <div className="form-group justify-content-center d-flex p-3">
+                            <button className="btn btn-secondary" onClick={navigateProfile}>Volver</button>
                         </div>
                     </div>
                 </div>

@@ -37,7 +37,7 @@ export const Block = () => {
     }
   };
   useEffect(() => {
-    fetchUnavailableDates()
+    fetchUnavailableDates();
     function extractDateInfo(dateString) {
       const dateObject = new Date(dateString);
       const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
@@ -79,8 +79,9 @@ export const Block = () => {
       newCalendar.push(row);
     }
     setCalendar(newCalendar);
-    fetchUnavailableDates()
-  }, [month, showModal === false]);
+    fetchUnavailableDates();
+    
+  }, [ month, unavailableDates]);
 
 
   const handleDayClick = (day) => {
