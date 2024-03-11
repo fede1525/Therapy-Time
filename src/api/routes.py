@@ -286,7 +286,7 @@ def reset_password():
 
     enviar_correo_recuperacion(email, token)
 
-    return jsonify({"message": "Correo electrónico de recuperación enviado"}), 200
+    return jsonify({"message": "El correo electrónico de recuperación ha sido enviado con exito."}), 200
 
 # Configuracion de nueva contraseña
 @api.route('/change_password', methods=['POST'])
