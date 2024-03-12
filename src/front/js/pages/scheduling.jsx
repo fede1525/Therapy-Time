@@ -26,6 +26,7 @@ export const Block = () => {
     11: 'Noviembre',
     12: 'Diciembre'
   };
+
   const fetchUnavailableDates = async () => {
     try {
       const response = await actions.apiFetch('/bloquear', 'GET');
@@ -35,7 +36,7 @@ export const Block = () => {
     }
   };
   useEffect(() => {
-    fetchUnavailableDates();
+    fetchUnavailableDates()
     function extractDateInfo(dateString) {
       const dateObject = new Date(dateString);
       const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
