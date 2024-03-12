@@ -81,7 +81,7 @@ export const Block = () => {
     setCalendar(newCalendar);
     fetchUnavailableDates();
     
-  }, [ month, unavailableDates]);
+  }, [ month, showModal===false]);
 
 
   const handleDayClick = (day) => {
