@@ -94,8 +94,8 @@ export const Login = () => {
                     {errorMessage && (
                         <p className="text-danger">{errorMessage}</p>
                     )}
-                    <div className="text-start link mb-4">
-                        <Link to="/recovery" style={{color:'#a76f6d', fontSize: '14px'}}>Recuperar contraseña</Link>
+                    <div className="text-end link mb-4">
+                        <Link to="/recovery" style={{color:'#a76f6d', fontSize: '15px'}}>¿Olvidaste tu contraseña?</Link>
                     </div>
                     <div className="d-flex justify-content-between align-items-center">
                         <div>

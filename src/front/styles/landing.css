@@ -218,32 +218,34 @@
 }
 a{
   color:#C47C7A; 
-  text-decoration: none;
 }
 a:hover{
   color:#C47C7A;
 }
-.content-behind-modal {
-  filter: blur(2px);
-  opacity: 0.5;
-  background-color: rgba(255, 255, 255, 0.5); 
+.textModal{
+  font-family: 'Jura', sans-serif;
 }
+.modal-content {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Ajusta el valor de acuerdo a tus preferencias */
+}
+
 #contactModal{
-  background-color: #bebbb9;
+  background-color: white;
   border:none;
-  color: #FAFAFA;
+  color: grey;
+  border: solid rgb(218, 217, 217) 0.5vh;
   font-family: 'Nanum Gothic', sans-serif;
 }
 .btn-close{
-  color: #FAFAFA !important;
+  color: grey !important; 
 }
 .btn-guardar-contact{
-  background-color: #FAFAFA;
-  color:#92908e;
+  background-color: #c4c2c1;
+  color: white;
   width: 20vh;
 }
 .btn-guardar-contact:hover{
-  background-color: #e4d9d9 ;
+  background-color: #797777 ;
   color: white;
 }
 .btn-guardar{
@@ -259,7 +261,7 @@ a:hover{
   position: relative;
 }
 .btn_close_contact {
-  color: white !important;
+  color: grey !important;
   background-color: transparent !important;
   border: none;
 }

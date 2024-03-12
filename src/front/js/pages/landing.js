@@ -198,25 +198,25 @@ export const Landing = () => {
                 </div>
             </div>
             <div className={`modal fade  ${showModal ? 'show d-block' : 'd-none'}`} id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
-                    <div className="modal-content" id='contactModal'>
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content" style={{textAlign:'left'}} id='contactModal'>
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="exampleModalLabel">Formulario de contacto</h1>
-                            <button type="button" className="btn_close_contact" onClick={closeModal} style={{color:'whitesmoke'}} >X</button>
+                            <button type="button" className="btn_close_contact" onClick={closeModal}>X</button>
                         </div>
                         <div className="modal-body">
                             <div className="row">
                                 <div className="col-6">
                                     <div className="mb-2">
-                                        <label htmlFor="name" className="col-form-label">Nombre:</label>
-                                        <input type="text" className="form-control" id="name" name="name" value={formData.name} onChange={handleChange} onFocus={() => handleInputFocus("name")} />
+                                        <label htmlFor="name" className="col-form-label" style={{ lineHeight: '1' }}>Nombre:</label>
+                                        <input type="text" className="form-control textModal" id="name" name="name" value={formData.name} onChange={handleChange} onFocus={() => handleInputFocus("name")} />
                                         <span className="text-danger">{errorMessages.name}</span>
                                     </div>
                                 </div>
                                 <div className="col-6">
                                     <div className="mb-2">
-                                        <label htmlFor="lastname" className="col-form-label">Apellido:</label>
-                                        <input type="text" className="form-control" id="lastname" name="lastname" value={formData.lastname} onChange={handleChange} onFocus={() => handleInputFocus("lastname")} />
+                                        <label htmlFor="lastname" className="col-form-label" style={{ lineHeight: '1' }}>Apellido:</label>
+                                        <input type="text" className="form-control textModal" id="lastname" name="lastname" value={formData.lastname} onChange={handleChange} onFocus={() => handleInputFocus("lastname")} />
                                         <span className="text-danger">{errorMessages.lastname}</span>
                                     </div>
                                 </div>
@@ -224,23 +224,23 @@ export const Landing = () => {
                             <div className="row">
                                 <div className="col-6">
                                     <div className="mb-2">
-                                        <label htmlFor="age" className="col-form-label">Edad:</label>
-                                        <input type="text" className="form-control" id="age" name="age" value={formData.age} onChange={handleChange} onFocus={() => handleInputFocus("age")} />
+                                        <label htmlFor="age" className="col-form-label" style={{ lineHeight: '1' }}>Edad:</label>
+                                        <input type="text" className="form-control textModal" id="age" name="age" value={formData.age} onChange={handleChange} onFocus={() => handleInputFocus("age")} />
                                         <span className="text-danger">{errorMessages.age}</span>
                                     </div>
                                 </div>
                                 <div className="col-6">
                                     <div className="mb-2">
-                                        <label htmlFor="phone" className="col-form-label">Telefono:</label>
-                                        <input type="text" className="form-control" id="phone" name="phone" value={formData.phone} onChange={handleChange} onFocus={() => handleInputFocus("phone")} />
+                                        <label htmlFor="phone" className="col-form-label" style={{ lineHeight: '1' }}>Telefono:</label>
+                                        <input type="text" className="form-control textModal" id="phone" name="phone" value={formData.phone} onChange={handleChange} onFocus={() => handleInputFocus("phone")} />
                                         <span className="text-danger">{errorMessages.phone}</span>
                                     </div>
                                 </div>
                             </div>
                             <div className="row">
                                 <div className="mb-2">
-                                    <label htmlFor="consultation" className="col-form-label">Motivo de la consulta:</label>
-                                    <textarea className="form-control" id="consultation" name="consultation" rows="4" value={formData.consultation} onChange={handleChange} onFocus={() => handleInputFocus("consultation")}></textarea>
+                                    <label htmlFor="consultation" className="col-form-label" style={{ lineHeight: '1' }}>Motivo de la consulta:</label>
+                                    <textarea className="form-control textModal" id="consultation" name="consultation" rows="4" value={formData.consultation} onChange={handleChange} onFocus={() => handleInputFocus("consultation")}></textarea>
                                     <span className="text-danger">{errorMessages.consultation}</span>
                                 </div>
                             </div>
@@ -252,8 +252,8 @@ export const Landing = () => {
                 </div>
             </div>
             <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
-                    <div className="modal-content" id='contactModal'>
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content" style={{textAlign:'left'}} id='contactModal'>
                         <div className="modal-header justify-content-end">
                             <button type="button" className="btn_close_contact" onClick={closeSuccessModal} aria-label="Close">X</button>
                         </div>
@@ -269,8 +269,8 @@ export const Landing = () => {
                 </div>
             </div>
             <div className={`modal fade ${showAboutModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
-                    <div className="modal-content" id='contactModal'>
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content" style={{textAlign:'left'}} id='contactModal'>
                         <div className="modal-header justify-content-end">
                             <button type="button" className="btn_close_contact" onClick={closeShowAboutModal} aria-label="Close" style={{ float: 'right' }}>X</button>
                         </div>

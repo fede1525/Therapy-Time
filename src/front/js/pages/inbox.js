@@ -95,12 +95,19 @@ export const Inbox = () => {
             if (event && event.target.tagName.toLowerCase() !== "input") { 
                 const data = await actions.getOneConsultation(id);
                 setConsultationData(data);
-                openModalConsultation();
+                // Abres el modal de consulta
+                setShowModalConsultation(true);
+                // Si la consulta está marcada como no leída, la marcamos como leída
+                if (!data.is_read) {
+                    await actions.markConsultationAsRead(id);
+                    await actions.getConsultations();
+                }
             }
         } catch (error) {
             console.error("Error al obtener la consulta:", error.message);
         }
     };
+    
     
     //Funciones para tab inbox
     const handleDeleteSingleConsultation = async (id) => {
@@ -132,9 +139,9 @@ export const Inbox = () => {
             }
         });
     };  
-    const handleMarkAsUnreadSingle = async (consultationId) => {
+    const handleMarkAsUnreadSingle = async (id) => {
         try {
-            await actions.changeStatusConsultation(consultationId);
+            await actions.changeStatusConsultation(id);
             await actions.getConsultations();
         } catch (error) {
             console.error("Error al marcar la consulta como no leída:", error.message);
@@ -142,9 +149,9 @@ export const Inbox = () => {
     };
 
     //Funciones para tab papelera
-    const confirmPhysicalDeletion = async (ids) => {
+    const confirmPhysicalDeletion = async (id) => {
         try {
-            await Promise.all(ids.map(id => actions.physicalDeletionMessage(id)));
+            await Promise.all(id.map(id => actions.physicalDeletionMessage(id)));
             await actions.getConsultations();
             closeConfirmationModalDeleted(); 
             openModalSuccess(); 
@@ -266,7 +273,7 @@ export const Inbox = () => {
                 </nav>
                 <div className={`modal fade ${showConfirmationModalInbox ? 'show d-block' : 'd-none'}`} id="confirmationModalInbox" tabIndex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content" id='contactModal'>
+                        <div className="modal-content"  style={{textAlign:'left'}} id='contactModal'>
                             <div className="modal-header">
                                 <h5 className="modal-title" id="confirmationModalLabel">Confirmación</h5>
                                 <button type="button" className="btn_close_contact" onClick={closeConfirmationModal} aria-label="Close">X</button>
@@ -283,7 +290,7 @@ export const Inbox = () => {
                 </div>
                 <div className={`modal fade ${showConfirmationModalDeleted ? 'show d-block' : 'd-none'}`} id="confirmationModalDeleted" tabIndex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content" id='contactModal'>
+                        <div className="modal-content"  style={{textAlign:'left'}} id='contactModal'>
                             <div className="modal-header">
                                 <h5 className="modal-title" id="confirmationModalLabel">Confirmación</h5>
                                 <button type="button" className="btn_close_contact" onClick={closeConfirmationModalDeleted} aria-label="Close">X</button>
@@ -300,19 +307,17 @@ export const Inbox = () => {
                 </div>
                 <div className={`modal fade ${modalSuccess ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content" id='contactModal'>
-                            <div className="modal-header d-flex justify-content-end">
-                                <button type="button" className="btn_close_contact" onClick={closeModalSuccess} aria-label="Close">X</button>
-                            </div>
-                            <div className="modal-body d-flex justify-content-center">
+                        <div className="modal-content"  style={{textAlign:'left'}} id='contactModal'>
+                            <div className="modal-header d-flex justify-content-between">
                                 <span>Eliminación exitosa.</span>
+                                <button type="button" className="btn_close_contact" onClick={closeModalSuccess} aria-label="Close">X</button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className={`modal fade ${showModalConsultation ? 'show d-block' : 'd-none'}`} id="showConsultation" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content" id='contactModal'>
+                        <div className="modal-content"  style={{textAlign:'left'}} id='contactModal'>
                             <div className="modal-header d-flex justify-content-between align-items-center">
                                 <FontAwesomeIcon icon={faArrowLeft} className="mr-2" onClick={closeModalConsultation}/>
                                 <div className="d-flex align-items-center">

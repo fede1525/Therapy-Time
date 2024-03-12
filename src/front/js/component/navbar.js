@@ -58,7 +58,7 @@ export const NavbarTherapist = () => {
 						{userData.name + " " + userData.lastname}
 					</button>
 					<ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-						<li><Link className="dropdown-item navTherapist" to="/profile" style={{ color: '#CA857D'}}>Mi perfil</Link></li>
+						<li><Link className="dropdown-item navTherapist" to="/editProfile" style={{ color: '#CA857D'}}>Mi perfil</Link></li>
 						<li><button className="dropdown-item btn" onClick={logoutFunction} style={{ color: '#CA857D' }}>Cerrar sesión</button></li>
 					</ul>
 				</div>

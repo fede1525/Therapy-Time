@@ -384,6 +384,23 @@ def mark_consultation_as_unread(id):
     except Exception as e:
         return jsonify({"error": "Error marking consultation as unread"}), 500
 
+@api.route('/consultations/<int:id>/mark_as_read', methods=['PUT'])
+@jwt_required()
+def mark_consultation_as_read(id):
+    payload = get_jwt()
+    if payload["role"]!= 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            consultation.is_read = True  # Cambiar a True para marcar como leída
+            db.session.commit()
+            return jsonify({"message": "Consultation marked as read"}), 200
+        else:
+            return jsonify({"error": "Consultation not found"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error marking consultation as read"}), 500
+
 #Borrado logico de las consultas
 @api.route('/deleted_consultations/<int:id>', methods=['PUT'])
 @jwt_required()

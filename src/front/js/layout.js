@@ -14,7 +14,6 @@ import { AppointmentScheduler } from "./pages/appointmentScheduler";
 import { IncomeControl } from "./pages/incomeControl";
 import { Inbox } from "./pages/inbox";
 import { Patients } from "./pages/patients";
-import { Profile } from "./pages/profile";
 import { Payments } from "./pages/payments";
 import { PatientSchedule } from "./pages/patientSchedule";
 import { Reset_password } from "./pages/resetPassword";
@@ -44,7 +43,6 @@ const Layout = () => {
                         <Route element={<Login />} path="/login" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : role === "Patient" ? <HomePatient /> : <HomeTherapist />} path="/home" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Recovery />} path="/recovery" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Profile />} path="/profile" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <EditProfile />} path="/editProfile" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Payments />} path="/payments" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <PatientSchedule />} path="/patient_schedule" />

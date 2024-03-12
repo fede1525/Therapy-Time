@@ -353,6 +353,19 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},
+			markConsultationAsRead: async (id) => {
+				try {
+					const response = await getActions().protectedFetch(`/consultations/${id}/mark_as_read`, 'PUT');
+					if (response.ok) {
+						return response.json();
+					} else {
+						throw new Error('Error al marcar la consulta como no leída');
+					}
+				} catch (error) {
+					console.error("Error al marcar la consulta como no leída:", error.message);
+					throw error;
+				}
+			},
 			logicalDeletionMessage: async (id) => {
 				try {
 					const response = await getActions().protectedFetch(`/deleted_consultations/${id}`, 'PUT');
