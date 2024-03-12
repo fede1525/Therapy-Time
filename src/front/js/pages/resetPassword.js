@@ -5,7 +5,7 @@ import "../../styles/login.css";
 
 export const Reset_password = () => {
     const { actions } = useContext(Context);
-    const navigate = useNavigate(); // Hook useNavigate
+    const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [resetToken, setResetToken] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -68,7 +68,11 @@ export const Reset_password = () => {
             }
         }
     }
-    
+    const errorTextStyle = {
+        color: 'red',
+        maxWidth: '50vh',
+        wordWrap: 'break-word'
+    };
     
     return (
         <div className="d-flex justify-content-center vh-100">
@@ -86,8 +90,8 @@ export const Reset_password = () => {
                                     onFocus={() => clearError('username')}
                                     style={{width:'50vh'}}
                                 />
-                                {errors.username && <p style={{ color: 'red' }}>{errors.username}</p>}
-                                {errors.global === 'El usuario ingresado es inválido' && <p style={{ color: 'red' }}>{errors.global}</p>}
+                                {errors.username && <p style={errorTextStyle}>{errors.username}</p>}
+                                {errors.global === 'El usuario ingresado es inválido' && <p style={errorTextStyle}>{errors.global}</p>}
                             </div>
                             <div className="form-group mb-3">
                                 <input
@@ -98,8 +102,8 @@ export const Reset_password = () => {
                                     onChange={(e) => setResetToken(e.target.value)}
                                     onFocus={() => clearError('resetToken')} 
                                 />
-                                {errors.resetToken && <p style={{ color: 'red' }}>{errors.resetToken}</p>}
-                                {errors.global === 'El token ingresado es inválido o ha expirado' && <p style={{ color: 'red' }}>{errors.global}</p>}
+                                {errors.resetToken && <p style={errorTextStyle}>{errors.resetToken}</p>}
+                                {errors.global === 'El token ingresado es inválido o ha expirado' && <p style={errorTextStyle}>{errors.global}</p>}
                             </div>
                             <div className="form-group mb-3">
                                 <input
@@ -110,7 +114,7 @@ export const Reset_password = () => {
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     onFocus={() => clearError('newPassword')}
                                 />
-                                {errors.newPassword && <p style={{ color: 'red' }}>{errors.newPassword}</p>}
+                                {errors.newPassword && <p style={errorTextStyle}>{errors.newPassword}</p>}
                             </div>
                             <div className="form-group mb-3">
                                 <input
@@ -121,7 +125,7 @@ export const Reset_password = () => {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     onFocus={() => clearError('confirmPassword')}
                                 />
-                                {errors.confirmPassword && <p style={{ color: 'red' }}>{errors.confirmPassword}</p>}
+                                {errors.confirmPassword && <p style={errorTextStyle}>{errors.confirmPassword}</p>}
                             </div>
                             <button type="submit" className="btn" style={{ backgroundColor: '#8A97A6', color: 'whitesmoke', width:'50vh' }}>Guardar cambios</button>
                         </div>
