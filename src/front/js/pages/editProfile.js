@@ -156,17 +156,13 @@ export const EditProfile = () => {
             setConfirmError('');
             setEmailError('');
             setDniError('');
-
-            // navigate("/profile");
         } catch (error) {
             console.error("Error actualizando el perfil:", error);
-            // navigate("/profile");
         }
     };
 
     const handleEdit = () => {
         setEditable(!editable);
-        // Agregar lógica adicional si es necesario
     };
 
     return (

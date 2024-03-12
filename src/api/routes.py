@@ -298,14 +298,14 @@ def change_password():
 
     user = User.query.filter_by(username=username).first()
     if not user:
-        return jsonify({"mensaje": "El usuario ingresado es inválido"}), 404 
+        return jsonify({"error": "El usuario ingresado es inválido"}), 404 
     if bcrypt.check_password_hash(user.reset_token, token):
         new_password = bcrypt.generate_password_hash(new_password, 10).decode("utf-8")
         user.password = new_password 
         db.session.commit()
-        return jsonify({"mensaje": "Contraseña cambiada exitosamente"}), 200
+        return jsonify({"error": "Contraseña cambiada exitosamente"}), 200
     else:
-        return jsonify({"mensaje": "El token ingresado es inválido o ha expirado"}), 401
+        return jsonify({"error": "El token ingresado es inválido o ha expirado"}), 401
 
 # Enviar mensaje de primera consulta
 @api.route('/message', methods=['POST'])

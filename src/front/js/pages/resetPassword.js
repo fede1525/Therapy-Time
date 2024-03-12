@@ -10,21 +10,47 @@ export const Reset_password = () => {
     const [resetToken, setResetToken] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
+    const [errors, setErrors] = useState({
+        username: "",
+        resetToken: "",
+        newPassword: "",
+        confirmPassword: "",
+        global: ""
+    });
     const [showSuccess, setShowSuccess] = useState(false);
-
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (newPassword !== confirmPassword) {
-            setError("Las contraseñas no coinciden");
+        const newErrors = {};
+        if (username.trim() === "") {
+            newErrors.username = "*El campo es obligatorio";
+        }
+        if (resetToken.trim() === "") {
+            newErrors.resetToken = "*El campo es obligatorio";
+        }
+        if (newPassword.trim() === "") {
+            newErrors.newPassword = "*El campo es obligatorio";
+        } else if (!passwordRegex.test(newPassword)) {
+            newErrors.newPassword ="La contraseña debe tener al menos 8 caracteres, una mayúscula y un carácter especial";
+        }
+        if (confirmPassword.trim() === "") {
+            newErrors.confirmPassword = "*El campo es obligatorio";
+        } else if (!passwordRegex.test(confirmPassword)) {
+            newErrors.confirmPassword ="La contraseña debe tener al menos 8 caracteres, una mayúscula y un carácter especial";
+        } else if (confirmPassword !== newPassword) {
+            newErrors.confirmPassword = "Las contraseñas no coinciden";
+        }
+        if (Object.keys(newErrors).length > 0) {
+            setErrors({...errors, ...newErrors});
             return;
         }
         try {
-            setError("");
+            setErrors({ ...errors, global: "" });
             const response = await actions.handleChangePassword(username, resetToken, newPassword);
             setShowSuccess(true);
         } catch (error) {
-            setError(error.message || 'Error al restablecer la contraseña');
+            setErrors({ ...errors, global: error.message || 'Error al restablecer la contraseña' });
         }
     };
     
@@ -32,11 +58,23 @@ export const Reset_password = () => {
         navigate('/login');
     }
 
+    const clearError = (field) => {
+        if (field === 'global') {
+            setErrors({ ...errors, global: "" });
+        } else {
+            setErrors({ ...errors, [field]: "" });
+            if (errors.global) {
+                setErrors({ ...errors, global: "" });
+            }
+        }
+    }
+    
+    
     return (
         <div className="d-flex justify-content-center vh-100">
             <div className="col-6 d-flex flex-column align-items-center justify-content-center formLogin" style={{ backgroundColor: '#EDE9E9' }}>
                 {!showSuccess ? (
-                    <form onSubmit={handleSubmit} className="text-center">
+                    <form onSubmit={handleSubmit} className="text-start">
                         <div className="token">
                             <div className="form-group mb-3">
                                 <input
@@ -45,8 +83,11 @@ export const Reset_password = () => {
                                     placeholder="Ingrese su nombre de usuario"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
+                                    onFocus={() => clearError('username')}
                                     style={{width:'50vh'}}
                                 />
+                                {errors.username && <p style={{ color: 'red' }}>{errors.username}</p>}
+                                {errors.global === 'El usuario ingresado es inválido' && <p style={{ color: 'red' }}>{errors.global}</p>}
                             </div>
                             <div className="form-group mb-3">
                                 <input
@@ -55,29 +96,35 @@ export const Reset_password = () => {
                                     placeholder="Ingrese tu código de validación"
                                     value={resetToken}
                                     onChange={(e) => setResetToken(e.target.value)}
+                                    onFocus={() => clearError('resetToken')} 
                                 />
+                                {errors.resetToken && <p style={{ color: 'red' }}>{errors.resetToken}</p>}
+                                {errors.global === 'El token ingresado es inválido o ha expirado' && <p style={{ color: 'red' }}>{errors.global}</p>}
                             </div>
+                            <div className="form-group mb-3">
+                                <input
+                                    type="password"
+                                    className="form-control"
+                                    placeholder="Ingrese su nueva contraseña"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    onFocus={() => clearError('newPassword')}
+                                />
+                                {errors.newPassword && <p style={{ color: 'red' }}>{errors.newPassword}</p>}
+                            </div>
+                            <div className="form-group mb-3">
+                                <input
+                                    type="password"
+                                    className="form-control"
+                                    placeholder="Repita su nueva contraseña"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    onFocus={() => clearError('confirmPassword')}
+                                />
+                                {errors.confirmPassword && <p style={{ color: 'red' }}>{errors.confirmPassword}</p>}
+                            </div>
+                            <button type="submit" className="btn" style={{ backgroundColor: '#8A97A6', color: 'whitesmoke', width:'50vh' }}>Guardar cambios</button>
                         </div>
-                        <div className="form-group mb-3">
-                            <input
-                                type="password"
-                                className="form-control"
-                                placeholder="Ingrese su nueva contraseña"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                            />
-                        </div>
-                        <div className="form-group mb-3">
-                            <input
-                                type="password"
-                                className="form-control"
-                                placeholder="Repita su nueva contraseña"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                            />
-                        </div>
-                        <button type="submit"className="btn" style={{ backgroundColor: '#8A97A6', color: 'whitesmoke', width:'50vh' }}>Guardar cambios</button>
-                        {error && <p style={{ color: 'red' }}>{error}</p>}
                     </form>
                 ) : (
                     <div>

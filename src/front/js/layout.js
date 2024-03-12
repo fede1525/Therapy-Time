@@ -42,7 +42,7 @@ const Layout = () => {
                         <Route element={<Landing />} path="/" />
                         <Route element={<Login />} path="/login" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : role === "Patient" ? <HomePatient /> : <HomeTherapist />} path="/home" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Recovery />} path="/recovery" />
+                        <Route element={<Recovery />} path="/recovery" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <EditProfile />} path="/editProfile" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Payments />} path="/payments" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <PatientSchedule />} path="/patient_schedule" />
@@ -50,7 +50,7 @@ const Layout = () => {
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <AppointmentScheduler />} path="/appointment_scheduler" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <IncomeControl />} path="/income_control" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Inbox />} path="/inbox" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Reset_password />} path="/reset_password" />
+                        <Route element={<Reset_password />} path="/reset_password" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Patients />} path="/patients" />
                     </Routes>
                 </ScrollToTop>
