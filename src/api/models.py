@@ -86,10 +86,8 @@ class Reservation(db.Model):
 class AvailabilityDates(db.Model):
     __tablename__='availability_dates'
     id= db.Column(db.Integer, primary_key=True, autoincrement=True)
-    date = db.Column(db.Date, nullable=False)
-    time_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), nullable=False)
-    time = db.relationship("Schedules")
-    availability = db.Column(db.Boolean, default=True)
+    date = db.Column(db.DateTime, nullable=False)
+    time = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f'<Availability_dates {self.id}>'
@@ -97,9 +95,9 @@ class AvailabilityDates(db.Model):
         return{
             "id": self.id,
             "date": self.date,
-            "time_id": self.time_id,
-            "availability": self.availability
+            "time": self.time,
         }
+
 
 class Schedules(db.Model):
     __tablename__='schedules'
