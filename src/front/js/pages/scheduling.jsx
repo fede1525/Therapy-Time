@@ -99,6 +99,7 @@ export const Block = () => {
     setShowModal(false);
   };
   const handleHourCheckboxChange = (hour) => {
+    setSelectedHour(hour)
     setSelectedHours((prevSelectedHours) => {
       if (prevSelectedHours.includes(hour)) {
         return prevSelectedHours.filter((selectedHour) => selectedHour !== hour);
@@ -106,6 +107,7 @@ export const Block = () => {
         return [...prevSelectedHours, hour];
       }
     });
+    console.log(selectedHours)
   };
   const handleBlockTime = async (hour) => {
 
@@ -140,12 +142,16 @@ export const Block = () => {
   };
   const handleBlockSelectedHours = async () => {
     try {
-      const response = await getActions().apiFetch('/block_hours', 'POST', {
-        selectedHours: selectedHours,
-      });
+      const data = {
+        date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
+        time: hour,
+        id: `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`,
+      };
+      const response = await actions.apiFetch('/block_hours', 'POST', {data});
 
       if (response.ok) {
         // Realizar alguna acción después de bloquear las horas
+        handleCloseModal()
         console.log('Horas bloqueadas con éxito');
       } else {
         console.error('Error al bloquear horas:', response.statusText);
@@ -241,7 +247,7 @@ export const Block = () => {
       </table>
 
       {showModal && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
+        <div className="modal-overlay">
           {renderModalContent()}
         </div>
       )}
