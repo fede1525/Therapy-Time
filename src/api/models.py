@@ -1,8 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemyseeder import ResolvingSeeder
 
-import arrow
-
 db = SQLAlchemy()
 
 import datetime
