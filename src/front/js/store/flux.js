@@ -18,6 +18,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"reset_token": ""
 				},
 			],
+			unavailableDates: [],
 			consultations: [
 				{
 					"id": "",
@@ -31,7 +32,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"arrival_date ": "",
 					"arrival_date": "",
 				}
-			]
+			],
+			dates: [{
+				"date": "",
+				"times": []
+			}] 
 		},
 		actions: {
 			//Funciones globales
@@ -394,9 +399,32 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al eliminar el mensaje:", error.message);
 					throw error;
 				}
+			},
+			bloquearVariasHoras: async (dates) => {
+				try {
+					// Preparar la estructura de datos para enviar al nuevo endpoint
+					const data = dates.map(date => ({
+						date: `2024-${date.month.toString().padStart(2, '0')}-${date.day.toString().padStart(2, '0')}`,
+						times: date.times
+					}));
+			
+					// Llamar a la acción bloquearVariasHoras para enviar los datos al servidor
+					const response = await getActions.apiFetch('/bloquear-varias-horas', 'POST', data);
+			
+					// Verificar si la solicitud fue exitosa
+					if (response.success) {
+						console.log('Horas bloqueadas con éxito');
+					} else {
+						console.error('Error al bloquear horas:', response.error);
+					}
+				} catch (error) {
+					console.error('Error al bloquear horas:', error);
+				}
 			}
+			
+			
 		}
-	};
+	}	
 };
 
 export default getState;

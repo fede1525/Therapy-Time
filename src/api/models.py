@@ -95,7 +95,6 @@ class AvailabilityDates(db.Model):
             "time": self.time,
         }
 
-
 class Schedules(db.Model):
     __tablename__='schedules'
     id =db.Column(db.Integer, primary_key=True, autoincrement=True)
