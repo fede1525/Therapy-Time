@@ -385,6 +385,7 @@ def mark_consultation_as_unread(id):
     except Exception as e:
         return jsonify({"error": "Error marking consultation as unread"}), 500
 
+#Marcar las consultas como leidas
 @api.route('/consultations/<int:id>/mark_as_read', methods=['PUT'])
 @jwt_required()
 def mark_consultation_as_read(id):
@@ -402,42 +403,34 @@ def mark_consultation_as_read(id):
     except Exception as e:
         return jsonify({"error": "Error marking consultation as read"}), 500
 
-@api.route('/bloquear-varias-horas', methods=['POST'])
-def bloquear_varias_horas():
+#Bloqueo de horarios/fechas (terapeuta)
+@api.route('/block_multiple_hours', methods=['POST'])
+def block_multiple_hours():
     if request.method == 'POST':
         try:
             data = request.get_json()
 
-            # Verifica si el campo 'dates' está presente y es una lista
             if 'dates' not in data or not isinstance(data['dates'], list):
                 return jsonify({'error': 'El campo "dates" es obligatorio y debe ser una lista de fechas con horas'}), 400
 
-            # Itera sobre cada fecha en la lista
             for date_data in data['dates']:
-                # Verifica si los campos requeridos están presentes en cada objeto de fecha
                 if 'date' not in date_data or 'times' not in date_data:
                     return jsonify({'error': 'Cada objeto de fecha debe contener tanto "date" como "times"'}), 400
 
-                # Extrae la fecha de la entrada de datos
                 date = date_data['date']
 
-                # Verifica si el campo 'times' es una lista
                 if not isinstance(date_data['times'], list):
                     return jsonify({'error': 'El campo "times" debe ser una lista de horas para la fecha especificada'}), 400
 
-                # Itera sobre cada hora en la lista de horas
                 for time in date_data['times']:
-                    # Crea una nueva instancia de AvailabilityDates y la agrega a la sesión
                     nueva_disponibilidad = AvailabilityDates(
                         date=date,
                         time=time
                     )
                     db.session.add(nueva_disponibilidad)
 
-            # Guarda los cambios en la base de datos
             db.session.commit()
-
-            return jsonify({'mensaje': 'Horas bloqueadas exitosamente'}), 200
+            return jsonify({'success': True, 'message': 'Horas bloqueadas exitosamente'}), 200
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -470,23 +463,6 @@ def desbloquear():
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-
-@api.route('/bloquear/<string:id>', methods=['DELETE'])
-def delete_blocked_time(id):
-    try:
-        # Supongamos que tienes un modelo llamado BlockedTime
-        blocked_time = AvailabilityDates.query.get(id)
-
-        if blocked_time:
-            # Eliminar el registro de la base de datos
-            db.session.delete(blocked_time)
-            db.session.commit()
-
-            return jsonify({"message": "Hora desbloqueada exitosamente"})
-        else:
-            return jsonify({"message": "La hora no existe"}), 404
-    except Exception as e:
-        return jsonify({"message": str(e)}), 500
 
 # Obtener fechas dispponibles
 @api.route('/bloquear', methods=['GET'])

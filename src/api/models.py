@@ -83,8 +83,8 @@ class Reservation(db.Model):
 class AvailabilityDates(db.Model):
     __tablename__='availability_dates'
     id= db.Column(db.Integer, primary_key=True, autoincrement=True)
-    date = db.Column(db.DateTime, nullable=False)
-    time = db.Column(db.Integer, nullable=False)
+    date = db.Column(db.String, nullable=False)
+    time = db.Column(db.String, nullable=False)
 
     def __repr__(self):
         return f'<Availability_dates {self.id}>'

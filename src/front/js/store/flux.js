@@ -400,20 +400,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},
+			//Funciones para el bloqueo de
 			bloquearVariasHoras: async (dates) => {
 				try {
-					// Preparar la estructura de datos para enviar al nuevo endpoint
-					const data = dates.map(date => ({
-						date: `2024-${date.month.toString().padStart(2, '0')}-${date.day.toString().padStart(2, '0')}`,
-						times: date.times
-					}));
-			
-					// Llamar a la acción bloquearVariasHoras para enviar los datos al servidor
-					const response = await getActions.apiFetch('/bloquear-varias-horas', 'POST', data);
-			
-					// Verificar si la solicitud fue exitosa
-					if (response.success) {
-						console.log('Horas bloqueadas con éxito');
+					const data = {
+						dates: dates
+					};
+
+					const response = await getActions().apiFetch('/block_multiple_hours', 'POST', data);
+
+					if (response && response.message) {
+						console.log('Horas bloqueadas con éxito:', response.message);
 					} else {
 						console.error('Error al bloquear horas:', response.error);
 					}
@@ -421,8 +418,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error('Error al bloquear horas:', error);
 				}
 			}
-			
-			
 		}
 	}	
 };
