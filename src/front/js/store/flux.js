@@ -401,7 +401,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 			},
 			//Funciones para el bloqueo de
-			bloquearVariasHoras: async (dates) => {
+			blockMultipleHours: async (dates) => {
 				try {
 					const data = {
 						dates: dates
@@ -416,6 +416,21 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				} catch (error) {
 					console.error('Error al bloquear horas:', error);
+				}
+			},
+			getBlockedDates: async () => {
+				try {
+					const response = await getActions().apiFetch('/bloquear', 'GET');
+					if (response && response.length > 0) {
+						console.log('Fechas bloqueadas obtenidas con éxito:', response);
+						return response;
+					} else {
+						console.log('No hay fechas bloqueadas disponibles.');
+						return [];
+					}
+				} catch (error) {
+					console.error('Error al obtener fechas bloqueadas:', error);
+					throw error;
 				}
 			}
 		}

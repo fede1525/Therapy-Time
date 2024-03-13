@@ -10,6 +10,7 @@ export const Scheduling = () => {
     const [showHours, setShowHours] = useState(false);
     const [selectedHours, setSelectedHours] = useState([]);
     const [extractedInfo, setExtractedInfo] = useState([]);
+    const [showSuccessModal, setShowSuccessModal]= useState(false);
     const meses = {
         1: 'Enero',
         2: 'Febrero',
@@ -51,6 +52,12 @@ export const Scheduling = () => {
         setShowHours(!showHours);
     };
 
+    const closeSuccessModal = () =>{
+      setShowSuccessModal(false)
+      setSelectedDates(new Set());
+      setSelectedHours([]);
+    }
+
     const handleSaveBlockedHours = async () => {
         try {
             const dates = Array.from(selectedDates).map(date => ({
@@ -58,26 +65,28 @@ export const Scheduling = () => {
                 times: selectedHours
             }));
 
-            await actions.bloquearVariasHoras(dates);
+            await actions.blockMultipleHours(dates);
+            setShowSuccessModal(true);
         } catch (error) {
             console.error('Error al bloquear horas:', error);
         }
     };
 
     useEffect(() => {
-        function extractDateInfo(dateString) {
-            const dateObject = new Date(dateString);
-            const month = dateObject.getMonth() + 1; 
-            const year = dateObject.getFullYear();
-            const day = dateObject.getDate();
-            const hour = dateObject.getHours() + 5;
-            return { month, year, day, hour };
+        async function fetchData() {
+            try {
+                const response = await actions.getBlockedDates();
+                const extractedInfo = response.map(item => {
+                    const { month, year, day, hour } = extractDateInfo(item.date);
+                    return { year, month, day, hour };
+                });
+                setExtractedInfo(extractedInfo);
+            } catch (error) {
+                console.error('Error al obtener fechas bloqueadas:', error);
+            }
         }
-        const extractedInfo = store.unavailableDates.map(item => {
-            const { month, year, day, hour } = extractDateInfo(item.date);
-            return { year, month, day, hour };
-        });
-        setExtractedInfo(extractedInfo);
+
+        fetchData();
 
         const currentYear = new Date().getFullYear();
         const currentDate = new Date(currentYear, month - 1, 1); 
@@ -106,6 +115,15 @@ export const Scheduling = () => {
 
     }, [month]);
 
+    const extractDateInfo = (dateString) => {
+        const dateObject = new Date(dateString);
+        const month = dateObject.getMonth() + 1; 
+        const year = dateObject.getFullYear();
+        const day = dateObject.getDate();
+        const hour = dateObject.getHours() + 5;
+        return { month, year, day, hour };
+    }
+
     return (
         <div>
             <h2>Calendario 2024</h2>
@@ -127,19 +145,26 @@ export const Scheduling = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {calendar.map((row, rowIndex) => (
-                        <tr key={rowIndex}>
-                            {row.map((cell, cellIndex) => (
-                                <td
-                                    key={cellIndex}
-                                    className={`pestanita ${selectedDates.has(cell) ? 'selected-day' : ''}`}
-                                    onClick={() => handleDayClickDay(cell)}
-                                >
-                                    {cell}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
+                  {calendar.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                          {row.map((cell, cellIndex) => (
+                              <td
+                                  key={cellIndex}
+                                  className={`pestanita ${
+                                      selectedDates.has(cell) && extractedInfo.every((item) => (
+                                          item.year === 2024 &&
+                                          item.month === month &&
+                                          item.day === cell &&
+                                          item.hour >= 8 && item.hour <= 20
+                                      )) ? 'selected-day' : ''
+                                  }`}
+                                  onClick={() => handleDayClickDay(cell)}
+                              >
+                                  {cell}
+                              </td>
+                          ))}
+                      </tr>
+                  ))}
                 </tbody>
             </table>
             <div className="button-container">
@@ -179,6 +204,21 @@ export const Scheduling = () => {
                     <button className='btn btn-primary' onClick={handleSaveBlockedHours}>Guardar</button>
                 </div>
             )}
+            <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content" style={{textAlign:'left'}} id="contactModal">
+                            <div className="modal-header justify-content-end">
+                                <button type="button" className="btn_close_contact" onClick={closeSuccessModal} aria-label="Close">X</button>
+                            </div>
+                            <div className="modal-body">
+                               <span>¡Bloqueo exitoso!</span>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-guardar-contact" onClick={closeSuccessModal}>Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+            </div>
         </div>
     );
 };
