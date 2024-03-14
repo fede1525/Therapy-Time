@@ -31,7 +31,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"arrival_date ": "",
 					"arrival_date": "",
 				}
-			]
+			],
+			preferenceId: null
 		},
 		actions: {
 			//Funciones globales
@@ -394,7 +395,35 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al eliminar el mensaje:", error.message);
 					throw error;
 				}
+			},
+			createPreference: async () => {
+				try {
+					const response = await getActions.protectedFetch("/paying", "POST", {
+						description: "Honorarios",
+						price: 100,
+						quantity: 1,
+						currency_id: "ARS"
+					})
+
+					if (response.ok) {
+						console.log("El response vino ok del back end y tiene esta info: ", response)
+						const data = await response.json();
+						const { id } = data;
+						console.log("ESTE ES EL FAMOSO ID: ", id)
+						let store = getStore()
+						setStore({ ...store, preferenceId: id })
+						let store2 = getStore()
+						console.log("Este es el contenido de id en el store: ", store2.preferenceId.id)
+						return id;
+					} else {
+						console.error("Error creating preference, o sea response.ok dio false en flux.js");
+					}
+				} catch (error) {
+					console.error(error);
+				}
+
 			}
+
 		}
 	};
 };

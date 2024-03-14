@@ -10,10 +10,12 @@ import os
 import datetime, json, string, random
 import requests
 import datetime
+import mercadopago
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 api = Blueprint('api', __name__)
+sdk = mercadopago.SDK("TEST-5789078080758140-031320-40e12865058c7a74eb23f44997d3703b-156863733") # ← Agregar token
 
 CORS(api)
 
@@ -533,3 +535,32 @@ def unaviable_dates():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/create_preference', methods=['POST'])
+def create_preference():
+    try:
+        req_data = request.get_json()
+
+        preference_data = {
+            "items": [
+                {
+                    "title": req_data["description"],
+                    "unit_price": float(req_data["price"]),
+                    "quantity": int(req_data["quantity"]),
+                }
+            ],
+            "back_urls": {
+                "success": "http://localhost:3000/",
+                "failure": "http://localhost:3000/",
+                "pending": "",
+            },
+            "auto_return": "approved",
+        }
+
+        preference_response = sdk.preference().create(preference_data)
+        preference_id = preference_response["response"] 
+
+        return jsonify({"id": preference_id})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
