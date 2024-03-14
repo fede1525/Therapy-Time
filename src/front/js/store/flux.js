@@ -37,7 +37,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"date": "",
 				"times": []
 			}],
-			globalDates: [{
+			globalBlockedDates: [{
 				"id": "",
 				"day": "",
 				"star_hour": "",
@@ -406,7 +406,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},
-			//Funciones para el bloqueo de fechas
+			//Funciones para el bloqueo de fechas individuales
 			blockMultipleHours: async (dates) => {
 				try {
 					const data = {
@@ -439,25 +439,21 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},
-			blockedGlobalDates: async (globalDates) =>{
-				try{
-					const data = {
-						globalDates: globalDates
-					}
-					const response = await getActions().apiFetch('/global_blockades', 'POST', data);
+			//Funciones para el bloqueo de fechas globales
+			addGlobalBlockedDates: async (globalBlockedDates) => {
+				try {
+					const response = await getActions().apiFetch('/global_blockades', 'POST', globalBlockedDates);
 
-					if (response && response.message){
-						console.log('Bloqueo exitoso', response.message);
-						const updatedGlobalDates = [...getStore().globalDates, ...globalDates];
-						setStore({ globalDates: updatedGlobalDates });
-						return response.message;
-					}else{
-						console.error('Error en el bloqueo', response.error)
+					if (!response.ok) {
+						throw new Error(response.error || 'Error al agregar bloqueos globales');
 					}
-				} catch (error){
-					console.log('Error al bloquear las fechas', error)
+				
+					return response.message;
+				} catch (error) {
+					console.error('Error al agregar bloqueos globales:', error.message);
+					throw error;
 				}
-			}
+			}						  
 		}
 	}	
 };

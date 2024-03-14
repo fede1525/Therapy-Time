@@ -459,8 +459,6 @@ def add_global_blockades():
     if not isinstance(data, list):
         return jsonify({'error': 'Se esperaba una lista de objetos'}), 400
 
-    blocked_dates = []
-
     for blocking in data:
         if not all(key in blocking for key in ['day', 'start_hour', 'end_hour']):
             return jsonify({'error': 'Falta algún campo en uno de los objetos'}), 400
@@ -477,13 +475,15 @@ def add_global_blockades():
         if start_time >= end_time:
             return jsonify({'error': 'La hora de inicio debe ser menor que la hora fin'}), 400
 
-        for blocked_date in blocked_dates:
-            if blocking['day'] == blocked_date['day']:
-                if (start_time >= blocked_date['start_time'] and start_time < blocked_date['end_time']) or \
-                   (end_time > blocked_date['start_time'] and end_time <= blocked_date['end_time']):
-                    return jsonify({'error': 'Solapamiento de días y horas no permitido'}), 400
+        existing_blockades = GlobalSchedulingBlockade.query.filter_by(day=blocking['day']).all()
 
-        blocked_dates.append({'day': blocking['day'], 'start_time': blocking['start_hour'], 'end_time': blocking['end_hour']})
+        for existing_blockade in existing_blockades:
+            existing_start_time = datetime.strptime(existing_blockade.start_hour, '%H:%M')
+            existing_end_time = datetime.strptime(existing_blockade.end_hour, '%H:%M')
+            if (start_time >= existing_start_time and start_time < existing_end_time) or \
+               (end_time > existing_start_time and end_time <= existing_end_time) or \
+               (start_time <= existing_start_time and end_time >= existing_end_time):
+                db.session.delete(existing_blockade)
 
         new_blocking = GlobalSchedulingBlockade(day=blocking['day'], start_hour=blocking['start_hour'], end_hour=blocking['end_hour'])
         db.session.add(new_blocking)

@@ -14,5 +14,3 @@ def setup_admin(app):
     admin.add_view(ModelView(Role, db.session))
     admin.add_view(ModelView(Consultation, db.session))
     admin.add_view(ModelView(GlobalSchedulingBlockade, db.session))
-
-

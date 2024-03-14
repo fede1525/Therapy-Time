@@ -143,7 +143,17 @@ class Consultation(db.Model):
 
 class GlobalSchedulingBlockade(db.Model):
     __tablename__='global_scheduling_blockade'
-    id = db.Column(db.Integer, primary_key=True)
-    day = db.Column(db.String, nullable=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    day = db.Column(db.String, nullable= False)
     start_hour = db.Column(db.String, nullable=False)
-    end_hour = db.Column(db.String, nullable=False)
+    end_hour =db.Column(db.String, nullable=False)
+
+    def __repr__(self):
+        return f'<GlobalSchedulingBlockade{self.id}>'
+    def serialize(self):
+        return{
+            "id": self.id,
+            "day": self.day,
+            "start_hour": self.start_hour,
+            "end_hour": self.end_hour
+        }
