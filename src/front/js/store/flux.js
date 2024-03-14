@@ -36,6 +36,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 			dates: [{
 				"date": "",
 				"times": []
+			}],
+			globalDates: [{
+				"id": "",
+				"day": "",
+				"star_hour": "",
+				"end_hour": ""
 			}] 
 		},
 		actions: {
@@ -400,7 +406,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},
-			//Funciones para el bloqueo de
+			//Funciones para el bloqueo de fechas
 			blockMultipleHours: async (dates) => {
 				try {
 					const data = {
@@ -431,6 +437,25 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					console.error('Error al obtener fechas bloqueadas:', error);
 					throw error;
+				}
+			},
+			blockedGlobalDates: async (globalDates) =>{
+				try{
+					const data = {
+						globalDates: globalDates
+					}
+					const response = await getActions().apiFetch('/global_blockades', 'POST', data);
+
+					if (response && response.message){
+						console.log('Bloqueo exitoso', response.message);
+						const updatedGlobalDates = [...getStore().globalDates, ...globalDates];
+						setStore({ globalDates: updatedGlobalDates });
+						return response.message;
+					}else{
+						console.error('Error en el bloqueo', response.error)
+					}
+				} catch (error){
+					console.log('Error al bloquear las fechas', error)
 				}
 			}
 		}

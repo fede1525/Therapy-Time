@@ -69,7 +69,6 @@ class Reservation(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User")
 
-
     def __repr__(self):
         return f'<Reservation {self.id}>'
     def serialize(self):
@@ -141,3 +140,10 @@ class Consultation(db.Model):
             "is_deleted": self.is_deleted,
             "arrival_date": self.arrival_date.strftime('%d-%B-%Y %H:%M:%S')
         }
+
+class GlobalSchedulingBlockade(db.Model):
+    __tablename__='global_scheduling_blockade'
+    id = db.Column(db.Integer, primary_key=True)
+    day = db.Column(db.String, nullable=False)
+    start_hour = db.Column(db.String, nullable=False)
+    end_hour = db.Column(db.String, nullable=False)

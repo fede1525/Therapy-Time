@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify, url_for, Blueprint, json, redirect, url_for
-from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates
+from flask import Flask, request, jsonify, Blueprint, json
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingBlockade
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -7,9 +7,10 @@ from flask_bcrypt import Bcrypt
 from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
-import datetime, json, string, random
+import datetime, json, string, random 
+from sqlalchemy.exc import IntegrityError
 import requests
-import datetime
+from datetime import datetime
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -403,7 +404,7 @@ def mark_consultation_as_read(id):
     except Exception as e:
         return jsonify({"error": "Error marking consultation as read"}), 500
 
-#Bloqueo de horarios/fechas (terapeuta)
+#blocking de horarios/fechas (terapeuta)
 @api.route('/block_multiple_hours', methods=['POST'])
 def block_multiple_hours():
     if request.method == 'POST':
@@ -445,3 +446,47 @@ def unaviable_dates():
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+#blocking de fechas y horarios globales
+# 1) Definición de opciones para los días y horas
+POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
+POSSIBLE_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00']
+
+# 2) Ruta para el endpoint POST
+@api.route('/global_blockades', methods=['POST'])
+def add_global_blockades():
+    data = request.get_json()
+
+    if not isinstance(data, list):
+        return jsonify({'error': 'Se esperaba una lista de objetos'}), 400
+
+    blocked_dates = []
+
+    for blocking in data:
+        if not all(key in blocking for key in ['day', 'start_hour', 'end_hour']):
+            return jsonify({'error': 'Falta algún campo en uno de los objetos'}), 400
+        
+        if blocking['day'] not in POSSIBLE_DAYS:
+            return jsonify({'error': 'Valor no válido para day'}), 400
+
+        if blocking['start_hour'] not in POSSIBLE_HOURS or blocking['end_hour'] not in POSSIBLE_HOURS:
+            return jsonify({'error': 'Valor no válido para start_hour o end_hour'}), 400
+
+        start_time = datetime.strptime(blocking['start_hour'], '%H:%M')
+        end_time = datetime.strptime(blocking['end_hour'], '%H:%M')
+
+        if start_time >= end_time:
+            return jsonify({'error': 'La hora de inicio debe ser menor que la hora fin'}), 400
+
+        for blocked_date in blocked_dates:
+            if blocking['day'] == blocked_date['day']:
+                if (start_time >= blocked_date['start_time'] and start_time < blocked_date['end_time']) or \
+                   (end_time > blocked_date['start_time'] and end_time <= blocked_date['end_time']):
+                    return jsonify({'error': 'Solapamiento de días y horas no permitido'}), 400
+
+        blocked_dates.append({'day': blocking['day'], 'start_time': blocking['start_hour'], 'end_time': blocking['end_hour']})
+
+        new_blocking = GlobalSchedulingBlockade(day=blocking['day'], start_hour=blocking['start_hour'], end_hour=blocking['end_hour'])
+        db.session.add(new_blocking)
+
+    db.session.commit()
+    return jsonify({'message': 'blockings agregados correctamente'}), 201
