@@ -37,12 +37,18 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"date": "",
 				"times": []
 			}],
-			globalBlockedDates: [{
+			globalEnabled: [{
 				"id": "",
 				"day": "",
-				"star_hour": "",
+				"start_hour": "",
 				"end_hour": ""
-			}] 
+			}],
+			globalEnabledByDay:[{
+				"id": "",
+				"day": "",
+				"start_hour": "",
+				"end_hour": ""
+			}]
 		},
 		actions: {
 			//Funciones globales
@@ -440,20 +446,56 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 			},
 			//Funciones para el bloqueo de fechas globales
-			addGlobalBlockedDates: async (globalBlockedDates) => {
+			addGlobalEnabled: async (data) => {
 				try {
-					const response = await getActions().apiFetch('/global_blockades', 'POST', globalBlockedDates);
-
+					const response = await getActions().apiFetch('/global_enabled', 'POST', data);
+			
 					if (!response.ok) {
-						throw new Error(response.error || 'Error al agregar bloqueos globales');
+						throw new Error('Error al agregar disponibilidad global');
 					}
-				
-					return response.message;
+					
+					const responseData = await response.json();
+					const updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData]; 
+					setStore({ globalEnabled: updatedGlobalEnabled });
+			
+					return responseData;
 				} catch (error) {
-					console.error('Error al agregar bloqueos globales:', error.message);
+					console.error("Error al agregar disponibilidad global:", error);
+					const errorMessage = error.message || 'Error de red';
+					return { success: false, error: errorMessage };
+				}
+			},
+			getGlobalEnabled: async () => {
+				try {
+					const resp = await getActions().apiFetch('/get_global_enabled', 'GET');
+					if (resp.ok) {
+						const data = await resp.json();
+						setStore({ globalEnabled: data }); // Almacena los datos en el estado del contexto
+						return data; // Devuelve los datos obtenidos
+					} else {
+						throw new Error("Error al obtener los datos de disponibilidad global.");
+					}
+				} catch (error) {
+					console.error("Error al obtener los datos de disponibilidad global:", error.message);
 					throw error;
 				}
-			}						  
+			},
+			getGlobalEnabledByDay: async (day) => {
+				try {
+				  const resp = await getActions().apiFetch(`/get_global_enabled_by_day/${day}`, 'GET');
+				  if (resp.ok) {
+					const data = await resp.json();
+					setStore({ globalEnabledByDay: data }); // Almacena los datos en el estado del contexto
+					return data; // Devuelve los datos obtenidos
+				  } else {
+					throw new Error("Error al obtener los datos de disponibilidad global por día.");
+				  }
+				} catch (error) {
+				  console.error("Error al obtener los datos de disponibilidad global por día:", error.message);
+				  throw error;
+				}
+			  }
+			  		
 		}
 	}	
 };

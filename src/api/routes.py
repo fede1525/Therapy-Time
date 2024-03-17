@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, Blueprint, json
-from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingBlockade
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -10,7 +10,7 @@ import os
 import datetime, json, string, random 
 from sqlalchemy.exc import IntegrityError
 import requests
-from datetime import datetime
+from datetime import datetime, time
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -451,9 +451,13 @@ def unaviable_dates():
 POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
 POSSIBLE_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00']
 
+# Marcado de dias y franjas horarias disponibles (terapeuta) 
+# 1) Definición de opciones para los días y horas
+POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
+POSSIBLE_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00']
 # 2) Ruta para el endpoint POST
-@api.route('/global_blockades', methods=['POST'])
-def add_global_blockades():
+@api.route('/global_enabled', methods=['POST'])
+def add_global_enabled():
     data = request.get_json()
 
     if not isinstance(data, list):
@@ -469,24 +473,69 @@ def add_global_blockades():
         if blocking['start_hour'] not in POSSIBLE_HOURS or blocking['end_hour'] not in POSSIBLE_HOURS:
             return jsonify({'error': 'Valor no válido para start_hour o end_hour'}), 400
 
-        start_time = datetime.strptime(blocking['start_hour'], '%H:%M')
-        end_time = datetime.strptime(blocking['end_hour'], '%H:%M')
+        start_time = time.fromisoformat(blocking['start_hour'])
+        end_time = time.fromisoformat(blocking['end_hour'])
 
         if start_time >= end_time:
             return jsonify({'error': 'La hora de inicio debe ser menor que la hora fin'}), 400
 
-        existing_blockades = GlobalSchedulingBlockade.query.filter_by(day=blocking['day']).all()
+    # Validar solapamiento de horarios solo para el mismo día
+    for i, blocking1 in enumerate(data):
+        day = blocking1['day']
+        start_time_1 = time.fromisoformat(blocking1['start_hour'])
+        end_time_1 = time.fromisoformat(blocking1['end_hour'])
+
+        for blocking2 in data[i+1:]:
+            if blocking2['day'] == day:
+                start_time_2 = time.fromisoformat(blocking2['start_hour'])
+                end_time_2 = time.fromisoformat(blocking2['end_hour'])
+
+                if (start_time_1 >= start_time_2 and start_time_1 < end_time_2) or \
+                   (end_time_1 > start_time_2 and end_time_1 <= end_time_2) or \
+                   (start_time_1 <= start_time_2 and end_time_1 >= end_time_2):
+                    return jsonify({'error': 'Los horarios se solapan en el mismo día'}), 400
+
+    # Validar solapamiento con los bloqueos existentes en la base de datos
+    for blocking in data:
+        start_time = time.fromisoformat(blocking['start_hour'])
+        end_time = time.fromisoformat(blocking['end_hour'])
+
+        existing_blockades = GlobalSchedulingEnabled.query.filter_by(day=blocking['day']).all()
 
         for existing_blockade in existing_blockades:
-            existing_start_time = datetime.strptime(existing_blockade.start_hour, '%H:%M')
-            existing_end_time = datetime.strptime(existing_blockade.end_hour, '%H:%M')
+            existing_start_time = existing_blockade.start_hour
+            existing_end_time = existing_blockade.end_hour
+
             if (start_time >= existing_start_time and start_time < existing_end_time) or \
                (end_time > existing_start_time and end_time <= existing_end_time) or \
                (start_time <= existing_start_time and end_time >= existing_end_time):
-                db.session.delete(existing_blockade)
+                return jsonify({'error': 'La franja horaria se solapa con un bloqueo existente'}), 400
 
-        new_blocking = GlobalSchedulingBlockade(day=blocking['day'], start_hour=blocking['start_hour'], end_hour=blocking['end_hour'])
+    # Si todas las validaciones pasaron, se agregan los bloqueos
+    for blocking in data:
+        start_time = time.fromisoformat(blocking['start_hour'])
+        end_time = time.fromisoformat(blocking['end_hour'])
+
+        new_blocking = GlobalSchedulingEnabled(day=blocking['day'], start_hour=start_time, end_hour=end_time)
         db.session.add(new_blocking)
 
     db.session.commit()
-    return jsonify({'message': 'blockings agregados correctamente'}), 201
+    return jsonify({'message': 'Bloqueos agregados correctamente'}), 201
+
+#Traer todos los dias y sus horarios habilitados de forma global
+@api.route('/get_global_enabled', methods=['GET'])
+def get_global_enabled():
+        try:
+            global_enabled = GlobalSchedulingEnabled.query.all()
+            return jsonify([blocking.serialize() for blocking in global_enabled]), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        
+#Traer todos los horarios habilitados para un mismo dia
+@api.route('/get_global_enabled_by_day/<string:day>', methods=['GET'])
+def get_global_enabled_by_day(day):
+    try:
+        global_enabled = GlobalSchedulingEnabled.query.filter_by(day=day).all()
+        return jsonify([blocking.serialize() for blocking in global_enabled]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

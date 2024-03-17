@@ -141,19 +141,20 @@ class Consultation(db.Model):
             "arrival_date": self.arrival_date.strftime('%d-%B-%Y %H:%M:%S')
         }
 
-class GlobalSchedulingBlockade(db.Model):
-    __tablename__='global_scheduling_blockade'
+class GlobalSchedulingEnabled(db.Model):
+    __tablename__ = 'global_scheduling_enabled'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    day = db.Column(db.String, nullable= False)
-    start_hour = db.Column(db.String, nullable=False)
-    end_hour =db.Column(db.String, nullable=False)
+    day = db.Column(db.String, nullable=False)
+    start_hour = db.Column(db.Time, nullable=False)
+    end_hour = db.Column(db.Time, nullable=False)
 
     def __repr__(self):
-        return f'<GlobalSchedulingBlockade{self.id}>'
+        return f'<GlobalSchedulingEnabled {self.id}>'
+
     def serialize(self):
-        return{
+        return {
             "id": self.id,
             "day": self.day,
-            "start_hour": self.start_hour,
-            "end_hour": self.end_hour
+            "start_hour": self.start_hour.strftime('%H:%M'),
+            "end_hour": self.end_hour.strftime('%H:%M') 
         }
