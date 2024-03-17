@@ -10,8 +10,8 @@ export const Scheduling = () => {
   const [dayOfWeek, setDayOfWeek] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [formDisabled, setFormDisabled] = useState(true); // Estado para controlar si el formulario está deshabilitado
-  const [hasChanges, setHasChanges] = useState(false); // Estado para rastrear cambios en los horarios
+  const [formDisabled, setFormDisabled] = useState(true);
+  const [hasChanges, setHasChanges] = useState(false);
   const POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
   const POSSIBLE_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
 
@@ -31,12 +31,12 @@ export const Scheduling = () => {
     setStartTime('');
     setEndTime('');
     setErrorMessage('');
-    setFormDisabled(false); // Habilitar el formulario al seleccionar un día
+    setFormDisabled(false); 
   };
 
   const handleStartTimeChange = (e) => {
     setStartTime(e.target.value);
-    setEndTime(''); // Resetear el valor del segundo combo al cambiar la hora de inicio
+    setEndTime(''); 
   };
 
   const handleEndTimeChange = (e) => {
@@ -48,15 +48,13 @@ export const Scheduling = () => {
       setErrorMessage('Ingrese horas válidas.');
       return;
     }
-
     const newSlot = { start_hour: startTime, end_hour: endTime };
     const updatedData = [...scheduleData, newSlot];
     setScheduleData(updatedData);
-
     setStartTime('');
     setEndTime('');
     setErrorMessage('');
-    setHasChanges(true); // Se detectaron cambios
+    setHasChanges(true); 
   };
 
   const handleDeleteSchedule = async (id) => {
@@ -64,10 +62,9 @@ export const Scheduling = () => {
       await actions.deleteGlobalEnabled(id);
       const updatedData = scheduleData.filter(slot => slot.id !== id);
       setScheduleData(updatedData);
-      setHasChanges(true); // Se detectaron cambios
+      setHasChanges(true);
     } catch (error) {
       console.error("Error al eliminar el registro de disponibilidad global:", error);
-      // Manejo de errores si es necesario
     }
   };
 
@@ -76,31 +73,24 @@ export const Scheduling = () => {
       setErrorMessage('Seleccione un día y una hora.');
       return;
     }
-
     try {
       const newSlots = scheduleData.map(slot => ({
         day: selectedDay,
         start_hour: slot.start_hour,
         end_hour: slot.end_hour
       }));
-
       const response = await actions.addGlobalEnabled(newSlots);
-      console.log('Disponibilidad agregada:', response); // Verificar la estructura de la respuesta
-
+      console.log('Disponibilidad agregada:', response); 
       setScheduleData([]);
       setStartTime('');
       setEndTime('');
       setErrorMessage('');
       openSuccessModal();
-
-      // Actualizar la tabla después de guardar
       actions.getGlobalEnabled();
-
-      // Deshabilitar el formulario y limpiar los campos después de guardar
       setFormDisabled(true);
       setSelectedDay('');
       setDayOfWeek('');
-      setHasChanges(false); // No hay cambios después de guardar
+      setHasChanges(false); 
     } catch (error) {
       console.error("Error al guardar disponibilidad global:", error);
       setErrorMessage(error.message || 'Error de red');
@@ -109,7 +99,6 @@ export const Scheduling = () => {
 
   useEffect(() => {
     actions.getGlobalEnabled();
-    // Deshabilitar el formulario y limpiar los campos al cargar la página
     setFormDisabled(true);
     setSelectedDay('');
     setDayOfWeek('');
@@ -119,54 +108,38 @@ export const Scheduling = () => {
     setErrorMessage('');
   }, []);
 
-  // Función para filtrar las opciones de hora disponibles para el primer combo
   const filterAvailableStartHours = () => {
     let availableHours = POSSIBLE_HOURS.filter(hour => {
-      // Filtrar las horas que no están dentro de las franjas horarias existentes
       return !scheduleData.some(slot => (slot.start_hour <= hour && hour < slot.end_hour));
     });
-
-    // Excluir la hora 20:00 de las opciones disponibles
     availableHours = availableHours.filter(hour => hour !== '20:00');
-
     return availableHours;
   };
 
-  // Función para filtrar las opciones de hora disponibles para el segundo combo
   const filterAvailableEndHours = () => {
-    if (!startTime) return []; // Si no se ha seleccionado una hora de inicio, mostrar ninguna hora disponible
+    if (!startTime) return []; 
 
     let availableHours = [];
-
-    // Encuentra la última hora seleccionada en el primer combo
     let lastSelectedHourIndex = POSSIBLE_HOURS.indexOf(startTime);
 
-    // Filtra las horas mayores al último horario seleccionado en el primer combo
     for (let i = lastSelectedHourIndex + 1; i < POSSIBLE_HOURS.length; i++) {
       let hour = POSSIBLE_HOURS[i];
       let isAvailable = true;
 
-      // Verificar si la hora actual se solapa con alguna franja horaria existente
       for (let j = 0; j < scheduleData.length; j++) {
         if (hour >= scheduleData[j].start_hour && hour <= scheduleData[j].end_hour) {
           isAvailable = false;
-
-          // Si la hora actual está comprendida dentro de una franja horaria existente, agregar solo la primer hora (más chica) de esa franja
           if (hour === scheduleData[j].start_hour) {
             availableHours.push(hour);
           }
-
           break;
         }
       }
-
       if (!isAvailable) {
-        break; // Detener el bucle si encontramos una hora que no es disponible
+        break; 
       }
-
       availableHours.push(hour);
     }
-
     return availableHours;
   };
 

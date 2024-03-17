@@ -453,11 +453,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 					if (!response.ok) {
 						throw new Error('Error al agregar disponibilidad global');
 					}
-					
 					const responseData = await response.json();
 					const updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData]; 
 					setStore({ globalEnabled: updatedGlobalEnabled });
-			
 					return responseData;
 				} catch (error) {
 					console.error("Error al agregar disponibilidad global:", error);
@@ -470,8 +468,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					const resp = await getActions().apiFetch('/get_global_enabled', 'GET');
 					if (resp.ok) {
 						const data = await resp.json();
-						setStore({ globalEnabled: data }); // Almacena los datos en el estado del contexto
-						return data; // Devuelve los datos obtenidos
+						setStore({ globalEnabled: data }); 
+						return data;
 					} else {
 						throw new Error("Error al obtener los datos de disponibilidad global.");
 					}
@@ -485,8 +483,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				  const resp = await getActions().apiFetch(`/get_global_enabled_by_day/${day}`, 'GET');
 				  if (resp.ok) {
 					const data = await resp.json();
-					setStore({ globalEnabledByDay: data }); // Almacena los datos en el estado del contexto
-					return data; // Devuelve los datos obtenidos
+					setStore({ globalEnabledByDay: data }); 
+					return data; 
 				  } else {
 					throw new Error("Error al obtener los datos de disponibilidad global por día.");
 				  }
@@ -500,7 +498,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 					const resp = await getActions().apiFetch(`/delete_global_enabled/${id}`, 'DELETE');
 					if (resp.ok) {
 						const data = await resp.json();
-						// Actualizar la lista de disponibilidad global después de eliminar el registro
 						const updatedGlobalEnabled = getStore().globalEnabled.filter(item => item.id !== id);
 						setStore({ globalEnabled: updatedGlobalEnabled });
 						return data;
@@ -511,8 +508,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al eliminar el registro de disponibilidad global:", error.message);
 					throw error;
 				}
-			}
-			  		
+			}		
 		}
 	}	
 };

@@ -463,7 +463,6 @@ def add_global_enabled():
     if not isinstance(data, list):
         return jsonify({'error': 'Se esperaba una lista de objetos'}), 400
 
-    # Se elimina todos los registros existentes para los días proporcionados
     for blocking in data:
         day = blocking['day']
         GlobalSchedulingEnabled.query.filter_by(day=day).delete()
@@ -484,7 +483,6 @@ def add_global_enabled():
         if start_time >= end_time:
             return jsonify({'error': 'La hora de inicio debe ser menor que la hora fin'}), 400
 
-        # Validar solapamiento con los bloqueos existentes en la base de datos
         existing_blockades = GlobalSchedulingEnabled.query.filter_by(day=blocking['day']).all()
 
         for existing_blockade in existing_blockades:
@@ -496,7 +494,6 @@ def add_global_enabled():
                (start_time <= existing_start_time and end_time >= existing_end_time):
                 return jsonify({'error': 'La franja horaria se solapa con un bloqueo existente'}), 400
 
-        # Si todas las validaciones pasaron, se agregan los bloqueos
         new_blocking = GlobalSchedulingEnabled(day=blocking['day'], start_hour=start_time, end_hour=end_time)
         db.session.add(new_blocking)
 
@@ -521,21 +518,15 @@ def get_global_enabled_by_day(day):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-
 # Eliminar un solo registro de disponibilidad global
 @api.route('/delete_global_enabled/<int:id>', methods=['DELETE'])
 def delete_global_enabled(id):
     try:
-        # Buscar el registro por su ID
         blocking = GlobalSchedulingEnabled.query.get(id)
         if not blocking:
             return jsonify({'error': 'No se encontró el registro'}), 404
-        
-        # Eliminar el registro de la base de datos
         db.session.delete(blocking)
         db.session.commit()
-
         return jsonify({'message': 'Registro eliminado correctamente'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
