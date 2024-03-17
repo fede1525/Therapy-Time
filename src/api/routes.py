@@ -463,6 +463,11 @@ def add_global_enabled():
     if not isinstance(data, list):
         return jsonify({'error': 'Se esperaba una lista de objetos'}), 400
 
+    # Se elimina todos los registros existentes para los días proporcionados
+    for blocking in data:
+        day = blocking['day']
+        GlobalSchedulingEnabled.query.filter_by(day=day).delete()
+
     for blocking in data:
         if not all(key in blocking for key in ['day', 'start_hour', 'end_hour']):
             return jsonify({'error': 'Falta algún campo en uno de los objetos'}), 400
@@ -479,27 +484,7 @@ def add_global_enabled():
         if start_time >= end_time:
             return jsonify({'error': 'La hora de inicio debe ser menor que la hora fin'}), 400
 
-    # Validar solapamiento de horarios solo para el mismo día
-    for i, blocking1 in enumerate(data):
-        day = blocking1['day']
-        start_time_1 = time.fromisoformat(blocking1['start_hour'])
-        end_time_1 = time.fromisoformat(blocking1['end_hour'])
-
-        for blocking2 in data[i+1:]:
-            if blocking2['day'] == day:
-                start_time_2 = time.fromisoformat(blocking2['start_hour'])
-                end_time_2 = time.fromisoformat(blocking2['end_hour'])
-
-                if (start_time_1 >= start_time_2 and start_time_1 < end_time_2) or \
-                   (end_time_1 > start_time_2 and end_time_1 <= end_time_2) or \
-                   (start_time_1 <= start_time_2 and end_time_1 >= end_time_2):
-                    return jsonify({'error': 'Los horarios se solapan en el mismo día'}), 400
-
-    # Validar solapamiento con los bloqueos existentes en la base de datos
-    for blocking in data:
-        start_time = time.fromisoformat(blocking['start_hour'])
-        end_time = time.fromisoformat(blocking['end_hour'])
-
+        # Validar solapamiento con los bloqueos existentes en la base de datos
         existing_blockades = GlobalSchedulingEnabled.query.filter_by(day=blocking['day']).all()
 
         for existing_blockade in existing_blockades:
@@ -511,16 +496,12 @@ def add_global_enabled():
                (start_time <= existing_start_time and end_time >= existing_end_time):
                 return jsonify({'error': 'La franja horaria se solapa con un bloqueo existente'}), 400
 
-    # Si todas las validaciones pasaron, se agregan los bloqueos
-    for blocking in data:
-        start_time = time.fromisoformat(blocking['start_hour'])
-        end_time = time.fromisoformat(blocking['end_hour'])
-
+        # Si todas las validaciones pasaron, se agregan los bloqueos
         new_blocking = GlobalSchedulingEnabled(day=blocking['day'], start_hour=start_time, end_hour=end_time)
         db.session.add(new_blocking)
 
     db.session.commit()
-    return jsonify({'message': 'Bloqueos agregados correctamente'}), 201
+    return jsonify({'message': 'Bloqueos sobrescritos correctamente'}), 201
 
 #Traer todos los dias y sus horarios habilitados de forma global
 @api.route('/get_global_enabled', methods=['GET'])
@@ -537,5 +518,24 @@ def get_global_enabled_by_day(day):
     try:
         global_enabled = GlobalSchedulingEnabled.query.filter_by(day=day).all()
         return jsonify([blocking.serialize() for blocking in global_enabled]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
+# Eliminar un solo registro de disponibilidad global
+@api.route('/delete_global_enabled/<int:id>', methods=['DELETE'])
+def delete_global_enabled(id):
+    try:
+        # Buscar el registro por su ID
+        blocking = GlobalSchedulingEnabled.query.get(id)
+        if not blocking:
+            return jsonify({'error': 'No se encontró el registro'}), 404
+        
+        # Eliminar el registro de la base de datos
+        db.session.delete(blocking)
+        db.session.commit()
+
+        return jsonify({'message': 'Registro eliminado correctamente'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

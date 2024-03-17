@@ -494,7 +494,24 @@ const getState = ({ getStore, getActions, setStore }) => {
 				  console.error("Error al obtener los datos de disponibilidad global por día:", error.message);
 				  throw error;
 				}
-			  }
+			},
+			deleteGlobalEnabled: async (id) => {
+				try {
+					const resp = await getActions().apiFetch(`/delete_global_enabled/${id}`, 'DELETE');
+					if (resp.ok) {
+						const data = await resp.json();
+						// Actualizar la lista de disponibilidad global después de eliminar el registro
+						const updatedGlobalEnabled = getStore().globalEnabled.filter(item => item.id !== id);
+						setStore({ globalEnabled: updatedGlobalEnabled });
+						return data;
+					} else {
+						throw new Error("Error al eliminar el registro de disponibilidad global.");
+					}
+				} catch (error) {
+					console.error("Error al eliminar el registro de disponibilidad global:", error.message);
+					throw error;
+				}
+			}
 			  		
 		}
 	}	
