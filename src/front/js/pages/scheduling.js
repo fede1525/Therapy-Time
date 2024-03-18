@@ -1,5 +1,12 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Context } from "../store/appContext";
+import { NavbarTherapist } from "../component/navbar"
+import "../../styles/scheduling.css";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+
 
 export const Scheduling = () => {
   const { actions, store } = useContext(Context);
@@ -12,6 +19,7 @@ export const Scheduling = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formDisabled, setFormDisabled] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
+  const [activeTab, setActiveTab] = useState('global');
   const POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
   const POSSIBLE_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
 
@@ -31,12 +39,12 @@ export const Scheduling = () => {
     setStartTime('');
     setEndTime('');
     setErrorMessage('');
-    setFormDisabled(false); 
+    setFormDisabled(false);
   };
 
   const handleStartTimeChange = (e) => {
     setStartTime(e.target.value);
-    setEndTime(''); 
+    setEndTime('');
   };
 
   const handleEndTimeChange = (e) => {
@@ -54,7 +62,7 @@ export const Scheduling = () => {
     setStartTime('');
     setEndTime('');
     setErrorMessage('');
-    setHasChanges(true); 
+    setHasChanges(true);
   };
 
   const handleDeleteSchedule = async (id) => {
@@ -80,7 +88,7 @@ export const Scheduling = () => {
         end_hour: slot.end_hour
       }));
       const response = await actions.addGlobalEnabled(newSlots);
-      console.log('Disponibilidad agregada:', response); 
+      console.log('Disponibilidad agregada:', response);
       setScheduleData([]);
       setStartTime('');
       setEndTime('');
@@ -90,7 +98,7 @@ export const Scheduling = () => {
       setFormDisabled(true);
       setSelectedDay('');
       setDayOfWeek('');
-      setHasChanges(false); 
+      setHasChanges(false);
     } catch (error) {
       console.error("Error al guardar disponibilidad global:", error);
       setErrorMessage(error.message || 'Error de red');
@@ -117,7 +125,7 @@ export const Scheduling = () => {
   };
 
   const filterAvailableEndHours = () => {
-    if (!startTime) return []; 
+    if (!startTime) return [];
 
     let availableHours = [];
     let lastSelectedHourIndex = POSSIBLE_HOURS.indexOf(startTime);
@@ -136,93 +144,127 @@ export const Scheduling = () => {
         }
       }
       if (!isAvailable) {
-        break; 
+        break;
       }
       availableHours.push(hour);
     }
     return availableHours;
   };
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
   return (
-    <div className="row">
-      <div className="col">
-        <h2>Disponibilidad Existente</h2>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Día</th>
-              {POSSIBLE_HOURS.map((hour, index) => (
-                <th key={index}>{hour}</th>
-              ))}
-              <th>Editar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {POSSIBLE_DAYS.map((day, index) => (
-              <tr key={index}>
-                <td>{day}</td>
-                {POSSIBLE_HOURS.map((hour, hourIndex) => (
-                  <td key={hourIndex} style={{ backgroundColor: store.globalEnabled.some(item => item.day === day && hour >= item.start_hour && hour < item.end_hour) ? 'green' : 'transparent' }}>
-                  </td>
-                ))}
-                <td>
-                  <button onClick={() => handleDayChange(day)}>Editar</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="col">
+    <div style={{ backgroundColor: 'white', minHeight: '100vh', minWidth: '100vw' }}>
+      <NavbarTherapist />
+      <div className="container mt-5 border" style={{ paddingTop: '1vh' }}>
+        <ul className="nav nav-tabs">
+          <li className="nav-item">
+            <button className={`nav-link ${activeTab === "global" ? "active" : "text-muted"}`} onClick={() => handleTabChange("global")}>Disponibilidad global</button>
+          </li>
+          <li className="nav-item">
+            <button className={`nav-link ${activeTab === "byDate" ? "active" : "text-muted"}`} onClick={() => handleTabChange("byDate")}>Disponibilidad por fechas</button>
+          </li>
+        </ul>
         <div>
-          <h2>Editar Disponibilidad</h2>
-          <div className="mb-3">
-            <label htmlFor="day-of-week">Día de la semana:</label>
-            <input type="text" id="day-of-week" value={dayOfWeek} readOnly disabled={formDisabled} />
-          </div>
-          <div className="mb-3">
-            <h3>Registros para {selectedDay}</h3>
-            {scheduleData.map((slot, index) => (
-              <div key={index}>
-                <span>{slot.start_hour} - {slot.end_hour}</span>
-                <button onClick={() => handleDeleteSchedule(slot.id)}>Eliminar</button>
+          {activeTab === 'global' && (
+              <div className="row" style={{ paddingTop: '2vh', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '3vh', marginBottom: '4vh', paddingRight: '4vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
+                <div className="col">
+                  <table className="table schedulingTable" style={{ backgroundColor: 'white', color: '#7E7E7E' }}>
+                    <thead style={{ backgroundColor: '#FAFAFA' }}>
+                      <tr>
+                        <th style={{ width: '10%' }}>Día</th>
+                        {POSSIBLE_HOURS.map((hour, index) => (
+                          <th key={index} style={{ width: '4%' }}>{hour}</th>
+                        ))}
+                        <th style={{ width: '5%' }}>Editar</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {POSSIBLE_DAYS.map((day, index) => (
+                        <tr key={index}>
+                          <td><strong>{day}</strong></td>
+                          {POSSIBLE_HOURS.map((hour, hourIndex) => (
+                            <td key={hourIndex} style={{ backgroundColor: store.globalEnabled.some(item => item.day === day && hour >= item.start_hour && hour < item.end_hour) ? '#a9a9a9' : 'transparent', width: '4%' }}>
+                            </td>
+                          ))}
+                          <td style={{ width: '7%', textAlign: 'center' }}>
+                            <FontAwesomeIcon icon={faPencilAlt} onClick={() => handleDayChange(day)} />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="col d-flex align-items-center justify-content-center" style={{ color: '#7E7E7E' }}>
+                  <div>
+                    <div className="row mb-3">
+                      <div>
+                        <label htmlFor="day-of-week" style={{ width: '32vh' }}>Día de la semana:</label>
+                      </div>
+                      <div>
+                        <input type="text" id="day-of-week" value={dayOfWeek} readOnly disabled={formDisabled} style={{ width: '100%' }} />
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      {scheduleData.map((slot, index) => (
+                        <div key={index} className='d-flex align-items-center justify-content-between'>
+                          <span>{slot.start_hour} - {slot.end_hour}</span>
+                          <FontAwesomeIcon icon={faTrashAlt} onClick={() => handleDeleteSchedule(slot.id)} style={{ marginRight: '2.8vh' }} />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mb-3">
+                      <div className='d-flex flex-column mb-1'>
+                        <select id="start-time" value={startTime} onChange={handleStartTimeChange} disabled={formDisabled} style={{ width: '18vh' }}>
+                          <option value="">Hora inicio</option>
+                          {filterAvailableStartHours().map(hour => (
+                            <option key={hour} value={hour}>{hour}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className='d-flex justify-content-between'>
+                        <div className='d-flex flex-column' style={{ width: '18vh' }}>
+                          <select id="end-time" value={endTime} onChange={handleEndTimeChange} disabled={formDisabled} style={{ width: '100%' }}>
+                            <option value="">Hora fin</option>
+                            {filterAvailableEndHours().map(hour => (
+                              <option key={hour} value={hour}>{hour}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <FontAwesomeIcon icon={faPlus} onClick={handleAddSchedule} disabled={formDisabled} style={{ marginRight: '2.8vh' }} />
+                        </div>
+                      </div>
+                    </div>
+                    {errorMessage && <p className="text-danger">{errorMessage}</p>}
+                    <div style={{ width: '100%' }}>
+                      <button onClick={handleSave} disabled={formDisabled || !hasChanges} style={{ width: '100%', padding: '0', marginBottom: '2vh', backgroundColor: '#C47C7A', color: 'white', padding: '0.5vh' }}>Guardar</button>
+                    </div>
+                  </div>
+                </div>
+                <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                  <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content" style={{ textAlign: 'left' }} id="contactModal">
+                      <div className="modal-header justify-content-end">
+                        <button type="button" className="btn_close_contact" onClick={closeSuccessModal} aria-label="Close">X</button>
+                      </div>
+                      <div className="modal-body">
+                        <span>Disponibilidad cargada exitosamente!</span>
+                      </div>
+                      <div className="modal-footer">
+                        <button type="button" className="btn btn-guardar-contact" onClick={closeSuccessModal}>Cerrar</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="mb-3">
-            <label htmlFor="start-time">Hora de inicio:</label>
-            <select id="start-time" value={startTime} onChange={handleStartTimeChange} disabled={formDisabled}>
-              <option value="">--:--</option>
-              {filterAvailableStartHours().map(hour => (
-                <option key={hour} value={hour}>{hour}</option>
-              ))}
-            </select>
-            <label htmlFor="end-time">Hora de fin:</label>
-            <select id="end-time" value={endTime} onChange={handleEndTimeChange} disabled={formDisabled}>
-              <option value="">--:--</option>
-              {filterAvailableEndHours().map(hour => (
-                <option key={hour} value={hour}>{hour}</option>
-              ))}
-            </select>
-            <button onClick={handleAddSchedule} disabled={formDisabled}>+</button>
-          </div>
-          {errorMessage && <p className="text-danger">{errorMessage}</p>}
-          <button onClick={handleSave} disabled={formDisabled || !hasChanges}>Guardar</button>
-        </div>
-        <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ textAlign: 'left' }} id="contactModal">
-              <div className="modal-header justify-content-end">
-                <button type="button" className="btn_close_contact" onClick={closeSuccessModal} aria-label="Close">X</button>
-              </div>
-              <div className="modal-body">
-                <span>Disponibilidad cargada exitosamente!</span>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-guardar-contact" onClick={closeSuccessModal}>Cerrar</button>
-              </div>
+          )}
+          {activeTab === 'byDate' && (
+            <div className="container-fluid mt-3 mb-3">
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
