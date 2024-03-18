@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Context } from "../store/appContext";
 import { NavbarTherapist } from "../component/navbar"
+import { SchedulingComponent } from "../component/scheduling"
 import "../../styles/scheduling.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt } from '@fortawesome/free-solid-svg-icons';
@@ -263,6 +264,7 @@ export const Scheduling = () => {
           )}
           {activeTab === 'byDate' && (
             <div className="container-fluid mt-3 mb-3">
+              <SchedulingComponent />
             </div>
           )}
         </div>

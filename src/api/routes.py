@@ -404,48 +404,6 @@ def mark_consultation_as_read(id):
     except Exception as e:
         return jsonify({"error": "Error marking consultation as read"}), 500
 
-#blocking de horarios/fechas (terapeuta)
-@api.route('/block_multiple_hours', methods=['POST'])
-def block_multiple_hours():
-    if request.method == 'POST':
-        try:
-            data = request.get_json()
-
-            if 'dates' not in data or not isinstance(data['dates'], list):
-                return jsonify({'error': 'El campo "dates" es obligatorio y debe ser una lista de fechas con horas'}), 400
-
-            for date_data in data['dates']:
-                if 'date' not in date_data or 'times' not in date_data:
-                    return jsonify({'error': 'Cada objeto de fecha debe contener tanto "date" como "times"'}), 400
-
-                date = date_data['date']
-
-                if not isinstance(date_data['times'], list):
-                    return jsonify({'error': 'El campo "times" debe ser una lista de horas para la fecha especificada'}), 400
-
-                for time in date_data['times']:
-                    nueva_disponibilidad = AvailabilityDates(
-                        date=date,
-                        time=time
-                    )
-                    db.session.add(nueva_disponibilidad)
-
-            db.session.commit()
-            return jsonify({'success': True, 'message': 'Horas bloqueadas exitosamente'}), 200
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-
-#Obtener fechas NO dispponibles
-@api.route('/get_blocked_dates', methods=['GET'])
-def unaviable_dates():
-    if request.method == 'GET':
-        try:
-            fechas_no_disponibles = AvailabilityDates.query.all()
-            return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-
 #blocking de fechas y horarios globales
 # 1) Definición de opciones para los días y horas
 POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
@@ -528,5 +486,117 @@ def delete_global_enabled(id):
         db.session.delete(blocking)
         db.session.commit()
         return jsonify({'message': 'Registro eliminado correctamente'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Bloqueo de fechas
+@api.route('/bloquear', methods=['POST'])
+def bloquear():
+    try:
+        data = request.get_json()
+
+        if isinstance(data, list):
+            # Si es una lista, iterar sobre los objetos
+            for item in data:
+                required_fields = ['date', 'time', 'id']
+                for field in required_fields:
+                    if field not in item:
+                        return jsonify({'error': f'{field} es un campo obligatorio'}), 400
+
+                nueva_disponibilidad = AvailabilityDates(
+                    date=item['date'],
+                    time=item['time'],
+                    id=item['id'],
+                )
+
+                db.session.add(nueva_disponibilidad)
+
+        elif isinstance(data, dict):
+            # Si es un objeto individual
+            required_fields = ['date', 'time', 'id']
+            for field in required_fields:
+                if field not in data:
+                    return jsonify({'error': f'{field} es un campo obligatorio'}), 400
+
+            nueva_disponibilidad = AvailabilityDates(
+                date=data['date'],
+                time=data['time'],
+                id=data['id'],
+            )
+
+            db.session.add(nueva_disponibilidad)
+
+        else:
+            return jsonify({'error': 'El formato de datos no es válido'}), 400
+
+        db.session.commit()
+
+        return jsonify({'mensaje': 'Horas bloqueadas exitosamente'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500        
+
+# Desbloquear multiples horas
+@api.route('/desbloquear/multiple', methods=['DELETE'])
+def delete_multiple_blocked_times():
+    try:
+        data = request.get_json()
+        ids = [item['id'] for item in data]  # Obtener una lista de IDs del cuerpo de la solicitud
+
+        if not isinstance(ids, list):
+            return jsonify({"error": "La lista de IDs debe ser un arreglo"}), 400
+
+        deleted_count = 0
+        for id in ids:
+            blocked_time = AvailabilityDates.query.get(id)
+            if blocked_time:
+                db.session.delete(blocked_time)
+                deleted_count += 1
+
+        db.session.commit()
+
+        return jsonify({"message": f"{deleted_count} horas desbloqueadas exitosamente"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Desbloquear Hora en particular
+@api.route('/bloquear/<string:id>', methods=['DELETE'])
+def delete_blocked_time(id):
+    try:
+        # Supongamos que tienes un modelo llamado BlockedTime
+        blocked_time = AvailabilityDates.query.get(id)
+
+        if blocked_time:
+            # Eliminar el registro de la base de datos
+            db.session.delete(blocked_time)
+            db.session.commit()
+
+            return jsonify({"message": "Hora desbloqueada exitosamente"})
+        else:
+            return jsonify({"message": "La hora no existe"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+# Obtener fechas dispponibles
+@api.route('/fetch_bloquear', methods=['GET'])
+def unaviable_dates():
+    if request.method == 'GET':
+        try:
+            fechas_no_disponibles = AvailabilityDates.query.all()
+
+            return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+
+    try:
+        # Consulta la base de datos para obtener las fechas no disponibles
+        fechas_no_disponibles = AvailabilityDates.query.all()
+
+        # Serializa los resultados en un formato JSON y los devuelve
+        return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
