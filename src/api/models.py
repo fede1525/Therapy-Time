@@ -69,7 +69,6 @@ class Reservation(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User")
 
-
     def __repr__(self):
         return f'<Reservation {self.id}>'
     def serialize(self):
@@ -94,7 +93,6 @@ class AvailabilityDates(db.Model):
             "date": self.date,
             "time": self.time,
         }
-
 
 class Schedules(db.Model):
     __tablename__='schedules'
@@ -141,4 +139,22 @@ class Consultation(db.Model):
             "is_read": self.is_read,
             "is_deleted": self.is_deleted,
             "arrival_date": self.arrival_date.strftime('%d-%B-%Y %H:%M:%S')
+        }
+
+class GlobalSchedulingEnabled(db.Model):
+    __tablename__ = 'global_scheduling_enabled'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    day = db.Column(db.String, nullable=False)
+    start_hour = db.Column(db.Time, nullable=False)
+    end_hour = db.Column(db.Time, nullable=False)
+
+    def __repr__(self):
+        return f'<GlobalSchedulingEnabled {self.id}>'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "day": self.day,
+            "start_hour": self.start_hour.strftime('%H:%M'),
+            "end_hour": self.end_hour.strftime('%H:%M') 
         }
