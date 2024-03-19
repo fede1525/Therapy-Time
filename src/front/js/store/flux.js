@@ -398,7 +398,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			createPreference: async () => {
 				try {
-					const response = await getActions.protectedFetch("/paying", "POST", {
+					const response = await getActions.protectedFetch("/create_preference", "POST", {
 						description: "Honorarios",
 						price: 100,
 						quantity: 1,

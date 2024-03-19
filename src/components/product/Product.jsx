@@ -20,7 +20,7 @@ const Product = () => {
             <div>
                 <div>
                     <img src='' alt='product stuff' />
-                    <h3>Sesión</h3>
+                    <h3>Consulta</h3>
                     <p>$100</p>
                     <button onClick={handleBuy} >Abonar</button>
                     {
