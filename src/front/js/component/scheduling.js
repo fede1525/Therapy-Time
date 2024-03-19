@@ -2,17 +2,48 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Context } from "../store/appContext";
 import "../../styles/calendar.css";
+import { FaTimes } from 'react-icons/fa';
+import { FaChevronLeft } from 'react-icons/fa';
+import { FaChevronRight } from 'react-icons/fa';
 
 export const SchedulingComponent = () => {
   const { actions } = useContext(Context);
   const [calendar, setCalendar] = useState([]);
   const [month, setMonth] = useState(1); //empieza en enero
+  const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedHour, setSelectedHour] = useState(null);
   const [selectedHours, setSelectedHours] = useState([]);
   const [unavailableDates, setUnavailableDates] = useState([]);
   const [extractedInfo, setExtractedInfo] = useState([]);
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+
+  const openShowSuccessModal= () =>{
+    setShowSuccessModal(true)
+  }
+
+  const closeShowSuccessModal= () =>{
+    setShowSuccessModal(false)
+  }
+
+  const handleNextMonth = () => {
+    if (month === 12) {
+      setYear(year => year + 1); 
+      setMonth(1);
+    } else {
+      setMonth(month => month + 1); 
+    }
+  };
+
+  const handlePreviousMonth = () => {
+    if (month === 1) {
+      setYear(year => year - 1); 
+      setMonth(12); 
+    } else {
+      setMonth(month => month - 1); 
+    }
+  };
 
   const meses = {
     1: 'Enero',
@@ -28,7 +59,7 @@ export const SchedulingComponent = () => {
     11: 'Noviembre',
     12: 'Diciembre'
   };
-  
+
   const fetchUnavailableDates = async () => {
     try {
       const response = await actions.apiFetch('/fetch_bloquear', 'GET');
@@ -37,27 +68,13 @@ export const SchedulingComponent = () => {
       console.error('Error al obtener fechas no disponibles:', error);
     }
   };
-  useEffect(() => {
-    fetchUnavailableDates()
-    function extractDateInfo(dateString) {
-      const dateObject = new Date(dateString);
-      const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
-      const year = dateObject.getFullYear();
-      const day = dateObject.getDate();
-      const hour = dateObject.getHours() + 5;
-      //console.log(hour)
-      return { month, year, day, hour };
-    }
-    if (unavailableDates.length > 0) {
-      const extractedInfo = unavailableDates.map(item => {
-          const { month, year, day, hour } = extractDateInfo(item.date);
-          return { year, month, day, hour };
-      });
-      setExtractedInfo(extractedInfo);
-  }  
 
-    const currentYear = new Date().getFullYear();
-    const currentDate = new Date(currentYear, month - 1, 1); //-1 para que empiece desde enero
+  useEffect(() => {
+    fetchUnavailableDates();
+  }, [year]); 
+
+  useEffect(() => {
+    const currentDate = new Date(year, month - 1, 1); 
     const firstDayOfWeek = currentDate.getDay();
     let day = 1;
 
@@ -68,86 +85,49 @@ export const SchedulingComponent = () => {
 
       for (let j = 0; j < 7; j++) {
         if (i === 0 && j < firstDayOfWeek) {
-          // Celdas vacías antes del primer día del mes
+
           row.push('');
         } else if (day <= 31) {
           row.push(day);
           day++;
         } else {
-          // Celdas vacías después del último día del mes
+
           row.push('');
         }
       }
-
       newCalendar.push(row);
     }
     setCalendar(newCalendar);
-    fetchUnavailableDates();
-    
-  }, [ month, showModal===false]);
-
+  }, [year, month]); 
 
   const handleDayClick = (day) => {
-    setSelectedDay(day);
-    setShowModal(true);
-    //console.log("se seleccionó el día: ", selectedDay)
-
+    if (day) {
+      setSelectedDay(day);
+      setShowModal(true);
+    } else {
+      setShowModal(false);
+    }
   };
-  const handleHourClick = (hour) => {
-    setSelectedHour(hour);
-    setShowModal(true)
-    //console.log("hora seleccionada", hour, ":00", "del día", selectedDay)
-  };
+  
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedHours([])
   };
+
   const handleSelectHours = (data) => {
-    // Verifica si el elemento ya está seleccionado
     const isSelected = selectedHours.find(item => item.id === data.id);
-    if (isSelected) { // si existe
+    if (isSelected) { 
       setSelectedHours(prevHours => prevHours.filter(item => item.id !== data.id));
     } else {
-      //Si no existe
       setSelectedHours(prevHours => [...prevHours, data]);
     }
   };
-  const handleBlockTime = async (hour) => {
 
-    const data = {
-      date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
-      time: hour,
-      id: `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`,
-    };
-
-    //console.log(data, hour,  " Antes del POST")
-    await actions.apiFetch('/bloquear', 'POST', data)
-      .then(data => {
-        console.log('Hora bloqueada exitosamente:', data);
-        handleCloseModal();
-      })
-      .catch(error => {
-        console.error('Error al bloquear la hora:', error);
-
-      });
-    //console.log(data, hour,  " Después del POST")
-  };
-  const handleUnblockTime = async (hour) => {
-    const id = `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`;
-
-    try {
-      await actions.apiFetch(`/bloquear/${id}`, 'DELETE');
-      console.log('Hora desbloqueada exitosamente');
-      handleCloseModal();
-    } catch (error) {
-      console.error('Error al desbloquear la hora:', error);
-    }
-  };
-  const handleBlockSelectedHours = async ()=>{
+  const handleBlockSelectedHours = async () => {
     await actions.apiFetch('/bloquear', 'POST', selectedHours)
       .then(selectedHours => {
         console.log('Hora bloqueada exitosamente:', selectedHours);
-        handleCloseModal();
+        openShowSuccessModal();
         setSelectedHours([])
       })
       .catch(error => {
@@ -155,11 +135,12 @@ export const SchedulingComponent = () => {
         console.log(selectedHours)
       });
   }
-  const handleUnblockSelectedHours = async ()=>{
+
+  const handleUnblockSelectedHours = async () => {
     await actions.apiFetch('/desbloquear/multiple', 'DELETE', selectedHours)
       .then(selectedHours => {
         console.log('Hora bloqueada exitosamente:', selectedHours);
-        handleCloseModal();
+        openShowSuccessModal();
         setSelectedHours([])
       })
       .catch(error => {
@@ -167,10 +148,10 @@ export const SchedulingComponent = () => {
         console.log(selectedHours)
       });
   }
+
   const handleBlockAllHours = async () => {
     try {
       const allHours = [];
-      // Iterar sobre las horas desde las 8 hasta las 20
       for (let hour = 8; hour <= 20; hour++) {
         const data = {
           date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
@@ -179,19 +160,19 @@ export const SchedulingComponent = () => {
         };
         allHours.push(data);
       }
-      
+
       await actions.apiFetch('/bloquear', 'POST', allHours);
       console.log('Horas bloqueadas exitosamente:', allHours);
-      handleCloseModal();
+      openShowSuccessModal();
       setSelectedHours([]);
     } catch (error) {
       console.error('Error al bloquear las horas:', error);
     }
   };
+
   const handleunBlockAllHours = async () => {
     try {
       const allHours = [];
-      // Iterar sobre las horas desde las 8 hasta las 20
       for (let hour = 8; hour <= 20; hour++) {
         const data = {
           date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
@@ -200,29 +181,30 @@ export const SchedulingComponent = () => {
         };
         allHours.push(data);
       }
-      
+
       await actions.apiFetch('/desbloquear/multiple', 'DELETE', allHours);
       console.log('Horas bloqueadas exitosamente:', allHours);
-      handleCloseModal();
+      openShowSuccessModal();
       setSelectedHours([]);
     } catch (error) {
       console.error('Error al bloquear las horas:', error);
     }
   };
+
   const renderModalContent = () => {
-    const hours = Array.from({ length: 13 }, (_, index) => index + 8);
-
+    const hours = Array.from({ length: 12 }, (_, index) => index + 8);
     return (
-      <div className="modal-content">
-        <h2>Horas disponibles para el día {selectedDay}</h2>
-        <button onClick={handleCloseModal}>Cerrar</button>
-        <button onClick={handleBlockAllHours}>bloquear todo el día</button>
-        <button onClick={handleBlockSelectedHours}>Bloquear horas seleccionadas</button>
-        <button onClick={handleUnblockSelectedHours}>desbloquear horas seleccionadas</button>
-        <button onClick={handleunBlockAllHours}>desbloquear todo el día</button>
-        <ul>
-
-          {hours.map((hour) => {
+      <div>
+        <div className='d-flex justify-content-between align-items-center mb-2' style={{fontFamily: 'Nanum Gothic, sans-serif'}}>
+          <div>
+            <h5>Disponibilidad {selectedDay} de {meses[month]}, {year}</h5>
+          </div>
+          <div>
+            <FaTimes  onClick={handleCloseModal} style={{ cursor: 'pointer', color:'grey' }} />
+          </div>
+        </div>
+        <div className="row">
+          {hours.map((hour, index) => {
             const data = {
               date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
               time: hour,
@@ -234,72 +216,94 @@ export const SchedulingComponent = () => {
               item.day === selectedDay &&
               item.hour === hour
             ));
-            // Esta seleccionada la hora? 
             const isSelected = selectedHours.find(item => item.id === data.id);
             return (
-              <li
-                key={hour}
-                onClick={() => handleSelectHours(data)}
-                className={`pestanita 
-                          ${matchingHour ? "bg-danger" : ""}
-                          ${isSelected ? "selected" : ""}
-                          `}
-              >
-                {hour}:00 - {hour + 1}:00
-                <div className="botones">
-                  <button className='blockDate' onClick={() => handleBlockTime(hour)}>Bloquear Hora</button>
-                  <button className='unblockDate' onClick={() => handleUnblockTime(hour)}>Desbloquear Hora</button>
+              <div key={hour} className="col-lg-4 col-md-4 col-sm-6 mb-2">
+                <div
+                  onClick={() => handleSelectHours(data)}
+                  className={`card border ${matchingHour ? "border-danger" : ""} ${isSelected ? "selected" : ""}`}
+                  style={{ height: '100%', cursor: 'pointer' }}
+                >
+                  <div className="card-body d-flex align-items-center justify-content-center">
+                    <p className="card-title mb-0">{hour}:00 - {hour + 1}:00</p>
+                  </div>
                 </div>
-              </li>
+              </div>
             );
           })}
-        </ul>
-
+        </div>
+        <div className="d-flex justify-content-center mt-2 mx-0">
+          <button className='btn_horasPorFecha mx-2 ' onClick={handleBlockSelectedHours}>Bloquear selección</button>
+          <button className='btn_horasPorFecha mx-2' onClick={handleUnblockSelectedHours}>Desbloquear selección</button>
+          <button className='btn_horasPorFecha mx-2' onClick={handleBlockAllHours}>Bloquear todo el día</button>
+          <button className='btn_horasPorFecha mx-2' onClick={handleunBlockAllHours}>Desbloquear todo el día</button>
+        </div>
+        <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{textAlign:'left'}} id="contactModal">
+              <div className="modal-header justify-content-between">
+                <div>
+                  <span>Disponibilidad configurada con exito </span>
+                </div>
+                <div>
+                  <button type="button" className="btn_close_contact" onClick={closeShowSuccessModal} aria-label="Close">X</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
 
   return (
-    <div>
-      <h2>Calendario 2024</h2>
-      <h2> {meses[month]} </h2>
-      <div className="button-container">
-        <button onClick={() => setMonth(month - 1)}>Mes Anterior</button>
-        <button onClick={() => setMonth(month + 1)}>Mes Siguiente</button>
-      </div>
-      <table className="calendar">
-        <thead>
-          <tr>
-            <th>Domingo</th>
-            <th>Lunes</th>
-            <th>Martes</th>
-            <th>Miércoles</th>
-            <th>Jueves</th>
-            <th>Viernes</th>
-            <th>Sábado</th>
-          </tr>
-        </thead>
-        <tbody>
-          {calendar.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {row.map((cell, cellIndex) => (
-                <td key={cellIndex} className='pestanita' onClick={() => handleDayClick(cell)}>
-                  {cell}
-                  <div className="botones">
-                    {/* <button className='unblockDate'>Besbloquear</button> */}
-                  </div>
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {showModal && (
-        <div className="modal-overlay">
-          {renderModalContent()}
+    <div className='d-flex'>
+      <div className="left-content mt-2" style={{ marginRight: '10vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
+        <div className="calendar-header d-flex justify-content-between aling-items-center">
+          <div className="button-container">
+            <FaChevronLeft style={{color:'grey'}} onClick={handlePreviousMonth} />
+          </div>
+          <h5>{meses[month]} de {year}</h5>
+          <div className="button-container">
+           <FaChevronRight style={{color:'grey'}} onClick={handleNextMonth} />
+          </div>
         </div>
-      )}
+        <table className="calendar" style={{  color: '#7E7E7E' }}>
+          <thead style={{ backgroundColor: '#FAFAFA' }}>
+            <tr>
+              <th style={{ width: '14.28%' }}>Domingo</th>
+              <th style={{ width: '14.28%' }}>Lunes</th>
+              <th style={{ width: '14.28%' }}>Martes</th>
+              <th style={{ width: '14.28%' }}>Miércoles</th>
+              <th style={{ width: '14.28%' }}>Jueves</th>
+              <th style={{ width: '14.28%' }}>Viernes</th>
+              <th style={{ width: '14.28%' }}>Sábado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {calendar.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {row.map((cell, cellIndex) => (
+                  <td key={cellIndex} className='pestanita' onClick={() => handleDayClick(cell)}>
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div>
+        {showModal ? (
+          <div>
+            {renderModalContent()}
+          </div>
+        ) : (
+          <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height:'100%', width:'120%' }}>
+            No se ha seleccionado ninguna fecha del calendario
+          </div>
+        )}
+    </div>
     </div>
   );
 };

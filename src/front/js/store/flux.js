@@ -75,7 +75,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						return { error: resp.statusText };
 					}
 
-					return resp.json()
+					return resp
 				} catch (error) {
 					console.error("Error:", error)
 				}
