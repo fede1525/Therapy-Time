@@ -19,29 +19,30 @@ export const SchedulingComponent = () => {
   const [extractedInfo, setExtractedInfo] = useState([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false)
 
-  const openShowSuccessModal= () =>{
+  const openShowSuccessModal = () => {
     setShowSuccessModal(true)
   }
 
-  const closeShowSuccessModal= () =>{
+  const closeShowSuccessModal = () => {
+    handleCloseModal();
     setShowSuccessModal(false)
   }
 
   const handleNextMonth = () => {
     if (month === 12) {
-      setYear(year => year + 1); 
+      setYear(year => year + 1);
       setMonth(1);
     } else {
-      setMonth(month => month + 1); 
+      setMonth(month => month + 1);
     }
   };
 
   const handlePreviousMonth = () => {
     if (month === 1) {
-      setYear(year => year - 1); 
-      setMonth(12); 
+      setYear(year => year - 1);
+      setMonth(12);
     } else {
-      setMonth(month => month - 1); 
+      setMonth(month => month - 1);
     }
   };
 
@@ -71,10 +72,10 @@ export const SchedulingComponent = () => {
 
   useEffect(() => {
     fetchUnavailableDates();
-  }, [year]); 
+  }, [year]);
 
   useEffect(() => {
-    const currentDate = new Date(year, month - 1, 1); 
+    const currentDate = new Date(year, month - 1, 1);
     const firstDayOfWeek = currentDate.getDay();
     let day = 1;
 
@@ -98,7 +99,7 @@ export const SchedulingComponent = () => {
       newCalendar.push(row);
     }
     setCalendar(newCalendar);
-  }, [year, month]); 
+  }, [year, month]);
 
   const handleDayClick = (day) => {
     if (day) {
@@ -108,7 +109,7 @@ export const SchedulingComponent = () => {
       setShowModal(false);
     }
   };
-  
+
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedHours([])
@@ -116,7 +117,7 @@ export const SchedulingComponent = () => {
 
   const handleSelectHours = (data) => {
     const isSelected = selectedHours.find(item => item.id === data.id);
-    if (isSelected) { 
+    if (isSelected) {
       setSelectedHours(prevHours => prevHours.filter(item => item.id !== data.id));
     } else {
       setSelectedHours(prevHours => [...prevHours, data]);
@@ -195,12 +196,12 @@ export const SchedulingComponent = () => {
     const hours = Array.from({ length: 12 }, (_, index) => index + 8);
     return (
       <div>
-        <div className='d-flex justify-content-between align-items-center mb-2' style={{fontFamily: 'Nanum Gothic, sans-serif'}}>
+        <div className='d-flex justify-content-between align-items-center mb-2' style={{ fontFamily: 'Nanum Gothic, sans-serif' }}>
           <div>
             <h5>Disponibilidad {selectedDay} de {meses[month]}, {year}</h5>
           </div>
           <div>
-            <FaTimes  onClick={handleCloseModal} style={{ cursor: 'pointer', color:'grey' }} />
+            <FaTimes onClick={handleCloseModal} style={{ cursor: 'pointer', color: 'grey' }} />
           </div>
         </div>
         <div className="row">
@@ -240,7 +241,7 @@ export const SchedulingComponent = () => {
         </div>
         <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{textAlign:'left'}} id="contactModal">
+            <div className="modal-content" style={{ textAlign: 'left' }} id="contactModal">
               <div className="modal-header justify-content-between">
                 <div>
                   <span>Disponibilidad configurada con exito </span>
@@ -261,14 +262,14 @@ export const SchedulingComponent = () => {
       <div className="left-content mt-2" style={{ marginRight: '10vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
         <div className="calendar-header d-flex justify-content-between aling-items-center">
           <div className="button-container">
-            <FaChevronLeft style={{color:'grey'}} onClick={handlePreviousMonth} />
+            <FaChevronLeft style={{ color: 'grey' }} onClick={handlePreviousMonth} />
           </div>
           <h5>{meses[month]} de {year}</h5>
           <div className="button-container">
-           <FaChevronRight style={{color:'grey'}} onClick={handleNextMonth} />
+            <FaChevronRight style={{ color: 'grey' }} onClick={handleNextMonth} />
           </div>
         </div>
-        <table className="calendar" style={{  color: '#7E7E7E' }}>
+        <table className="calendar" style={{ color: '#7E7E7E' }}>
           <thead style={{ backgroundColor: '#FAFAFA' }}>
             <tr>
               <th style={{ width: '14.28%' }}>Domingo</th>
@@ -299,11 +300,11 @@ export const SchedulingComponent = () => {
             {renderModalContent()}
           </div>
         ) : (
-          <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height:'100%', width:'120%' }}>
+          <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '120%' }}>
             No se ha seleccionado ninguna fecha del calendario
           </div>
         )}
-    </div>
+      </div>
     </div>
   );
 };

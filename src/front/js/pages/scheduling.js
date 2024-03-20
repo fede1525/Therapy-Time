@@ -187,7 +187,7 @@ export const Scheduling = () => {
                         <tr key={index}>
                           <td><strong>{day}</strong></td>
                           {POSSIBLE_HOURS.map((hour, hourIndex) => (
-                            <td key={hourIndex} style={{ backgroundColor: store.globalEnabled.some(item => item.day === day && hour >= item.start_hour && hour < item.end_hour) ? '#a9a9a9' : 'transparent', width: '4%' }}>
+                            <td key={hourIndex} style={{ backgroundColor: store.globalEnabled.some(item => item.day === day && hour >= item.start_hour && hour < item.end_hour) ? '#a9a9a9' : 'transparent', width: '4%'}}>
                             </td>
                           ))}
                           <td style={{ width: '7%', textAlign: 'center' }}>

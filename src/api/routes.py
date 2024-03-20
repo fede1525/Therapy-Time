@@ -8,9 +8,12 @@ from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import datetime, json, string, random 
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 import requests
-from datetime import datetime, time
+from datetime import datetime, time, timedelta, date
+import calendar
+
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -404,11 +407,6 @@ def mark_consultation_as_read(id):
     except Exception as e:
         return jsonify({"error": "Error marking consultation as read"}), 500
 
-#blocking de fechas y horarios globales
-# 1) Definición de opciones para los días y horas
-POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
-POSSIBLE_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00']
-
 # Marcado de dias y franjas horarias disponibles (terapeuta) 
 # 1) Definición de opciones para los días y horas
 POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
@@ -508,7 +506,6 @@ def bloquear():
                     time=item['time'],
                     id=item['id'],
                 )
-
                 db.session.add(nueva_disponibilidad)
 
         elif isinstance(data, dict):
@@ -523,14 +520,12 @@ def bloquear():
                 time=data['time'],
                 id=data['id'],
             )
-
             db.session.add(nueva_disponibilidad)
 
         else:
             return jsonify({'error': 'El formato de datos no es válido'}), 400
 
         db.session.commit()
-
         return jsonify({'mensaje': 'Horas bloqueadas exitosamente'}), 200
 
     except Exception as e:
@@ -541,7 +536,7 @@ def bloquear():
 def delete_multiple_blocked_times():
     try:
         data = request.get_json()
-        ids = [item['id'] for item in data]  # Obtener una lista de IDs del cuerpo de la solicitud
+        ids = [item['id'] for item in data]  
 
         if not isinstance(ids, list):
             return jsonify({"error": "La lista de IDs debe ser un arreglo"}), 400
@@ -552,6 +547,11 @@ def delete_multiple_blocked_times():
             if blocked_time:
                 db.session.delete(blocked_time)
                 deleted_count += 1
+            else:
+                global_blocked_times = AvailabilityDates.query.filter_by(id=id, global_block=True).all()
+                for global_blocked_time in global_blocked_times:
+                    db.session.delete(global_blocked_time)
+                    deleted_count += 1
 
         db.session.commit()
 
@@ -559,67 +559,67 @@ def delete_multiple_blocked_times():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 # Desbloquear Hora en particular
-@api.route('/bloquear/<string:id>', methods=['DELETE'])
+@api.route('/desbloquear/<string:id>', methods=['DELETE'])
 def delete_blocked_time(id):
     try:
-        # Supongamos que tienes un modelo llamado BlockedTime
         blocked_time = AvailabilityDates.query.get(id)
-
         if blocked_time:
-            # Eliminar el registro de la base de datos
             db.session.delete(blocked_time)
             db.session.commit()
-
             return jsonify({"message": "Hora desbloqueada exitosamente"})
         else:
-            return jsonify({"message": "La hora no existe"}), 404
+            # Verificar si el ID corresponde a un bloqueo global y eliminar todos los bloqueos globales
+            global_blocked_times = AvailabilityDates.query.filter_by(id=id, global_block=True).all()
+            if global_blocked_times:
+                for global_blocked_time in global_blocked_times:
+                    db.session.delete(global_blocked_time)
+                db.session.commit()
+                return jsonify({"message": f"Horas desbloqueadas exitosamente"})
+            else:
+                return jsonify({"message": "La hora no existe"}), 404
     except Exception as e:
-        return jsonify({"message": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
-# Obtener fechas dispponibles
-@api.route('/fetch_bloquear', methods=['GET'])
-def unaviable_dates():
-    if request.method == 'GET':
-        try:
-            fechas_no_disponibles = AvailabilityDates.query.all()
-
-            return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-
-
+# Eliminar todos los bloqueos del calendario final
+@api.route('/borrar_todo_availability_dates', methods=['DELETE'])
+def borrar_todo_availability_dates():
     try:
-        # Consulta la base de datos para obtener las fechas no disponibles
-        fechas_no_disponibles = AvailabilityDates.query.all()
+        db.session.query(AvailabilityDates).delete()
+        db.session.commit()
+        return jsonify({'message': 'Todos los registros de AvailabilityDates han sido borrados'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+#Enpoint para almacenar bloqueo final de horas por fecha
+@api.route('/add_global_blocked_dates/<int:year>/<int:month>', methods=['GET'])
+def add_global_blocked_dates(year, month):
+    try:
+        start_date = date(year, month, 1)
+        end_date = date(year, month + 1, 1) - timedelta(days=1)
+        possible_dates = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
 
-        # Serializa los resultados en un formato JSON y los devuelve
-        return jsonify([fecha.serialize() for fecha in fechas_no_disponibles]), 200
+        blocked_dates = []
+
+        for current_date in possible_dates:
+            if current_date.weekday() < 5:  
+                if not GlobalSchedulingEnabled.query.filter_by(day=current_date.strftime('%A'), start_hour='19:00', end_hour='20:00').first():
+                    start_hour = '19'
+                    id = int(f"{current_date.year}{current_date.month:02d}{current_date.day:02d}{int(start_hour):02d}")
+                    new_blocked_date = AvailabilityDates(id=id, date=current_date, time=start_hour)
+                    db.session.add(new_blocked_date)
+
+        db.session.commit()
+        return jsonify({'message': 'Horas bloqueadas almacenadas correctamente'}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Reservar turno
-@app.route('/create_reservation', methods=['POST'])
-def create_reservation():
-    data = request.json
-
-    # Guardar en AvailabilityDates
-    new_availability = AvailabilityDates(date=data['date'], time=data['time'])
-    db.session.add(new_availability)
-    db.session.commit()
-
-    # Obtener el ID del nuevo registro de AvailabilityDates
-    availability_id = new_availability.id
-
-    # Guardar en Reservation
-    new_reservation = Reservation(date_id=availability_id, user_id=data['user_id'])
-    db.session.add(new_reservation)
-    db.session.commit()
-
-    return jsonify(message="Reserva creada exitosamente")
-
-if __name__ == '__main__':
-    app.run(debug=True)
+@api.route('/final_calendar', methods=['GET'])
+def final_calendar():
+    try:
+        availability_dates = AvailabilityDates.query.all()
+        serialized_dates = [availability_date.serialize() for availability_date in availability_dates]
+        return jsonify(serialized_dates), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

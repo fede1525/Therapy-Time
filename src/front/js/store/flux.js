@@ -18,7 +18,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"reset_token": ""
 				},
 			],
-			unavailableDates: [],
+			unavailableDates: [{
+				"id": "",
+				"date": "",
+				"time": ""
+			}],
 			consultations: [
 				{
 					"id": "",
@@ -43,7 +47,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"start_hour": "",
 				"end_hour": ""
 			}],
-			globalEnabledByDay:[{
+			globalEnabledByDay: [{
 				"id": "",
 				"day": "",
 				"start_hour": "",
@@ -449,12 +453,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 			addGlobalEnabled: async (data) => {
 				try {
 					const response = await getActions().apiFetch('/global_enabled', 'POST', data);
-			
+
 					if (!response.ok) {
 						throw new Error('Error al agregar disponibilidad global');
 					}
 					const responseData = await response.json();
-					const updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData]; 
+					const updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData];
 					setStore({ globalEnabled: updatedGlobalEnabled });
 					return responseData;
 				} catch (error) {
@@ -468,7 +472,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					const resp = await getActions().apiFetch('/get_global_enabled', 'GET');
 					if (resp.ok) {
 						const data = await resp.json();
-						setStore({ globalEnabled: data }); 
+						setStore({ globalEnabled: data });
 						return data;
 					} else {
 						throw new Error("Error al obtener los datos de disponibilidad global.");
@@ -480,17 +484,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			getGlobalEnabledByDay: async (day) => {
 				try {
-				  const resp = await getActions().apiFetch(`/get_global_enabled_by_day/${day}`, 'GET');
-				  if (resp.ok) {
-					const data = await resp.json();
-					setStore({ globalEnabledByDay: data }); 
-					return data; 
-				  } else {
-					throw new Error("Error al obtener los datos de disponibilidad global por día.");
-				  }
+					const resp = await getActions().apiFetch(`/get_global_enabled_by_day/${day}`, 'GET');
+					if (resp.ok) {
+						const data = await resp.json();
+						setStore({ globalEnabledByDay: data });
+						return data;
+					} else {
+						throw new Error("Error al obtener los datos de disponibilidad global por día.");
+					}
 				} catch (error) {
-				  console.error("Error al obtener los datos de disponibilidad global por día:", error.message);
-				  throw error;
+					console.error("Error al obtener los datos de disponibilidad global por día:", error.message);
+					throw error;
 				}
 			},
 			deleteGlobalEnabled: async (id) => {
@@ -508,9 +512,48 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al eliminar el registro de disponibilidad global:", error.message);
 					throw error;
 				}
-			}		
+			},
+			fetchUnavailableDates: async () => {
+				try {
+					const response = await getActions().apiFetch('/fetch_bloquear', 'GET');
+
+					if (!response.ok) {
+						throw new Error('Failed to fetch unavailable dates');
+					}
+
+					const responseData = await response.json();
+					setStore({ unavailableDates: responseData });
+
+					return { success: true, message: 'Unavailable dates fetched successfully' };
+				} catch (error) {
+					console.error('Error fetching unavailable dates:', error);
+					return { success: false, error: error.message || 'Error fetching unavailable dates' };
+				}
+			},
+			addGlobalAndFinalBlocks: async (year, month) => {
+				try {
+					const globalResponse = await getActions().apiFetch('/final_calendar', 'GET');
+					if (!globalResponse.ok) {
+						throw new Error("Error al obtener los datos de disponibilidad global.");
+					}
+					const globalData = await globalResponse.json();
+			
+					const finalResponse = await getActions().apiFetch(`/add_global_blocked_dates/${year}/${month}`, 'GET');
+					if (!finalResponse.ok) {
+						throw new Error('Failed to block dates');
+					}
+					const finalData = await finalResponse.json();
+			
+					setStore({ unavailableDates: { ...globalData, ...finalData } });
+			
+					return { success: true, message: 'Fechas bloqueadas actualizadas correctamente.' };
+				} catch (error) {
+					console.error('Error al obtener las fechas bloqueadas:', error);
+					return { success: false, error: error.message || 'Error al obtener las fechas bloqueadas.' };
+				}
+			}
 		}
-	}	
+	}
 };
 
 export default getState;
