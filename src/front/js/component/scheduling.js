@@ -31,7 +31,7 @@ export const SchedulingComponent = () => {
   
   const fetchUnavailableDates = async () => {
     try {
-      const response = await actions.apiFetch('/fetch_bloquear', 'GET');
+      const response = await actions.APIFetch('/fetch_bloquear', 'GET');
       setUnavailableDates(response);
     } catch (error) {
       console.error('Error al obtener fechas no disponibles:', error);

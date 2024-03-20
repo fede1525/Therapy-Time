@@ -75,6 +75,34 @@ const getState = ({ getStore, getActions, setStore }) => {
 						return { error: resp.statusText };
 					}
 
+					return resp
+				} catch (error) {
+					console.error("Error:", error)
+				}
+			},
+			APIFetch: async (endpoint, method = 'GET', body = null) => {
+				try {
+					let params = {
+						method,
+						headers: {
+							"Access-Control-Allow-Origin": "*"
+						}
+					};
+
+					if (body !== null) {
+						params.body = JSON.stringify(body);
+						params.headers["Content-Type"] = "application/json";
+					}
+					if (body != null) {
+						params.body = JSON.stringify(body)
+					}
+					let resp = await fetch(process.env.BACKEND_URL + "api" + endpoint, params);
+
+					if (!resp.ok) {
+						console.error(resp.statusText);
+						return { error: resp.statusText };
+					}
+
 					return resp.json()
 				} catch (error) {
 					console.error("Error:", error)
