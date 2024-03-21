@@ -409,7 +409,7 @@ def mark_consultation_as_read(id):
 
 # Marcado de dias y franjas horarias disponibles (terapeuta) 
 # 1) Definición de opciones para los días y horas
-POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
+POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 POSSIBLE_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00']
 # 2) Ruta para el endpoint POST
 @api.route('/global_enabled', methods=['POST'])
@@ -581,6 +581,81 @@ def delete_blocked_time(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Treae todos los registros bloqueados del calendario final
+@api.route('/final_calendar', methods=['GET'])
+def final_calendar():
+    try:
+        availability_dates = AvailabilityDates.query.all()
+        serialized_dates = [availability_date.serialize() for availability_date in availability_dates]
+        return jsonify(serialized_dates), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+#Arma un listado de las horas globales bloqueadas por dia
+#Paso 1)
+english_to_spanish = {
+            'Monday': 'Lunes',
+            'Tuesday': 'Martes',
+            'Wednesday': 'Miércoles',
+            'Thursday': 'Jueves',
+            'Friday': 'Viernes',
+            'Saturday': 'Sábado',
+            'Sunday': 'Domingo'
+        }
+#Paso 2)
+def get_unincluded_hours_by_day(day_of_week):
+    unincluded_hours_by_day = {day: [] for day in POSSIBLE_DAYS}
+
+    schedule_entries = GlobalSchedulingEnabled.query.filter_by(day=day_of_week).all()
+
+    for entry in schedule_entries:
+        start_hour = entry.start_hour.strftime('%H:%M')
+        end_hour = entry.end_hour.strftime('%H:%M')
+        
+        included_hours = POSSIBLE_HOURS[POSSIBLE_HOURS.index(start_hour):POSSIBLE_HOURS.index(end_hour) + 1]
+
+        unincluded_hours_by_day[day_of_week] += [hour for hour in POSSIBLE_HOURS if hour not in included_hours]
+
+    return unincluded_hours_by_day
+#Paso 3) (Prueba en postman)
+@api.route('/unincluded_hours_by_day', methods=['GET'])
+def get_unincluded_hours_by_day_endpoint():
+    try:
+        unincluded_hours_by_day = get_unincluded_hours_by_day()
+        return jsonify(unincluded_hours_by_day), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+#Almacena todas las horas bloqueadas a nivel global en AvailabilityDates
+@api.route('/add_availability_dates/<int:year>/<int:month>', methods=['POST'])
+def add_availability_dates(year, month):
+    try:
+        first_day = datetime(year, month, 1)
+        last_day = datetime(year, month, calendar.monthrange(year, month)[1])
+
+        for day in range(1, last_day.day + 1):
+            date = datetime(year, month, day)
+
+            day_of_week = date.strftime('%A')
+            day_of_week_spanish = english_to_spanish[day_of_week]
+
+            unincluded_hours = get_unincluded_hours_by_day(day_of_week_spanish)
+
+            for hour in unincluded_hours[day_of_week_spanish]:
+                hour_without_zero = str(int(hour.split(':')[0]))
+
+                date_time = datetime.combine(date.date(), datetime.strptime(hour, '%H:%M').time())
+                id = int(f"{year}{month:02d}{day:02d}{hour[:2]}")
+                new_availability_date = AvailabilityDates(id=id, date=date_time, time=hour_without_zero)
+                db.session.add(new_availability_date)
+                
+        db.session.commit()
+
+        return jsonify({'message': 'Fechas de disponibilidad agregadas correctamente'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # Eliminar todos los bloqueos del calendario final
 @api.route('/borrar_todo_availability_dates', methods=['DELETE'])
 def borrar_todo_availability_dates():
@@ -590,36 +665,6 @@ def borrar_todo_availability_dates():
         return jsonify({'message': 'Todos los registros de AvailabilityDates han sido borrados'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
-#Enpoint para almacenar bloqueo final de horas por fecha
-@api.route('/add_global_blocked_dates/<int:year>/<int:month>', methods=['GET'])
-def add_global_blocked_dates(year, month):
-    try:
-        start_date = date(year, month, 1)
-        end_date = date(year, month + 1, 1) - timedelta(days=1)
-        possible_dates = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
 
-        blocked_dates = []
 
-        for current_date in possible_dates:
-            if current_date.weekday() < 5:  
-                if not GlobalSchedulingEnabled.query.filter_by(day=current_date.strftime('%A'), start_hour='19:00', end_hour='20:00').first():
-                    start_hour = '19'
-                    id = int(f"{current_date.year}{current_date.month:02d}{current_date.day:02d}{int(start_hour):02d}")
-                    new_blocked_date = AvailabilityDates(id=id, date=current_date, time=start_hour)
-                    db.session.add(new_blocked_date)
 
-        db.session.commit()
-        return jsonify({'message': 'Horas bloqueadas almacenadas correctamente'}), 200
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@api.route('/final_calendar', methods=['GET'])
-def final_calendar():
-    try:
-        availability_dates = AvailabilityDates.query.all()
-        serialized_dates = [availability_date.serialize() for availability_date in availability_dates]
-        return jsonify(serialized_dates), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500

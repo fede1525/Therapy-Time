@@ -532,26 +532,27 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			addGlobalAndFinalBlocks: async (year, month) => {
 				try {
-					const globalResponse = await getActions().apiFetch('/final_calendar', 'GET');
-					if (!globalResponse.ok) {
-						throw new Error("Error al obtener los datos de disponibilidad global.");
+					const addAvailabilityResponse = await getActions().apiFetch(`/add_availability_dates/${year}/${month}`, {
+						method: 'POST'
+					});
+					if (!addAvailabilityResponse.ok) {
+						throw new Error('Error al agregar fechas de disponibilidad');
 					}
-					const globalData = await globalResponse.json();
 			
-					const finalResponse = await getActions().apiFetch(`/add_global_blocked_dates/${year}/${month}`, 'GET');
+					const finalResponse = await getActions().apiFetch('/final_calendar', 'GET');
 					if (!finalResponse.ok) {
-						throw new Error('Failed to block dates');
+						throw new Error("Error al obtener los datos de disponibilidad final.");
 					}
 					const finalData = await finalResponse.json();
 			
-					setStore({ unavailableDates: { ...globalData, ...finalData } });
-			
-					return { success: true, message: 'Fechas bloqueadas actualizadas correctamente.' };
+					setStore({ unavailableDates: finalData });
+					return finalData;
 				} catch (error) {
 					console.error('Error al obtener las fechas bloqueadas:', error);
 					return { success: false, error: error.message || 'Error al obtener las fechas bloqueadas.' };
 				}
 			}
+			
 		}
 	}
 };

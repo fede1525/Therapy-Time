@@ -80,10 +80,10 @@ class Reservation(db.Model):
         }
 
 class AvailabilityDates(db.Model):
-    __tablename__ = 'availability_dates'
-    id = db.Column(db.BigInteger, primary_key=True) 
-    date = db.Column(db.Date, nullable=False)
-    time = db.Column(db.String(5), nullable=False)
+    __tablename__='availability_dates'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    date = db.Column(db.DateTime, nullable=False)
+    time = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f'<Availability_dates {self.id}>'
@@ -91,8 +91,8 @@ class AvailabilityDates(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "date": self.date,
-            "time": self.time,
+            "date": self.date.strftime('%a, %d %b %Y %H:%M:%S GMT'),
+            "time": self.time,  
         }
 
 class Schedules(db.Model):

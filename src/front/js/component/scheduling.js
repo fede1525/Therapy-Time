@@ -63,8 +63,8 @@ export const SchedulingComponent = () => {
 
   const fetchUnavailableDates = async () => {
     try {
-      const response = await actions.apiFetch('/fetch_bloquear', 'GET');
-      setUnavailableDates(response);
+      const response = await actions.addGlobalAndFinalBlocks(year, month); 
+      setUnavailableDates(response); 
     } catch (error) {
       console.error('Error al obtener fechas no disponibles:', error);
     }
@@ -72,7 +72,7 @@ export const SchedulingComponent = () => {
 
   useEffect(() => {
     fetchUnavailableDates();
-  }, [year]);
+  }, [year, month]);
 
   useEffect(() => {
     const currentDate = new Date(year, month - 1, 1);
