@@ -16,7 +16,7 @@ from datetime import datetime, time
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 api = Blueprint('api', __name__)
-sdk = mercadopago.SDK("TEST-5789078080758140-031320-40e12865058c7a74eb23f44997d3703b-156863733") # ← Agregar token
+sdk = mercadopago.SDK(os.environ.get("MERCADOPAGO_ACCESSTOKEN")) 
 
 CORS(api)
 
@@ -614,13 +614,14 @@ def create_preference():
                     "title": req_data["description"],
                     "unit_price": float(req_data["price"]),
                     "quantity": int(req_data["quantity"]),
+                    "currency_id": "ARS"
                 }
             ],
             "back_urls": {
                 "success": "http://localhost:3000/",
                 "failure": "http://localhost:3000/",
                 "pending": "",
-            },
+            }, 
             "auto_return": "approved",
         }
 

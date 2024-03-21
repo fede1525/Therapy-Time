@@ -1,12 +1,15 @@
 import React, { useState, useContext } from 'react'
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react'
 import { Context } from "../js/store/appContext.js"
+import "./Product.module.css"
 
-const Product = () => {
+export const Product = () => {
     const { store, actions } = useContext(Context)
     const [preferenceIdLocal, setPreferenceIdLocal] = useState(null)
 
-    initMercadoPago('TEST-bceca7d7-bc1c-4085-bcfd-9b7555de2e39');
+    initMercadoPago(process.env.MERCADOPAGO_PUBLICKEY, {
+        locale: 'es-AR',
+    });
 
     const handleBuy = async () => {
         const id = await actions.createPreference()
@@ -16,20 +19,20 @@ const Product = () => {
     }
 
     return (
-        <div>
-            <div>
-                <div>
-                    <img src='' alt='product stuff' />
+        <div className="card-product-container">
+            <div className='card-product'>
+                <div className="card">
+                    <img src='src/front/img/logoHome.png' alt='product stuff' />
                     <h3>Consulta</h3>
                     <p>$100</p>
                     <button onClick={handleBuy} >Abonar</button>
-                    {
-                        preferenceIdLocal && <Wallet initialization={{ preferenceId: store.preferenceId.id }} />
-                    }
+                    <div className="wallet-container">
+                        {
+                            preferenceIdLocal && <Wallet initialization={{ preferenceId: store.preferenceId.id }} />
+                        }
+                    </div>
                 </div>
             </div>
         </div>
     )
 }
-
-export default Product;
