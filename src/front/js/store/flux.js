@@ -18,7 +18,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"reset_token": ""
 				},
 			],
-			unavailableDates: [],
+			unavailableDates: [{
+				"id": "",
+				"date": "",
+				"time": ""
+			}],
 			consultations: [
 				{
 					"id": "",
@@ -43,7 +47,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"start_hour": "",
 				"end_hour": ""
 			}],
-			globalEnabledByDay:[{
+			globalEnabledByDay: [{
 				"id": "",
 				"day": "",
 				"start_hour": "",
@@ -76,34 +80,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 
 					return resp
-				} catch (error) {
-					console.error("Error:", error)
-				}
-			},
-			APIFetch: async (endpoint, method = 'GET', body = null) => {
-				try {
-					let params = {
-						method,
-						headers: {
-							"Access-Control-Allow-Origin": "*"
-						}
-					};
-
-					if (body !== null) {
-						params.body = JSON.stringify(body);
-						params.headers["Content-Type"] = "application/json";
-					}
-					if (body != null) {
-						params.body = JSON.stringify(body)
-					}
-					let resp = await fetch(process.env.BACKEND_URL + "api" + endpoint, params);
-
-					if (!resp.ok) {
-						console.error(resp.statusText);
-						return { error: resp.statusText };
-					}
-
-					return resp.json()
 				} catch (error) {
 					console.error("Error:", error)
 				}
@@ -477,12 +453,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 			addGlobalEnabled: async (data) => {
 				try {
 					const response = await getActions().apiFetch('/global_enabled', 'POST', data);
-			
+
 					if (!response.ok) {
 						throw new Error('Error al agregar disponibilidad global');
 					}
 					const responseData = await response.json();
-					const updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData]; 
+					const updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData];
 					setStore({ globalEnabled: updatedGlobalEnabled });
 					return responseData;
 				} catch (error) {
@@ -496,7 +472,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					const resp = await getActions().apiFetch('/get_global_enabled', 'GET');
 					if (resp.ok) {
 						const data = await resp.json();
-						setStore({ globalEnabled: data }); 
+						setStore({ globalEnabled: data });
 						return data;
 					} else {
 						throw new Error("Error al obtener los datos de disponibilidad global.");
@@ -508,17 +484,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			getGlobalEnabledByDay: async (day) => {
 				try {
-				  const resp = await getActions().apiFetch(`/get_global_enabled_by_day/${day}`, 'GET');
-				  if (resp.ok) {
-					const data = await resp.json();
-					setStore({ globalEnabledByDay: data }); 
-					return data; 
-				  } else {
-					throw new Error("Error al obtener los datos de disponibilidad global por día.");
-				  }
+					const resp = await getActions().apiFetch(`/get_global_enabled_by_day/${day}`, 'GET');
+					if (resp.ok) {
+						const data = await resp.json();
+						setStore({ globalEnabledByDay: data });
+						return data;
+					} else {
+						throw new Error("Error al obtener los datos de disponibilidad global por día.");
+					}
 				} catch (error) {
-				  console.error("Error al obtener los datos de disponibilidad global por día:", error.message);
-				  throw error;
+					console.error("Error al obtener los datos de disponibilidad global por día:", error.message);
+					throw error;
 				}
 			},
 			deleteGlobalEnabled: async (id) => {
@@ -536,9 +512,49 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al eliminar el registro de disponibilidad global:", error.message);
 					throw error;
 				}
-			}		
+			},
+			fetchUnavailableDates: async () => {
+				try {
+					const response = await getActions().apiFetch('/fetch_bloquear', 'GET');
+
+					if (!response.ok) {
+						throw new Error('Failed to fetch unavailable dates');
+					}
+
+					const responseData = await response.json();
+					setStore({ unavailableDates: responseData });
+
+					return { success: true, message: 'Unavailable dates fetched successfully' };
+				} catch (error) {
+					console.error('Error fetching unavailable dates:', error);
+					return { success: false, error: error.message || 'Error fetching unavailable dates' };
+				}
+			},
+			addGlobalAndFinalBlocks: async (year, month) => {
+				try {
+					const addAvailabilityResponse = await getActions().apiFetch(`/add_availability_dates/${year}/${month}`, {
+						method: 'POST'
+					});
+					if (!addAvailabilityResponse.ok) {
+						throw new Error('Error al agregar fechas de disponibilidad');
+					}
+			
+					const finalResponse = await getActions().apiFetch('/final_calendar', 'GET');
+					if (!finalResponse.ok) {
+						throw new Error("Error al obtener los datos de disponibilidad final.");
+					}
+					const finalData = await finalResponse.json();
+			
+					setStore({ unavailableDates: finalData });
+					return finalData;
+				} catch (error) {
+					console.error('Error al obtener las fechas bloqueadas:', error);
+					return { success: false, error: error.message || 'Error al obtener las fechas bloqueadas.' };
+				}
+			}
+			
 		}
-	}	
+	}
 };
 
 export default getState;
