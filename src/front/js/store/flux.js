@@ -4,7 +4,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			user: [
 				{
 					"id": "",
-					"role": "",
+					"role_id": "",
 					"username": "",
 					"name": "",
 					"lastname": "",
@@ -134,7 +134,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					localStorage.setItem('token', token);
 					console.log("Token almacenado en localStorage:", token);
 
-					setStore({ isAuthenticated: true, role: userRole });
+					setStore({ isAuthenticated: true, role_id: userRole });
 
 					return { success: true, message: responseData.message };
 				} catch (error) {
