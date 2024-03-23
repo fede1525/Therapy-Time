@@ -36,7 +36,7 @@ const Layout = () => {
                         <Route element={<Recovery />} path="/recovery" />
                         <Route element={<Reset_password />} path="/reset_password" />
                         {!isAuthenticated() ? <Route element={<Navigate to="/login" />} path="*" /> : <>
-                            <Route element={store.user.role_id === 1 ? <HomePatient /> : <HomeTherapist />} path="/home" />
+                            <Route element={store.user.role === 1 ? <HomePatient /> : <HomeTherapist />} path="/home" />
                             <Route element={<EditProfile />} path="/editProfile" />
                             <Route element={<Payments />} path="/payments" />
                             <Route element={<PatientSchedule />} path="/patient_schedule" />

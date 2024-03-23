@@ -4,7 +4,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			user: [
 				{
 					"id": "",
-					"role_id": "",
+					"role": "",
 					"username": "",
 					"name": "",
 					"lastname": "",
@@ -129,14 +129,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 					const responseData = await response.json();
 					const token = responseData.token || "";
-					const userRole = responseData.role || "";
 
 					localStorage.setItem('token', token);
 					console.log("Token almacenado en localStorage:", token);
-
-					setStore({ isAuthenticated: true, role_id: userRole });
-
+					setStore({ user: responseData });
 					return { success: true, message: responseData.message };
+
 				} catch (error) {
 					console.error("Error al realizar la solicitud:", error);
 					const errorMessage = error.message || 'Error de red';
@@ -538,13 +536,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 					if (!addAvailabilityResponse.ok) {
 						throw new Error('Error al agregar fechas de disponibilidad');
 					}
-			
+
 					const finalResponse = await getActions().apiFetch('/final_calendar', 'GET');
 					if (!finalResponse.ok) {
 						throw new Error("Error al obtener los datos de disponibilidad final.");
 					}
 					const finalData = await finalResponse.json();
-			
+
 					setStore({ unavailableDates: finalData });
 					return finalData;
 				} catch (error) {
@@ -552,7 +550,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message || 'Error al obtener las fechas bloqueadas.' };
 				}
 			}
-			
+
 		}
 	}
 };
