@@ -52,7 +52,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"day": "",
 				"start_hour": "",
 				"end_hour": ""
-			}]
+			}],
+			patientReservation:{
+				"id": "",
+            	"date": "",
+            	"user_id": ""
+			}
 		},
 		actions: {
 			//Funciones globales
@@ -549,7 +554,89 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error('Error al obtener las fechas bloqueadas:', error);
 					return { success: false, error: error.message || 'Error al obtener las fechas bloqueadas.' };
 				}
+			},
+			getVirtualLink : async () =>{
+				try {
+					const resp = await getActions().protectedFetch("/profile_virtual_link", "GET", null)
+					if (!resp.ok) {
+						console.error("Error al traer el link de sala virtual: ", resp)
+						return { error: "Error al traer el link de sala virtual" }
+					}
+					return resp.json()
+				} catch (error) {
+					console.error("Error: ", error)
+					return { error: "Error al traer el link de sala virtual" }
+				}
+			},
+			getPatientReservation: async ()=>{
+				try {
+					const resp = await getActions().protectedFetch("/next_reservation", "GET", null)
+					if (!resp.ok) {
+						console.error("Error consultar el proximo truno: ", resp)
+						return { error: "Error consultar el proximo truno" }
+					}
+					return resp.json()
+				} catch (error) {
+					console.error("Error: ", error)
+					return { error: "Error consultar el proximo truno" }
+				}
+			},
+			deleteReservation: async (reservationId) => {
+				try {
+					const resp = await getActions().apiFetch(`/delete_reservation/${reservationId}`, "DELETE");
+					if (!resp.ok) {
+						console.error("Error al intentar cancelar la reserva: ", resp);
+						return { error: "Error al intentar cancelar la reserva" };
+					}
+					return { message: "Reserva cancelada exitosamente" };
+				} catch (error) {
+					console.error("Error al intentar cancelar la reserva: ", error);
+					return { error: "Error al intentar cancelar la reserva" };
+				}
+			},
+			createReservation: async (date, time) => {
+				try {
+				  const token = localStorage.getItem("token");
+				  if (!token) {
+					throw new Error("Token not found.");
+				  }
+				  
+				  const body = {
+					date: date,
+					time: time
+				  };
+			  
+				  const response = await getActions().protectedFetch("/reservation", "POST", body);
+				  const data = await response.json();
+			  
+				  if (!response.ok) {
+					throw new Error(data.error || "Error creating reservation.");
+				  }
+			  
+				  return data;
+				} catch (error) {
+				  console.error("Error creating reservation:", error);
+				  throw error;
+				}
+			},
+			updateReservation : async (reservationId, dataToUpdate) => {
+				try {
+				  const response = await getActions().apiFetch(`/edit_reservation/${reservationId}`, 'PUT', dataToUpdate);
+				  
+				  if (!response.ok) {
+					throw new Error('Failed to update reservation');
+				  }
+			  
+				  const responseData = await response.json();
+				  return { success: true, message: responseData.message, reservation: responseData.reservation };
+			  
+				} catch (error) {
+				  console.error("Error:", error);
+				  return { success: false, error: error.message || 'Error al actualizar la reserva' };
+				}
 			}
+
+
 
 		}
 	}
