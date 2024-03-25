@@ -58,6 +58,12 @@ const getState = ({ getStore, getActions, setStore }) => {
             	"date": "",
             	"user_id": ""
 			}
+			}],
+			patientReservation:{
+				"id": "",
+            	"date": "",
+            	"user_id": ""
+			}
 		},
 		actions: {
 			//Funciones globales
