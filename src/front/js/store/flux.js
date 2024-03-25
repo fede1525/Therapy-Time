@@ -58,6 +58,12 @@ const getState = ({ getStore, getActions, setStore }) => {
             	"date": "",
             	"user_id": ""
 			}
+			}],
+			patientReservation:{
+				"id": "",
+            	"date": "",
+            	"user_id": ""
+			}
 		},
 		actions: {
 			//Funciones globales
@@ -635,9 +641,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 				  return { success: false, error: error.message || 'Error al actualizar la reserva' };
 				}
 			}
-
-
-
 		}
 	}
 };

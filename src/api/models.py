@@ -69,7 +69,7 @@ class Reservation(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User")
 
-    def __repr__(self):
+    def __repr__(self):     
         return f'<Reservation {self.id}>'
     def serialize(self):
         return{

@@ -19,7 +19,3 @@ export const NewDate = () => {
         </div>
     );
 };
-
-
-
-

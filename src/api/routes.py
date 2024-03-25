@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, Blueprint, json
 from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled, Reservation
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled, Reservation
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -407,6 +408,42 @@ def mark_consultation_as_read(id):
     except Exception as e:
         return jsonify({"error": "Error marking consultation as read"}), 500
 
+#Borrado logico de las consultas
+@api.route('/deleted_consultations/<int:id>', methods=['PUT'])
+@jwt_required()
+def logical_deletion(id):
+    payload = get_jwt()
+    if payload["role"]!=2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            consultation.is_deleted = True
+            db.session.commit()
+            return jsonify({"message": "El mensaje ha sido eliminado"}),200
+        else:
+            return jsonify({"message" : "Error al eliminar el mensaje"}),404
+    except Exception as e:
+        return jsonify({"error": "Error al intentar eliminar el mensaje"}),500
+    
+#Borrado fisico de las consultas
+@api.route('/deleted_consultations/<int:id>', methods=['DELETE'])
+@jwt_required()
+def physical_deletion(id):
+    payload = get_jwt()
+    if payload["role"] != 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            db.session.delete(consultation)  
+            db.session.commit()
+            return jsonify({"message": "El mensaje ha sido eliminado de forma permanente"}), 200
+        else:
+            return jsonify({"message": "La consulta no existe"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error al intentar eliminar la consulta"}), 500
+
 # Marcado de dias y franjas horarias disponibles (terapeuta) 
 # 1) Definición de opciones para los días y horas
 POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
@@ -665,8 +702,6 @@ def borrar_todo_availability_dates():
         return jsonify({'message': 'Todos los registros de AvailabilityDates han sido borrados'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
 
 #Obetener link sala virtual (turnero Paciente)
 @api.route('/profile_virtual_link', methods=['GET'])
