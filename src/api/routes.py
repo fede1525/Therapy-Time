@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, Blueprint, json
-from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled, Reservation
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -668,3 +668,94 @@ def borrar_todo_availability_dates():
 
 
 
+#Obetener link sala virtual (turnero Paciente)
+@api.route('/profile_virtual_link', methods=['GET'])
+@jwt_required()
+def get_virtual_link():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+
+    if user is None:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    virtual_link = user.virtual_link
+
+    return jsonify({"virtual_link": virtual_link}), 200
+
+#Eliminar un turno (Paciente)
+@api.route('/delete_reservation/<int:reservation_id>', methods=['DELETE'])
+def delete_reservation(reservation_id):
+    try:
+        reservation = Reservation.query.get(reservation_id)
+        if reservation:
+            db.session.delete(reservation)
+            db.session.commit()
+            return jsonify({"message": "Reservación eliminada exitosamente"}), 200
+        else:
+            return jsonify({"error": "Reservación no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+#Consultar el proximo turno (Paciente)
+@api.route('/next_reservation', methods=['GET'])
+@jwt_required()
+def get_next_reservation():
+    try:
+        current_user_id = get_jwt_identity()
+        next_reservation = Reservation.query.filter(Reservation.user_id == current_user_id, Reservation.date >= datetime.now()).order_by(Reservation.date).first()
+        if next_reservation:
+            return jsonify(next_reservation.serialize()), 200
+        else:
+            return jsonify({"message": "No se encontró próxima reservación para este usuario."}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#Reservar nuevo turno (paciente)
+@api.route('/reservation', methods=['POST'])
+@jwt_required()
+def create_reservation():
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.json
+
+        if not data or 'date' not in data or 'time' not in data:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        datetime_str = f"{data['date']} {data['time']}"
+        
+        new_reservation = Reservation(
+            date=datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'),
+            user_id=current_user_id 
+        )
+
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/edit_reservation/<int:id>', methods=['PUT'])
+def update_reservation(id):
+    try:
+        data = request.json
+        reservation = Reservation.query.filter_by(id=id).first()  
+        if not reservation:
+            return jsonify({'error': 'Reservation not found '}), 404
+
+        if not data or ('date' not in data and 'time' not in data):
+            return jsonify({'error': 'Missing fields to update'}), 400
+
+        if 'date' in data and 'time' in data:
+            datetime_str = f"{data['date']} {data['time']}"
+            reservation.date = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+        elif 'date' in data:
+            reservation.date = datetime.strptime(data['date'], '%Y-%m-%d')
+        elif 'time' in data:
+            reservation.time = data['time']
+
+        db.session.commit()
+
+        return jsonify({'message': 'Reservation updated successfully', 'reservation': reservation.serialize()}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

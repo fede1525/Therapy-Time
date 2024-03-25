@@ -19,6 +19,9 @@ import { PatientSchedule } from "./pages/patientSchedule";
 import { Reset_password } from "./pages/resetPassword";
 import { EditProfile } from "./pages/editProfile";
 import { isAuthenticated } from "./authentication";
+import { NewDate } from "./pages/newDate.js";
+import { EditDate } from "./pages/editDate.js";
+
 
 const Layout = () => {
     const basename = process.env.BASENAME || "";
@@ -45,6 +48,8 @@ const Layout = () => {
                             <Route element={<IncomeControl />} path="/income_control" />
                             <Route element={<Inbox />} path="/inbox" />
                             <Route element={<Patients />} path="/patients" />
+                            <Route element={<NewDate />} path="/new_date" />
+                            <Route element={<EditDate />} path="/edit_date"  />
                         </>}
                     </Routes>
                 </ScrollToTop>
