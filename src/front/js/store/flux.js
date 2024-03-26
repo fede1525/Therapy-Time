@@ -63,7 +63,10 @@ const getState = ({ getStore, getActions, setStore }) => {
             	"date": "",
             	"user_id": ""
 			},
-			reservations :[]
+			reservations :[],
+			reservationByID:{
+
+			}
 		},
 		actions: {
 			//Funciones globales
@@ -658,6 +661,25 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					console.error('Error: ', error);
 					return { success: false, error: error.message || 'Error al cargar las reservas' };
+				}
+			},
+			getReservationByID: async (id) =>{
+				try {
+					const response = await getActions().apiFetch(`/get_reservation_by_id/${id}`, 'GET');
+			
+					if (!response.ok) {
+						throw new Error('Error al traer la reserva');
+					}
+			
+					const responseData = await response.json();
+					const reservationsData = responseData.data; 
+					console.log(reservationsData); 
+			
+					setStore({ reservationByID: reservationsData });
+					return { success: true, message: responseData.message };
+				} catch (error) {
+					console.error('Error: ', error);
+					return { success: false, error: error.message || 'Error al traer la reserva' };
 				}
 			}
 		}
