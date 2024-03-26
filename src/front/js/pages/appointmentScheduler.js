@@ -91,12 +91,10 @@ export const AppointmentScheduler = () => {
     };
 
     const handleEdit = (idReservation) => {
-        const selectedReservation = reservations.find(reservation => reservation.id === idReservation);
-        setSelectedReservation(selectedReservation);
+        const dataReservation = reservations.find(reservation => reservation.id === idReservation);
+        setSelectedReservation(dataReservation);
         setShowEditModal(true);
     };
-    
-    
 
     return (
         <div style={{ backgroundColor: 'white', minHeight: '100vh', paddingBottom: '7vh' }}>
@@ -207,7 +205,7 @@ export const AppointmentScheduler = () => {
                                             <button type="button" className="btn-close" onClick={() => setShowEditModal(false)} aria-label="Close"></button>
                                         </div>
                                         <div className="modal-body" style={{ paddingRight: '2vh' }}>
-                                            <SchedulingTherapistEdit reservation={selectedReservation} />
+                                            <SchedulingTherapistEdit idReservation={selectedReservation ? selectedReservation.id : null} />
                                         </div>
                                     </div>
                                 </div>
@@ -224,3 +222,5 @@ export const AppointmentScheduler = () => {
         </div>
     );
 };
+
+            

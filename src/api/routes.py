@@ -816,3 +816,23 @@ def get_all_reservations():
         return jsonify({"success": True, "data": citas})
     except Exception as e:
         return jsonify({"success": False, "error": "Error inesperado"}), 500
+
+#Consulta una reserva por id
+@api.route('/get_reservation_by_id/<int:id>', methods=['GET'])
+def get_reservation_by_id(id):
+    try:
+        reserva = Reservation.query.get(id)
+        if reserva:
+            usuario = User.query.get(reserva.user_id)
+            cita = {
+                "id": reserva.id,
+                "fecha": reserva.date.strftime('%Y-%m-%d %H:%M'),
+                "nombre_paciente": f"{usuario.name} {usuario.lastname}",
+                "telefono": usuario.phone,
+                "link_sala_virtual": usuario.virtual_link
+            }
+            return jsonify({"success": True, "data": cita})
+        else:
+            return jsonify({"success": False, "error": "Reserva no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "error": "Error inesperado"}), 500
