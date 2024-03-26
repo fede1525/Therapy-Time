@@ -30,7 +30,7 @@ class User(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "role_id": self.role.id, 
+            "role": self.role.id, 
             "username": self.username,
             "name": self.name,
             "lastname": self.lastname,
@@ -65,33 +65,33 @@ def seed():
 class Reservation(db.Model):
     __tablename__='reservation'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    date = db.Column(db.Date, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User")
 
-    def __repr__(self):
+    def __repr__(self):     
         return f'<Reservation {self.id}>'
     def serialize(self):
         return{
             "id": self.id,
             "date": self.date,
             "user_id": self.user_id,
-            "time_id": self.time_id,
         }
 
 class AvailabilityDates(db.Model):
     __tablename__='availability_dates'
-    id= db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     date = db.Column(db.DateTime, nullable=False)
     time = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f'<Availability_dates {self.id}>'
+
     def serialize(self):
-        return{
+        return {
             "id": self.id,
-            "date": self.date,
-            "time": self.time,
+            "date": self.date.strftime('%a, %d %b %Y %H:%M:%S GMT'),
+            "time": self.time,  
         }
 
 class Schedules(db.Model):
@@ -158,3 +158,7 @@ class GlobalSchedulingEnabled(db.Model):
             "start_hour": self.start_hour.strftime('%H:%M'),
             "end_hour": self.end_hour.strftime('%H:%M') 
         }
+
+
+
+

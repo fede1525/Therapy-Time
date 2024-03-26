@@ -40,32 +40,32 @@ export const NavbarPatient = () => {
 	}
 
 	return (
-		<nav className="navbar" style={{ backgroundColor: '#EDE9E9' }}>
-			<div className="container">
-				<div id="home-link">
-					<Link to="/home">
-						<span className="navbar-brand mb-0 h1">Inicio</span>
-					</Link>
+		<nav className="navbar" style={{ backgroundColor: '#EDE9E9', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
+			<div id="home-link">
+				<Link to="/home">
+					<img style={{ maxHeight: '8vh' }} className="mt-2" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/logo_login.png?raw=true"></img>
+				</Link>
+			</div>
+			<div id="home-link" className="d-flex ">
+				<Link to="/home" style={{ color: '#8A97A6', fontSize: '3vh', marginRight: '3vh' }}>
+					<p id="turns-button" className="navTherapist mt-3">Turnero</p>
+				</Link>
+				<div>
+					<p className="navTherapist mt-3" style={{color: '#8A97A6', fontSize: '3vh'}}>|</p>
 				</div>
-				<div className="d-flex justify-content-center" id="center-nav">
-					<Link to="/patient_schedule">
-						<p style={{ color: '#8A97A6' }} id="turns-button">Turnero</p>
-					</Link>
-					<div className="vr d-flex" style={{ color: '#8A97A6', margin: '10px', margin: '0px 20px', height: '26px', display: 'flex !important' }}></div>
-					<Link to="/payment">
-						<p style={{ color: '#8A97A6' }} id="payments-button">Mis Pagos</p>
-					</Link>
-				</div>
-				<div id="profile-button">
-					<div className="dropdown">
-						<button className="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style={{ color: '#CA857D' }}>
-							{userData.name + " " + userData.lastname}
-						</button>
-						<ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-							<li><Link className="dropdown-item" to="/editProfile" style={{ color: '#CA857D' }}>Mi perfil</Link></li>
-							<li><button className="dropdown-item btn" onClick={logoutFunction} style={{ color: '#CA857D' }}>Cerrar sesión</button></li>
-						</ul>
-					</div>
+				<Link to="/home" style={{ color: '#8A97A6', fontSize: '3vh', marginLeft: '3vh' }}>
+					<p id="turns-button" className="navTherapist mt-3">  Mis pagos</p>
+				</Link>
+			</div>
+			<div id="profile-button">
+				<div className="dropdown">
+					<button className="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style={{ color: '#8A97A6', fontSize: '3vh' }}>
+						{userData.name + " " + userData.lastname}
+					</button>
+					<ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+						<li><Link className="dropdown-item navTherapist" to="/editProfile" style={{ color: '#CA857D' }}>Mi perfil</Link></li>
+						<li><button className="dropdown-item btn" onClick={logoutFunction} style={{ color: '#CA857D' }}>Cerrar sesión</button></li>
+					</ul>
 				</div>
 			</div>
 		</nav>

@@ -1,9 +1,20 @@
 /* home.css */
 
 .selected {
-  background-color: gray !important;
+  background-color: #C47C7A !important;
+  color: white;
+}
+.btn_horasPorFecha{
+  background-color: #f5f1f1;
+  border-radius: 5px;
+  color:grey;
 }
 
+.btn_horasPorFecha:hover{
+  background-color: grey;
+  color: white;
+  border: none
+}
 .calendar {
   width: 80%;
   max-width: 400px;
@@ -11,21 +22,17 @@
   border-collapse: collapse;
   border-spacing: 5px;
 }
-
 .calendar th, .calendar td {
   padding: 10px;
   text-align: center;
   border: none;
 }
-
 .calendar th {
   background-color: #f2f2f2;
 }
-
 .calendar td {
   cursor: pointer;
 }
-
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -37,7 +44,6 @@
   align-items: center;
   justify-content: center;
 }
-
 .modal-content {
   background: #fff;
   padding: 20px;
@@ -45,11 +51,9 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
-
 .modal-content h2 {
   margin-bottom: 15px;
 }
-
 .modal-content ul {
   list-style: none;
   padding: 0;
@@ -58,12 +62,10 @@
   flex-wrap: wrap;
   justify-content: space-around;
 }
-
 .modal-content li {
   margin-bottom: 10px;
   cursor: pointer;
 }
-
 .modal-content li button {
   margin-left: 10px;
   padding: 5px 10px;
@@ -89,7 +91,6 @@
   background-color: rgb(150, 233, 133) ;
   transition: color 0.3s, background-color 0.3s, border-radius 0.3s;
 }
-
 button {
     cursor: pointer;
     background-color: transparent;
@@ -99,33 +100,29 @@ button {
     font-size: 16px;
     transition: color 0.3s, background-color 0.3s, border-radius 0.3s;
 }
-
 .button-container {
 text-align: center;
 margin-top: 10px;
 }
-
 button:hover {
-color: #8F9779; 
+color: #C47C7A; 
 background-color: #f2f2f2;
 }
-
 .calendar td {
 cursor: pointer;
 transition: background-color 0.3s, border-radius 0.3s;
 }
-
 .calendar td:hover {
-background-color: #8F9779; /* Color caqui */
-color: #fff; /* Color del texto en hover */
+background-color: #C47C7A; 
+color: #fff; 
 }
+
 .matching-hour{
   background-color: red;
 }
 td {
   position: relative;
 }
-
 /* Estilo de la pestañita */
 .pestanita {
   position: relative;
@@ -133,7 +130,6 @@ td {
   border: 1px solid #ccc;
   border-radius: 5px;
 }
-
 .botones {
   justify-content: space-evenly;
   display: none;
@@ -150,7 +146,6 @@ td {
 .botones > button{
   font-size: small;
 }
-
 .pestanita:hover .botones {
   display: flex;
   flex-direction: row;

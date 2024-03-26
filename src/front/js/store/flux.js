@@ -18,7 +18,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"reset_token": ""
 				},
 			],
-			unavailableDates: [],
+			unavailableDates: [{
+				"id": "",
+				"date": "",
+				"time": ""
+			}],
 			consultations: [
 				{
 					"id": "",
@@ -49,7 +53,18 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"day": "",
 				"start_hour": "",
 				"end_hour": ""
-			}]
+			}],
+			patientReservation: {
+				"id": "",
+				"date": "",
+				"user_id": ""
+			},
+			patientReservation: {
+				"id": "",
+				"date": "",
+				"user_id": ""
+			},
+			reservations: []
 		},
 		actions: {
 			//Funciones globales
@@ -76,7 +91,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						return { error: resp.statusText };
 					}
 
-					return resp.json()
+					return resp
 				} catch (error) {
 					console.error("Error:", error)
 				}
@@ -126,14 +141,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 					const responseData = await response.json();
 					const token = responseData.token || "";
-					const userRole = responseData.role || "";
 
 					localStorage.setItem('token', token);
 					console.log("Token almacenado en localStorage:", token);
-
-					setStore({ isAuthenticated: true, role: userRole });
-
+					setStore({ user: responseData });
 					return { success: true, message: responseData.message };
+
 				} catch (error) {
 					console.error("Error al realizar la solicitud:", error);
 					const errorMessage = error.message || 'Error de red';
@@ -535,6 +548,144 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					console.error("Error al eliminar el registro de disponibilidad global:", error.message);
 					throw error;
+				}
+			},
+			fetchUnavailableDates: async () => {
+				try {
+					const response = await getActions().apiFetch('/fetch_bloquear', 'GET');
+
+					if (!response.ok) {
+						throw new Error('Failed to fetch unavailable dates');
+					}
+
+					const responseData = await response.json();
+					setStore({ unavailableDates: responseData });
+
+					return { success: true, message: 'Unavailable dates fetched successfully' };
+				} catch (error) {
+					console.error('Error fetching unavailable dates:', error);
+					return { success: false, error: error.message || 'Error fetching unavailable dates' };
+				}
+			},
+			addGlobalAndFinalBlocks: async (year, month) => {
+				try {
+					const addAvailabilityResponse = await getActions().apiFetch(`/add_availability_dates/${year}/${month}`, {
+						method: 'POST'
+					});
+					if (!addAvailabilityResponse.ok) {
+						throw new Error('Error al agregar fechas de disponibilidad');
+					}
+
+					const finalResponse = await getActions().apiFetch('/final_calendar', 'GET');
+					if (!finalResponse.ok) {
+						throw new Error("Error al obtener los datos de disponibilidad final.");
+					}
+					const finalData = await finalResponse.json();
+
+					setStore({ unavailableDates: finalData });
+					return finalData;
+				} catch (error) {
+					console.error('Error al obtener las fechas bloqueadas:', error);
+					return { success: false, error: error.message || 'Error al obtener las fechas bloqueadas.' };
+				}
+			},
+			getVirtualLink: async () => {
+				try {
+					const resp = await getActions().protectedFetch("/profile_virtual_link", "GET", null)
+					if (!resp.ok) {
+						console.error("Error al traer el link de sala virtual: ", resp)
+						return { error: "Error al traer el link de sala virtual" }
+					}
+					return resp.json()
+				} catch (error) {
+					console.error("Error: ", error)
+					return { error: "Error al traer el link de sala virtual" }
+				}
+			},
+			getPatientReservation: async () => {
+				try {
+					const resp = await getActions().protectedFetch("/next_reservation", "GET", null)
+					if (!resp.ok) {
+						console.error("Error consultar el proximo truno: ", resp)
+						return { error: "Error consultar el proximo truno" }
+					}
+					return resp.json()
+				} catch (error) {
+					console.error("Error: ", error)
+					return { error: "Error consultar el proximo truno" }
+				}
+			},
+			deleteReservation: async (reservationId) => {
+				try {
+					const resp = await getActions().apiFetch(`/delete_reservation/${reservationId}`, "DELETE");
+					if (!resp.ok) {
+						console.error("Error al intentar cancelar la reserva: ", resp);
+						return { error: "Error al intentar cancelar la reserva" };
+					}
+					return { message: "Reserva cancelada exitosamente" };
+				} catch (error) {
+					console.error("Error al intentar cancelar la reserva: ", error);
+					return { error: "Error al intentar cancelar la reserva" };
+				}
+			},
+			createReservation: async (date, time) => {
+				try {
+					const token = localStorage.getItem("token");
+					if (!token) {
+						throw new Error("Token not found.");
+					}
+
+					const body = {
+						date: date,
+						time: time
+					};
+
+					const response = await getActions().protectedFetch("/reservation", "POST", body);
+					const data = await response.json();
+
+					if (!response.ok) {
+						throw new Error(data.error || "Error creating reservation.");
+					}
+
+					return data;
+				} catch (error) {
+					console.error("Error creating reservation:", error);
+					throw error;
+				}
+			},
+			updateReservation: async (reservationId, dataToUpdate) => {
+				try {
+					const response = await getActions().apiFetch(`/edit_reservation/${reservationId}`, 'PUT', dataToUpdate);
+
+					if (!response.ok) {
+						throw new Error('Failed to update reservation');
+					}
+
+					const responseData = await response.json();
+					return { success: true, message: responseData.message, reservation: responseData.reservation };
+
+				} catch (error) {
+					console.error("Error:", error);
+					return { success: false, error: error.message || 'Error al actualizar la reserva' };
+				}
+			},
+			getAllReservations: async () => {
+				try {
+					const response = await getActions().apiFetch('/get_all_reservations', 'GET');
+
+					if (!response.ok) {
+						throw new Error('Error al traer las reservas');
+					}
+
+					const responseData = await response.json();
+					const reservationsData = responseData.data; // Acceder a la propiedad 'data'
+					console.log(reservationsData); // Ver los datos de las reservas en la consola
+
+					setStore({ reservations: reservationsData });
+					return { success: true, message: responseData.message };
+				} catch (error) {
+					console.error('Error: ', error);
+					return { success: false, error: error.message || 'Error al cargar las reservas' };
 				}
 			}
 		}

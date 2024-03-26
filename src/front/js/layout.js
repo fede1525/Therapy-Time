@@ -20,19 +20,15 @@ import { Reset_password } from "./pages/resetPassword";
 import { EditProfile } from "./pages/editProfile";
 import { isAuthenticated } from "./authentication";
 import { Payment } from "./pages/payment"
+import { NewDate } from "./pages/newDate.js";
+import { EditDate } from "./pages/editDate.js";
+
 
 const Layout = () => {
     const basename = process.env.BASENAME || "";
     if (!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL />;
 
     const { store } = useContext(Context);
-    const [role, setRole] = useState(store.role);
-
-    useEffect(() => {
-        setRole(store.role);
-        console.log(store.role)
-    }, [store.role]);
-
 
     return (
         <div>
@@ -41,18 +37,21 @@ const Layout = () => {
                     <Routes>
                         <Route element={<Landing />} path="/" />
                         <Route element={<Login />} path="/login" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : role === "Patient" ? <HomePatient /> : <HomeTherapist />} path="/home" />
                         <Route element={<Recovery />} path="/recovery" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Payment />} path="/payment" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <EditProfile />} path="/editProfile" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <PaymentList />} path="/payment_list" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <PatientSchedule />} path="/patient_schedule" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Scheduling />} path="/scheduling" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <AppointmentScheduler />} path="/appointment_scheduler" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <IncomeControl />} path="/income_control" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Inbox />} path="/inbox" />
                         <Route element={<Reset_password />} path="/reset_password" />
-                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Patients />} path="/patients" />
+                        {!isAuthenticated() ? <Route element={<Navigate to="/login" />} path="*" /> : <>
+                            <Route element={store.user.role === 1 ? <HomePatient /> : <HomeTherapist />} path="/home" />
+                            <Route element={<EditProfile />} path="/editProfile" />
+                            <Route element={<Payment />} path="/payment" />
+                            <Route element={<PatientSchedule />} path="/patient_schedule" />
+                            <Route element={<Scheduling />} path="/scheduling" />
+                            <Route element={<AppointmentScheduler />} path="/appointment_scheduling" />
+                            <Route element={<IncomeControl />} path="/income_control" />
+                            <Route element={<Inbox />} path="/inbox" />
+                            <Route element={<Patients />} path="/patients" />
+                            <Route element={<NewDate />} path="/new_date" />
+                            <Route element={<EditDate />} path="/edit_date" />
+                        </>}
                     </Routes>
                 </ScrollToTop>
             </BrowserRouter>
