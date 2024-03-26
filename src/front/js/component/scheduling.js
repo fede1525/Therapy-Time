@@ -102,6 +102,13 @@ export const SchedulingComponent = () => {
   }, [year, month]);
 
   const handleDayClick = (day) => {
+    const selectedDate = new Date(year, month - 1, day);
+    const currentDate = new Date();
+  
+    if (selectedDate < currentDate) {
+      return;
+    }
+  
     if (day) {
       setSelectedDay(day);
       setShowModal(true);
@@ -109,6 +116,7 @@ export const SchedulingComponent = () => {
       setShowModal(false);
     }
   };
+  
 
   const handleCloseModal = () => {
     setShowModal(false);

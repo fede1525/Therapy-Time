@@ -169,25 +169,6 @@ export const SchedulingPatientEdit = () => {
     }
   };
 
-  const handleReservation = async () => {
-    // Construir la fecha en el formato YYYY-MM-DD
-    const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
-
-    // Asegúrate de que selectedHour esté en el formato "hh:mm:ss"
-    const formattedHour = `${selectedHour.toString().padStart(2, '0')}:00:00`;
-
-    try {
-      const response = await actions.createReservation(formattedDate, formattedHour);
-      if (response && response.message === 'Reservation created successfully') {
-        openShowSuccessModal();
-      } else {
-        console.error('Error al realizar la reserva:', response && response.error ? response.error : 'Error desconocido');
-      }
-    } catch (error) {
-      console.error('Error al realizar la reserva:', error);
-    }
-  };
-
   const renderModalContent = () => {
     const hours = Array.from({ length: 12 }, (_, index) => index + 8);
     return (
@@ -289,11 +270,11 @@ export const SchedulingPatientEdit = () => {
         </div>
         <div>
           {showModal ? (
-            <div>
+            <div className='mt-4'>
               {renderModalContent()}
             </div>
           ) : (
-            <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '120%' }}>
+            <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '120%'}}>
               No se ha seleccionado ninguna fecha del calendario
             </div>
           )}

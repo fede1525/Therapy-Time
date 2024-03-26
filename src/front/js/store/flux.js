@@ -62,7 +62,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"id": "",
             	"date": "",
             	"user_id": ""
-			}
+			},
+			reservations :[]
 		},
 		actions: {
 			//Funciones globales
@@ -638,6 +639,25 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 				  console.error("Error:", error);
 				  return { success: false, error: error.message || 'Error al actualizar la reserva' };
+				}
+			},
+			getAllReservations: async () => {
+				try {
+					const response = await getActions().apiFetch('/get_all_reservations', 'GET');
+			
+					if (!response.ok) {
+						throw new Error('Error al traer las reservas');
+					}
+			
+					const responseData = await response.json();
+					const reservationsData = responseData.data; // Acceder a la propiedad 'data'
+					console.log(reservationsData); // Ver los datos de las reservas en la consola
+			
+					setStore({ reservations: reservationsData });
+					return { success: true, message: responseData.message };
+				} catch (error) {
+					console.error('Error: ', error);
+					return { success: false, error: error.message || 'Error al cargar las reservas' };
 				}
 			}
 		}

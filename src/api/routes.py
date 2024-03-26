@@ -770,6 +770,7 @@ def create_reservation():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+#Editar un turno paciente
 @api.route('/edit_reservation/<int:id>', methods=['PUT'])
 def update_reservation(id):
     try:
@@ -794,3 +795,24 @@ def update_reservation(id):
         return jsonify({'message': 'Reservation updated successfully', 'reservation': reservation.serialize()}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+#Consultar todas las citas agendadas
+@api.route('/get_all_reservations', methods=['GET'])
+def get_all_reservations():
+    try:
+        reservas = Reservation.query.all()
+        citas = []
+
+        for reserva in reservas:
+            usuario = User.query.get(reserva.user_id)
+            cita = {
+                "id": reserva.id,
+                "fecha": reserva.date.strftime('%Y-%m-%d %H:%M'),
+                "nombre_paciente": f"{usuario.name} {usuario.lastname}",
+                "telefono": usuario.phone,
+                "link_sala_virtual": usuario.virtual_link
+            }
+            citas.append(cita)
+        return jsonify({"success": True, "data": citas})
+    except Exception as e:
+        return jsonify({"success": False, "error": "Error inesperado"}), 500

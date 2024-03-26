@@ -258,7 +258,7 @@ export const SchedulingPatient = () => {
       </div>
       <div>
         {showModal ? (
-          <div>
+          <div className='mt-4'>
             {renderModalContent()}
           </div>
         ) : (
