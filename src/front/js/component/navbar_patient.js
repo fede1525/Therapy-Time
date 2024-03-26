@@ -51,8 +51,8 @@ export const NavbarPatient = () => {
 					<Link to="/patient_schedule">
 						<p style={{ color: '#8A97A6' }} id="turns-button">Turnero</p>
 					</Link>
-					<div className="vr d-flex" style={{ color: '#8A97A6', margin: '10px', margin: '0px 20px',  height: '26px',  display: 'flex !important'}}></div>
-					<Link to="/payments">
+					<div className="vr d-flex" style={{ color: '#8A97A6', margin: '10px', margin: '0px 20px', height: '26px', display: 'flex !important' }}></div>
+					<Link to="/payment">
 						<p style={{ color: '#8A97A6' }} id="payments-button">Mis Pagos</p>
 					</Link>
 				</div>

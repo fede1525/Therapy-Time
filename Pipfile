@@ -24,6 +24,7 @@ flask-mail = "*"
 requests = "*"
 sqlalchemy-seeder = "*"
 arrow = "*"
+mercadopago = "*"
 
 [requires]
 python_version = "3.10"

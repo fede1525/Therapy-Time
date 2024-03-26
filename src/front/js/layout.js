@@ -9,7 +9,7 @@ import { Login } from "./pages/login"
 import { Recovery } from "./pages/recovery";
 import { HomePatient } from "./pages/homePatient";
 import { HomeTherapist } from "./pages/homeTherapist";
-import {Scheduling} from "./pages/scheduling.js";
+import { Scheduling } from "./pages/scheduling.js";
 import { AppointmentScheduler } from "./pages/appointmentScheduler";
 import { IncomeControl } from "./pages/incomeControl";
 import { Inbox } from "./pages/inbox";
@@ -19,6 +19,7 @@ import { PatientSchedule } from "./pages/patientSchedule";
 import { Reset_password } from "./pages/resetPassword";
 import { EditProfile } from "./pages/editProfile";
 import { isAuthenticated } from "./authentication";
+import { Payment } from "./pages/payment"
 
 const Layout = () => {
     const basename = process.env.BASENAME || "";
@@ -42,6 +43,7 @@ const Layout = () => {
                         <Route element={<Login />} path="/login" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : role === "Patient" ? <HomePatient /> : <HomeTherapist />} path="/home" />
                         <Route element={<Recovery />} path="/recovery" />
+                        <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <Payment />} path="/payment" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <EditProfile />} path="/editProfile" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <PaymentList />} path="/payment_list" />
                         <Route element={!isAuthenticated() ? <Navigate to="/login" /> : <PatientSchedule />} path="/patient_schedule" />
