@@ -15,6 +15,16 @@
   color: white;
   border: none
 }
+.unavailableDate{
+  border-color: rgb(196, 124, 122); 
+  color: white;
+  background-color: #A9A9A9;
+}
+.unavailableByDate{
+  border-color: rgb(196, 124, 122); 
+  color: white;
+  background-color: #A9A9A9;
+}
 .calendar {
   width: 80%;
   max-width: 400px;

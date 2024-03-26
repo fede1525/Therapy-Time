@@ -84,6 +84,34 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error:", error)
 				}
 			},
+			APIFetch: async (endpoint, method = 'GET', body = null) => {
+				try {
+					let params = {
+						method,
+						headers: {
+							"Access-Control-Allow-Origin": "*"
+						}
+					};
+
+					if (body !== null) {
+						params.body = JSON.stringify(body);
+						params.headers["Content-Type"] = "application/json";
+					}
+					if (body != null) {
+						params.body = JSON.stringify(body)
+					}
+					let resp = await fetch(process.env.BACKEND_URL + "api" + endpoint, params);
+
+					if (!resp.ok) {
+						console.error(resp.statusText);
+						return { error: resp.statusText };
+					}
+
+					return resp.json()
+				} catch (error) {
+					console.error("Error:", error)
+				}
+			},
 			protectedFetch: async (endpoint, method = "GET", body = null) => {
 				const token = localStorage.getItem("token")
 				if (!token) {
@@ -527,30 +555,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error('Error fetching unavailable dates:', error);
 					return { success: false, error: error.message || 'Error fetching unavailable dates' };
 				}
-			},
-			addGlobalAndFinalBlocks: async (year, month) => {
-				try {
-					const addAvailabilityResponse = await getActions().apiFetch(`/add_availability_dates/${year}/${month}`, {
-						method: 'POST'
-					});
-					if (!addAvailabilityResponse.ok) {
-						throw new Error('Error al agregar fechas de disponibilidad');
-					}
-
-					const finalResponse = await getActions().apiFetch('/final_calendar', 'GET');
-					if (!finalResponse.ok) {
-						throw new Error("Error al obtener los datos de disponibilidad final.");
-					}
-					const finalData = await finalResponse.json();
-
-					setStore({ unavailableDates: finalData });
-					return finalData;
-				} catch (error) {
-					console.error('Error al obtener las fechas bloqueadas:', error);
-					return { success: false, error: error.message || 'Error al obtener las fechas bloqueadas.' };
-				}
 			}
-
 		}
 	}
 };
