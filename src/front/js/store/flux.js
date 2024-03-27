@@ -18,6 +18,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"reset_token": ""
 				},
 			],
+			userByDNI : {},
 			unavailableDates: [{
 				"id": "",
 				"date": "",
@@ -64,7 +65,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"date": "",
 				"user_id": ""
 			},
-			reservations: []
+			reservations :[],
+			reservationByID:{
+
+			}
 		},
 		actions: {
 			//Funciones globales
@@ -80,9 +84,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 					if (body !== null) {
 						params.body = JSON.stringify(body);
 						params.headers["Content-Type"] = "application/json";
-					}
-					if (body != null) {
-						params.body = JSON.stringify(body)
 					}
 					let resp = await fetch(process.env.BACKEND_URL + "api" + endpoint, params);
 
@@ -588,7 +589,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message || 'Error al obtener las fechas bloqueadas.' };
 				}
 			},
-			getVirtualLink: async () => {
+			getVirtualLink : async () =>{
 				try {
 					const resp = await getActions().protectedFetch("/profile_virtual_link", "GET", null)
 					if (!resp.ok) {
@@ -677,16 +678,63 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 
 					const responseData = await response.json();
-					const reservationsData = responseData.data; // Acceder a la propiedad 'data'
-					console.log(reservationsData); // Ver los datos de las reservas en la consola
-
+					const reservationsData = responseData.data; 
+					console.log(reservationsData); 
+			
 					setStore({ reservations: reservationsData });
 					return { success: true, message: responseData.message };
 				} catch (error) {
 					console.error('Error: ', error);
 					return { success: false, error: error.message || 'Error al cargar las reservas' };
 				}
+			},
+			getReservationByID: async (id) =>{
+				try {
+					const response = await getActions().apiFetch(`/get_reservation_by_id/${id}`, 'GET');
+			
+					if (!response.ok) {
+						throw new Error('Error al traer la reserva');
+					}
+			
+					const responseData = await response.json();
+					const reservationsData = responseData.data; 
+					console.log(reservationsData); 
+			
+					setStore({ reservationByID: reservationsData });
+					return { success: true, message: responseData.message };
+				} catch (error) {
+					console.error('Error: ', error);
+					return { success: false, error: error.message || 'Error al traer la reserva' };
+				}
+			},
+			searchUserByDNI: async (dni) => {
+				try {
+					const response = await getActions().apiFetch(`/search_user/${dni}`, 'GET');
+			
+					if (!response.ok) {
+						throw new Error('Error al buscar usuario por DNI');
+					}
+			
+					const responseData = await response.json();
+			
+					if (responseData.error) {
+						throw new Error(responseData.error);
+					}
+			
+					const userData = responseData; // No necesitas responseData.data, ya que la respuesta ya contiene los datos del usuario.
+			
+					// Actualiza el store con los datos del usuario
+					setStore({ userByDNI: userData });
+			
+					console.log("Datos del usuario recibidos:", userData);
+			
+					return { success: true, message: "Usuario encontrado correctamente" };
+				} catch (error) {
+					console.error('Error al buscar usuario por DNI:', error.message);
+					return { success: false, error: error.message };
+				}
 			}
+			
 		}
 	}
 };
