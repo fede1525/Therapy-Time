@@ -23,7 +23,19 @@ export const Landing = () => {
     const openSuccessModal = () => {
         setShowSuccessModal(true);
     }
+
+    const resetForm = () => {
+        setFormData({
+        name: "",
+        lastname: "",
+        age: "",
+        phone: "",
+        consultation: ""
+        });
+    };
+
     const closeModal = () => {
+        resetForm(); 
         setShowModal(false);
     };
     const closeSuccessModal = () => {

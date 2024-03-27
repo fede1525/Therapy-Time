@@ -1,11 +1,11 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
-import "../../styles/home.css";
-import { NavbarPatient, NavbarPatients } from "../component/navbar_patient";
+import { NavbarPatient } from "../component/navbar_patient";
 import moment from 'moment';
 import 'moment/locale/es';
-import { SchedulingPatient } from "../component/schedulingPatient"
+import "../../styles/inbox.css";
+import "../../styles/landing.css";
 
 export const HomePatient = () => {
     const { actions } = useContext(Context);
@@ -125,8 +125,8 @@ export const HomePatient = () => {
                             <span>¿Seguro desea cancelar su próximo turno?</span>
                         </div>
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={closeSuccessModal}>Cancelar</button>
-                            <button type="button" className="btn btn-danger" onClick={confirmCancelReservation}>Confirmar</button>
+                            <button type="button" className="btn btn-guardar" onClick={closeSuccessModal}>Cancelar</button>
+                            <button type="button" className="btn btn-guardar-contact" onClick={confirmCancelReservation}>Confirmar</button>
                         </div>
                     </div>
                 </div>

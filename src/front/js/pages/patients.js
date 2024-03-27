@@ -3,8 +3,9 @@ import "../../styles/landing.css";
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPencilAlt} from '@fortawesome/free-solid-svg-icons';
+import { faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import { NavbarTherapist } from "../component/navbar"
+import { faLink } from '@fortawesome/free-solid-svg-icons';
 
 export const Patients = () => {
     const { store, actions } = useContext(Context);
@@ -19,28 +20,28 @@ export const Patients = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [patientsPerPage] = useState(10);
     const [userData, setUserData] = useState({
-        id : "",
+        id: "",
         role_id: 1,
         username: "",
         name: "",
         lastname: "",
         dni: "",
         phone: "",
-        email: "", 
+        email: "",
         virtual_link: "",
-        is_active : true
+        is_active: true
     });
     const initialUserData = {
-        id : "",
+        id: "",
         role_id: 1,
         username: "",
         name: "",
         lastname: "",
         dni: "",
         phone: "",
-        email: "", 
+        email: "",
         virtual_link: "",
-        is_active : true
+        is_active: true
     };
 
     useEffect(() => {
@@ -65,17 +66,17 @@ export const Patients = () => {
     const handleSubmit = async () => {
         const validationMessages = validateForm(userData, false);
         setErrorMessages(validationMessages);
-        
+
         const hasErrors = Object.values(validationMessages).some(msg => msg !== "");
         if (hasErrors) {
-            return; 
+            return;
         }
         try {
             await actions.createUser(
                 userData
             );
             closeModal();
-            setSuccessAction("add"); 
+            setSuccessAction("add");
             setShowSuccessModal(true);
             setUserData({
                 id: "",
@@ -86,7 +87,7 @@ export const Patients = () => {
                 dni: "",
                 phone: "",
                 email: "",
-                virtual_link: "", 
+                virtual_link: "",
                 is_active: true
             });
         } catch (error) {
@@ -115,28 +116,28 @@ export const Patients = () => {
     };
     const handleChangeNameFilter = (e) => {
         setNameFilter(e.target.value);
-    };  
+    };
     const handleChangeDniFilter = (e) => {
         setDniFilter(e.target.value);
-    };   
-    const filteredUsers = store.user.filter(user => {
+    };
+    const filteredUsers = store.user.length > 0 ? store.user.filter(user => {
         const nameMatches = (user.name && user.name.toLowerCase().includes(nameFilter.toLowerCase())) || (user.lastname && user.lastname.toLowerCase().includes(nameFilter.toLowerCase()));
         const dniMatches = user.dni && user.dni.includes(dniFilter);
         return nameMatches && dniMatches;
-    });
+    }) : [];
     const activeFilteredUsers = filteredUsers.filter(user => user.is_active);
     const inactiveFilteredUsers = filteredUsers.filter(user => !user.is_active);
     const sortedActiveFilteredUsers = activeFilteredUsers.sort((a, b) => a.name.localeCompare(b.name));
     const sortedInactiveFilteredUsers = inactiveFilteredUsers.sort((a, b) => a.name.localeCompare(b.name));
     const sortedFilteredUsers = [...sortedActiveFilteredUsers, ...sortedInactiveFilteredUsers];
-    
+
     //Edicion de usuario
-    const handleGetUser = async(id) =>{
-        try{
+    const handleGetUser = async (id) => {
+        try {
             const data = await actions.getUser(id);
             setUserData(data);
             setShowModalEdit(true);
-            const validationMessages = validateForm(data, true); 
+            const validationMessages = validateForm(data, true);
             setErrorMessages(validationMessages);
         } catch (error) {
             console.error("Error al obtener el usuario:", error.message);
@@ -145,22 +146,22 @@ export const Patients = () => {
     const handleSaveChanges = async () => {
         const validationMessages = validateForm(userData, true);
         setErrorMessages(validationMessages);
-        
+
         const hasErrors = Object.values(validationMessages).some(msg => msg !== "");
         if (hasErrors) {
-            return; 
+            return;
         }
         try {
             const userId = userData.id;
             await actions.editUser(userId, userData);
             closeModal();
-            setSuccessAction("edit"); 
+            setSuccessAction("edit");
             setShowSuccessModal(true);
         } catch (error) {
             console.error("Error al guardar los cambios:", error.message);
         }
     };
-    
+
     //Validaciones
     const [errorMessages, setErrorMessages] = useState({
         username: "",
@@ -187,7 +188,7 @@ export const Patients = () => {
             errors.name = "*El campo es obligatorio";
         } else {
             errors.name = "";
-        }        
+        }
         if (data.lastname.trim() === "") {
             errors.lastname = "*El campo es obligatorio";
         } else {
@@ -231,35 +232,35 @@ export const Patients = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
         return emailRegex.test(email);
     };
-    
+
     //Paginacion
     const paginate = pageNumber => setCurrentPage(pageNumber);
     const visibleUsers = (showInactive ? sortedFilteredUsers : sortedActiveFilteredUsers);
 
     return (
-        <div style={{backgroundColor: 'white', minHeight: '100vh', minWidth: '100vw'}}>
+        <div style={{ backgroundColor: 'white', minHeight: '100vh', minWidth: '100vw' }}>
             <NavbarTherapist />
-            <div className="container mt-5 border" style={{paddingTop:'2vh'}}>
+            <div className="container mt-5 border" style={{ paddingTop: '2vh' }}>
                 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" />
-                <div className="d-flex justify-content-start align-items-center mb-3" style={{fontFamily: 'Nanum Gothic, sans-serif'}}>
+                <div className="d-flex justify-content-start align-items-center mb-3" style={{ fontFamily: 'Nanum Gothic, sans-serif' }}>
                     <div className="input-group flex-grow-1 ">
-                        <span className="input-group-text" style={{backgroundColor:'#FAFAFA', color:'#7E7E7E'}}>Nombre o Apellido</span>
+                        <span className="input-group-text" style={{ backgroundColor: '#FAFAFA', color: '#7E7E7E' }}>Nombre o Apellido</span>
                         <input type="text" className="form-control" value={nameFilter} onChange={handleChangeNameFilter} />
                     </div>
                     <div className="input-group m-3">
-                        <span className="input-group-text"style={{backgroundColor:'#FAFAFA', color:'#7E7E7E'}}>DNI</span>
+                        <span className="input-group-text" style={{ backgroundColor: '#FAFAFA', color: '#7E7E7E' }}>DNI</span>
                         <input type="text" className="form-control" value={dniFilter} onChange={handleChangeDniFilter} />
                     </div>
                     <div className="input-group flex-grow-1 m-3">
-                        <input className="form-check-input me-2" type="checkbox" id="showInactiveCheckbox" onChange={toggleShowInactive}/>
+                        <input className="form-check-input me-2" type="checkbox" id="showInactiveCheckbox" onChange={toggleShowInactive} />
                         <label className="form-check-label mr-1" htmlFor="showInactiveCheckbox">
                             Mostrar pacientes inactivos
                         </label>
                     </div>
-                    <button type="button" className="btn ms-3" style={{backgroundColor:'#C47C7A', color:'white'}} onClick={openModal}>+</button>
+                    <button type="button" className="btn ms-3" style={{ backgroundColor: '#C47C7A', color: 'white' }} onClick={openModal}>+</button>
                 </div>
-                <table className="table table-hover" style={{backgroundColor:'white', color: '#7E7E7E', fontFamily: 'Nanum Gothic, sans-serif'}}>
-                    <thead style={{backgroundColor: '#FAFAFA'}}>
+                <table className="table table-hover" style={{ backgroundColor: 'white', color: '#7E7E7E', fontFamily: 'Nanum Gothic, sans-serif' }}>
+                    <thead style={{ backgroundColor: '#FAFAFA' }}>
                         <tr>
                             <th>Nombre</th>
                             <th>Apellido</th>
@@ -301,7 +302,7 @@ export const Patients = () => {
                 <ul className="pagination justify-content-start">
                     {Array.from({ length: Math.ceil(visibleUsers.length / patientsPerPage) }, (_, index) => (
                         <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                            <button onClick={() => paginate(index + 1)} className="page-link" style={{backgroundColor:'#B2A79F', color:'white',   border: '1px solid transparent', outline: 'none'}}>
+                            <button onClick={() => paginate(index + 1)} className="page-link" style={{ backgroundColor: '#B2A79F', color: 'white', border: '1px solid transparent', outline: 'none' }}>
                                 {index + 1}
                             </button>
                         </li>
@@ -309,7 +310,7 @@ export const Patients = () => {
                 </ul>
                 <div className={`modal fade ${showModal ? 'show d-block' : 'd-none'}`} id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content" style={{textAlign:'left'}} id="contactModal">
+                        <div className="modal-content" style={{ textAlign: 'left' }} id="contactModal">
                             <div className="modal-header">
                                 <h1 className="modal-title fs-5" id="exampleModalLabel">Nuevo paciente</h1>
                                 <button type="button" className="btn_close_contact" onClick={closeModal} aria-label="Close">X</button>
@@ -319,22 +320,22 @@ export const Patients = () => {
                                     <div className="row">
                                         <div className="mb-3">
                                             <label htmlFor="userName" className="col-form-label">Nombre de usuario:</label>
-                                            <input type="text" className="form-control textModal" id="userName" name="username" value={userData.username} onChange={handleChange}  onFocus={() => handleInputFocus("username")} />
+                                            <input type="text" className="form-control textModal" id="userName" name="username" value={userData.username} onChange={handleChange} onFocus={() => handleInputFocus("username")} />
                                             <span className="text-danger">{errorMessages.username}</span>
                                         </div>
                                     </div>
                                     <div className="row">
-                                        <div className="col-6">    
+                                        <div className="col-6">
                                             <div className="mb-3">
                                                 <label htmlFor="name" className="col-form-label">Nombre:</label>
-                                                <input type="text" className="form-control textModal" id="name" name="name" value={userData.name} onChange={handleChange}  onFocus={() => handleInputFocus("name")} />
+                                                <input type="text" className="form-control textModal" id="name" name="name" value={userData.name} onChange={handleChange} onFocus={() => handleInputFocus("name")} />
                                                 <span className="text-danger">{errorMessages.name}</span>
                                             </div>
                                         </div>
                                         <div className="col-6">
                                             <div className="mb-3">
                                                 <label htmlFor="lastName" className="col-form-label">Apellido:</label>
-                                                <input type="text" className="form-control textModal" id="lastName" name="lastname" value={userData.lastname} onChange={handleChange}  onFocus={() => handleInputFocus("lastname")} />
+                                                <input type="text" className="form-control textModal" id="lastName" name="lastname" value={userData.lastname} onChange={handleChange} onFocus={() => handleInputFocus("lastname")} />
                                                 <span className="text-danger">{errorMessages.lastname}</span>
                                             </div>
                                         </div>
@@ -343,14 +344,14 @@ export const Patients = () => {
                                         <div className="col-6">
                                             <div className="mb-3">
                                                 <label htmlFor="dni" className="col-form-label">DNI:</label>
-                                                <input type="text" className="form-control textModal" id="dni" name="dni" value={userData.dni} onChange={handleChange}  onFocus={() => handleInputFocus("dni")}  />
+                                                <input type="text" className="form-control textModal" id="dni" name="dni" value={userData.dni} onChange={handleChange} onFocus={() => handleInputFocus("dni")} />
                                                 <span className="text-danger">{errorMessages.dni}</span>
                                             </div>
                                         </div>
                                         <div className="col-6">
                                             <div className="mb-3">
                                                 <label htmlFor="phone" className="col-form-label">Telefono de contacto:</label>
-                                                <input type="text" className="form-control textModal" id="phone" name="phone" value={userData.phone} onChange={handleChange}  onFocus={() => handleInputFocus("phone")} />
+                                                <input type="text" className="form-control textModal" id="phone" name="phone" value={userData.phone} onChange={handleChange} onFocus={() => handleInputFocus("phone")} />
                                                 <span className="text-danger">{errorMessages.phone}</span>
                                             </div>
                                         </div>
@@ -359,14 +360,21 @@ export const Patients = () => {
                                         <div className="col-6">
                                             <div className="mb-3">
                                                 <label htmlFor="email" className="col-form-label">Email:</label>
-                                                <input type="text" className="form-control textModal" id="email" name="email" value={userData.email} onChange={handleChange}  onFocus={() => handleInputFocus("email")}  /> 
+                                                <input type="text" className="form-control textModal" id="email" name="email" value={userData.email} onChange={handleChange} onFocus={() => handleInputFocus("email")} />
                                                 <span className="text-danger">{errorMessages.email}</span>
                                             </div>
                                         </div>
-                                        <div className="col-6">
+                                        <div className="col-6" style={{ position: 'relative' }}>
                                             <div className="mb-3">
-                                                <label htmlFor="virtual_link" className="col-form-label">Link a sala vitual:</label>
-                                                <textarea className="form-control textModal" id="virtual_link" name="virtual_link" value={userData.virtual_link} onChange={handleChange} />
+                                                <label htmlFor="virtual_link" className="col-form-label">Link a sala virtual:</label>
+                                                <div style={{ position: 'relative' }}>
+                                                    <textarea className="form-control textModal" id="virtual_link" name="virtual_link" value={userData.virtual_link} onChange={handleChange} />
+                                                    <div style={{ position: 'absolute', bottom: '5px', right: '5px', zIndex: '1' }}>
+                                                        <a href="https://meet.google.com/" target="_blank" rel="noopener noreferrer" style={{ cursor: 'pointer', color: 'grey', textDecoration: 'none' }}>
+                                                            <FontAwesomeIcon icon={faLink} />
+                                                        </a>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -380,7 +388,7 @@ export const Patients = () => {
                 </div>
                 <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content" style={{textAlign:'left'}} id="contactModal">
+                        <div className="modal-content" style={{ textAlign: 'left' }} id="contactModal">
                             <div className="modal-header justify-content-end">
                                 <button type="button" className="btn_close_contact" onClick={closeSuccessModal} aria-label="Close">X</button>
                             </div>
@@ -399,7 +407,7 @@ export const Patients = () => {
                 </div>
                 <div className={`modal fade ${showModalEdit ? 'show d-block' : 'd-none'}`} id="modalEdit" tabIndex="-1" aria-labelledby="ModalEdit" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content" style={{textAlign:'left'}} id="contactModal">
+                        <div className="modal-content" style={{ textAlign: 'left' }} id="contactModal">
                             <div className="modal-header">
                                 <h1 className="modal-title fs-5" id="exampleModalLabel">Editar paciente</h1>
                                 <button type="button" className="btn_close_contact" onClick={closeModal} aria-label="Close">X</button>
@@ -414,17 +422,17 @@ export const Patients = () => {
                                         </div>
                                     </div>
                                     <div className="row">
-                                        <div className="col-6">    
+                                        <div className="col-6">
                                             <div className="mb-2">
                                                 <label htmlFor="name" className="col-form-label">Nombre:</label>
-                                                <input type="text" className="form-control textModal" id="name" name="name" value={userData.name} onChange={handleChange}  onFocus={() => handleInputFocus("name")}  />
+                                                <input type="text" className="form-control textModal" id="name" name="name" value={userData.name} onChange={handleChange} onFocus={() => handleInputFocus("name")} />
                                                 <span className="text-danger">{errorMessages.name}</span>
                                             </div>
                                         </div>
                                         <div className="col-6">
                                             <div className="mb-2">
                                                 <label htmlFor="lastName" className="col-form-label">Apellido:</label>
-                                                <input type="text" className="form-control textModal" id="lastName" name="lastname" value={userData.lastname} onChange={handleChange}  onFocus={() => handleInputFocus("lastname")} />
+                                                <input type="text" className="form-control textModal" id="lastName" name="lastname" value={userData.lastname} onChange={handleChange} onFocus={() => handleInputFocus("lastname")} />
                                                 <span className="text-danger">{errorMessages.lastname}</span>
                                             </div>
                                         </div>
@@ -433,14 +441,14 @@ export const Patients = () => {
                                         <div className="col-6">
                                             <div className="mb-2">
                                                 <label htmlFor="dni" className="col-form-label">DNI:</label>
-                                                <input type="text" className="form-control textModal" id="dni" name="dni" value={userData.dni} onChange={handleChange}  onFocus={() => handleInputFocus("dni")}  />
+                                                <input type="text" className="form-control textModal" id="dni" name="dni" value={userData.dni} onChange={handleChange} onFocus={() => handleInputFocus("dni")} />
                                                 <span className="text-danger">{errorMessages.dni}</span>
                                             </div>
                                         </div>
                                         <div className="col-6">
                                             <div className="mb-2">
                                                 <label htmlFor="phone" className="col-form-label">Telefono de contacto:</label>
-                                                <input type="text" className="form-control textModal" id="phone" name="phone" value={userData.phone} onChange={handleChange}  onFocus={() => handleInputFocus("phone")}  />
+                                                <input type="text" className="form-control textModal" id="phone" name="phone" value={userData.phone} onChange={handleChange} onFocus={() => handleInputFocus("phone")} />
                                                 <span className="text-danger">{errorMessages.phone}</span>
                                             </div>
                                         </div>
@@ -449,7 +457,7 @@ export const Patients = () => {
                                         <div className="col-6">
                                             <div className="mb-2">
                                                 <label htmlFor="email" className="col-form-label">Email:</label>
-                                                <input type="email" className="form-control textModal" id="email" name="email" value={userData.email} onChange={handleChange}  onFocus={() => handleInputFocus("email")}  /> 
+                                                <input type="email" className="form-control textModal" id="email" name="email" value={userData.email} onChange={handleChange} onFocus={() => handleInputFocus("email")} />
                                                 <span className="text-danger">{errorMessages.email}</span>
                                             </div>
                                         </div>
