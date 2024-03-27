@@ -1,7 +1,8 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react'
-import { Context } from "../../front/js/store/appContext.js"
+import { Context } from "../../store/appContext.js"
 import "./Product.module.css"
+import Logo from "../../../img/logoHome.png"
 
 export const Product = () => {
     const { store, actions } = useContext(Context)
@@ -13,25 +14,27 @@ export const Product = () => {
         locale: 'es-AR',
     });
 
-    const handleBuy = async () => {
-        const id = await actions.createPreference()
-        if (id) {
-            setPreferenceIdLocal(store.preferenceId)
+    useEffect(() => {
+        const fetchData = async () => {
+            const id = await actions.createPreference()
+            if (id) {
+                setPreferenceIdLocal(store.preferenceId)
+            }
         }
-    }
+        fetchData();
+    }, []);
 
     return (
-        <div className="card-product-container">
+        <div className="container">
             <div className='card-product'>
                 <div className="card">
-                    <img src='src/front/img/logoHome.png' alt='product stuff' />
-                    <h3>Consulta</h3>
+                    <img className="w-25" src={Logo} alt='product stuff' />
+                    <h3>Consulta psicologica</h3>
                     <p>{description}</p>
-                    <p>${price}</p>
-                    <button onClick={handleBuy}>Abonar</button>
+                    <p>Total: ${price}</p>
                     <div className="wallet-container">
                         {
-                            preferenceIdLocal && <Wallet initialization={{ preferenceId: store.preferenceId.id }} />
+                            preferenceIdLocal && <Wallet initialization={{ preferenceId: preferenceIdLocal.id }} />
                         }
                     </div>
                 </div>

@@ -1,5 +1,5 @@
-import React, {useContext, useState} from "react"
-import { Product } from "../../../components/product/Product.jsx"
+import React, { useContext, useState } from "react"
+import { Product } from "../component/product/Product.jsx"
 import { Context } from "../store/appContext.js"
 
 export const Payment = () => {

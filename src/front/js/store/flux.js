@@ -428,7 +428,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			createPreference: async () => {
 				try {
-					const response = await getActions.protectedFetch("/create_preference", "POST", {
+					const response = await getActions().protectedFetch("/create_preference", "POST", {
 						description: "Honorarios",
 						price: 100,
 						quantity: 1,
@@ -439,19 +439,18 @@ const getState = ({ getStore, getActions, setStore }) => {
 						console.log("El response vino ok del back end y tiene esta info: ", response)
 						const data = await response.json();
 						const { id } = data;
-						console.log("ESTE ES EL FAMOSO ID: ", id)
+						console.log("Este es el id: ", id)
 						let store = getStore()
 						setStore({ ...store, preferenceId: id })
 						let store2 = getStore()
 						console.log("Este es el contenido de id en el store: ", store2.preferenceId.id)
 						return id;
 					} else {
-						console.error("Error creating preference, o sea response.ok dio false en flux.js");
+						console.error("Error creating preference");
 					}
 				} catch (error) {
 					console.error(error);
 				}
-
 			},
 			//Funciones para el bloqueo de fechas individuales
 			blockMultipleHours: async (dates) => {

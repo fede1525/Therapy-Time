@@ -692,7 +692,7 @@ def add_availability_dates(year, month):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/create_preference', methods=['POST'])
+@api.route('/create_preference', methods=['POST'])
 def create_preference():
     try:
         req_data = request.get_json()
@@ -723,7 +723,30 @@ def create_preference():
         return jsonify({"error": str(e)}), 500
     
 # Reservar turno
-@app.route('/create_reservation', methods=['POST'])
+@api.route('/create_reservation', methods=['POST'])
+@jwt_required()
+def create_reservation():
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.json
+
+        if not data or 'date' not in data or 'time' not in data:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        datetime_str = f"{data['date']} {data['time']}"
+        
+        new_reservation = Reservation(
+            date=datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'),
+            user_id=current_user_id 
+        )
+
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Eliminar todos los bloqueos del calendario final
 @api.route('/borrar_todo_availability_dates', methods=['DELETE'])
 def borrar_todo_availability_dates():
@@ -779,7 +802,7 @@ def get_next_reservation():
 #Reservar nuevo turno (paciente)
 @api.route('/reservation', methods=['POST'])
 @jwt_required()
-def create_reservation():
+def make_reservation():
     try:
         current_user_id = get_jwt_identity()
         data = request.json
@@ -800,6 +823,7 @@ def create_reservation():
         return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
 #Editar un turno paciente
 @api.route('/edit_reservation/<int:id>', methods=['PUT'])
 def update_reservation(id):
