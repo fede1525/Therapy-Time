@@ -18,7 +18,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"reset_token": ""
 				},
 			],
-			userByDNI : {},
+			userByDNI: {},
 			unavailableDates: [{
 				"id": "",
 				"date": "",
@@ -54,18 +54,18 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"start_hour": "",
 				"end_hour": ""
 			}],
-			patientReservation:{
+			patientReservation: {
 				"id": "",
-            	"date": "",
-            	"user_id": ""
+				"date": "",
+				"user_id": ""
 			},
-			patientReservation:{
+			patientReservation: {
 				"id": "",
-            	"date": "",
-            	"user_id": ""
+				"date": "",
+				"user_id": ""
 			},
-			reservations :[],
-			reservationByID:{
+			reservations: [],
+			reservationByID: {
 
 			}
 		},
@@ -540,7 +540,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message || 'Error fetching unavailable dates' };
 				}
 			},
-			getVirtualLink : async () =>{
+			getVirtualLink: async () => {
 				try {
 					const resp = await getActions().protectedFetch("/profile_virtual_link", "GET", null)
 					if (!resp.ok) {
@@ -553,7 +553,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { error: "Error al traer el link de sala virtual" }
 				}
 			},
-			getPatientReservation: async ()=>{
+			getPatientReservation: async () => {
 				try {
 					const resp = await getActions().protectedFetch("/next_reservation", "GET", null)
 					if (!resp.ok) {
@@ -581,57 +581,57 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			createReservation: async (date, time) => {
 				try {
-				  const token = localStorage.getItem("token");
-				  if (!token) {
-					throw new Error("Token not found.");
-				  }
-				  
-				  const body = {
-					date: date,
-					time: time
-				  };
-			  
-				  const response = await getActions().protectedFetch("/reservation", "POST", body);
-				  const data = await response.json();
-			  
-				  if (!response.ok) {
-					throw new Error(data.error || "Error creating reservation.");
-				  }
-			  
-				  return data;
+					const token = localStorage.getItem("token");
+					if (!token) {
+						throw new Error("Token not found.");
+					}
+
+					const body = {
+						date: date,
+						time: time
+					};
+
+					const response = await getActions().protectedFetch("/reservation", "POST", body);
+					const data = await response.json();
+
+					if (!response.ok) {
+						throw new Error(data.error || "Error creating reservation.");
+					}
+
+					return data;
 				} catch (error) {
-				  console.error("Error creating reservation:", error);
-				  throw error;
+					console.error("Error creating reservation:", error);
+					throw error;
 				}
 			},
-			updateReservation : async (reservationId, dataToUpdate) => {
+			updateReservation: async (reservationId, dataToUpdate) => {
 				try {
-				  const response = await getActions().apiFetch(`/edit_reservation/${reservationId}`, 'PUT', dataToUpdate);
-				  
-				  if (!response.ok) {
-					throw new Error('Failed to update reservation');
-				  }
-			  
-				  const responseData = await response.json();
-				  return { success: true, message: responseData.message, reservation: responseData.reservation };
-			  
+					const response = await getActions().apiFetch(`/edit_reservation/${reservationId}`, 'PUT', dataToUpdate);
+
+					if (!response.ok) {
+						throw new Error('Failed to update reservation');
+					}
+
+					const responseData = await response.json();
+					return { success: true, message: responseData.message, reservation: responseData.reservation };
+
 				} catch (error) {
-				  console.error("Error:", error);
-				  return { success: false, error: error.message || 'Error al actualizar la reserva' };
+					console.error("Error:", error);
+					return { success: false, error: error.message || 'Error al actualizar la reserva' };
 				}
 			},
 			getAllReservations: async () => {
 				try {
 					const response = await getActions().apiFetch('/get_all_reservations', 'GET');
-			
+
 					if (!response.ok) {
 						throw new Error('Error al traer las reservas');
 					}
-			
+
 					const responseData = await response.json();
-					const reservationsData = responseData.data; 
-					console.log(reservationsData); 
-			
+					const reservationsData = responseData.data;
+					console.log(reservationsData);
+
 					setStore({ reservations: reservationsData });
 					return { success: true, message: responseData.message };
 				} catch (error) {
@@ -639,18 +639,18 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message || 'Error al cargar las reservas' };
 				}
 			},
-			getReservationByID: async (id) =>{
+			getReservationByID: async (id) => {
 				try {
 					const response = await getActions().apiFetch(`/get_reservation_by_id/${id}`, 'GET');
-			
+
 					if (!response.ok) {
 						throw new Error('Error al traer la reserva');
 					}
-			
+
 					const responseData = await response.json();
-					const reservationsData = responseData.data; 
-					console.log(reservationsData); 
-			
+					const reservationsData = responseData.data;
+					console.log(reservationsData);
+
 					setStore({ reservationByID: reservationsData });
 					return { success: true, message: responseData.message };
 				} catch (error) {
@@ -661,30 +661,57 @@ const getState = ({ getStore, getActions, setStore }) => {
 			searchUserByDNI: async (dni) => {
 				try {
 					const response = await getActions().apiFetch(`/search_user/${dni}`, 'GET');
-			
+
 					if (!response.ok) {
 						throw new Error('Error al buscar usuario por DNI');
 					}
-			
+
 					const responseData = await response.json();
-			
+
 					if (responseData.error) {
 						throw new Error(responseData.error);
 					}
-			
-					const userData = responseData; // No necesitas responseData.data, ya que la respuesta ya contiene los datos del usuario.
-			
-					// Actualiza el store con los datos del usuario
+
+					const userData = responseData; 
 					setStore({ userByDNI: userData });
-			
+
 					console.log("Datos del usuario recibidos:", userData);
-			
+
 					return { success: true, message: "Usuario encontrado correctamente" };
 				} catch (error) {
 					console.error('Error al buscar usuario por DNI:', error.message);
 					return { success: false, error: error.message };
 				}
+			},
+			postNewDate: async (date, time, user_id) => {
+				try {
+					const body = {
+						date: date,
+						time: time
+					};
+			
+					const response = await fetch(`${process.env.BACKEND_URL}/api/reservation/${user_id}`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*'
+						},
+						body: JSON.stringify(body)
+					});
+			
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || 'Error creating reservation.');
+					}
+			
+					const data = await response.json();
+					return data;
+				} catch (error) {
+					console.error('Error creating reservation:', error);
+					throw error;
+				}
 			}
+					
 			
 		}
 	}
