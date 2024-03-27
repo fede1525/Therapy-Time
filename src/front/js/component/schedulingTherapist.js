@@ -213,12 +213,12 @@ export const SchedulingTherapist = ({ patientId }) => {
 
     return (
         <div className='d-flex'>
-            <div className="left-content mt-2" style={{ marginRight: '10vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
+            <div className="left-content mt-2" style={{ marginRight: '5vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
                 <div className="calendar-header d-flex justify-content-between aling-items-center">
                     <div className="button-container">
                         <FaChevronLeft style={{ color: 'grey' }} onClick={handlePreviousMonth} />
                     </div>
-                    <h5>{meses[month]} de {year}</h5>
+                    <h5 className='mt-2'>{meses[month]} de {year}</h5>
                     <div className="button-container">
                         <FaChevronRight style={{ color: 'grey' }} onClick={handleNextMonth} />
                     </div>
@@ -254,7 +254,7 @@ export const SchedulingTherapist = ({ patientId }) => {
                         {renderModalContent()}
                     </div>
                 ) : (
-                    <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '120%' }}>
+                    <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '125%' }}>
                         No se ha seleccionado ninguna fecha del calendario
                     </div>
                 )}

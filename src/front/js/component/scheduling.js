@@ -272,7 +272,7 @@ export const SchedulingComponent = () => {
           <div className="button-container">
             <FaChevronLeft style={{ color: 'grey' }} onClick={handlePreviousMonth} />
           </div>
-          <h5>{meses[month]} de {year}</h5>
+          <h5 className='mt-2'>{meses[month]} de {year}</h5>
           <div className="button-container">
             <FaChevronRight style={{ color: 'grey' }} onClick={handleNextMonth} />
           </div>
