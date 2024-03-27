@@ -6,11 +6,10 @@ import { FaChevronLeft } from 'react-icons/fa';
 import { FaChevronRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-export const SchedulingTherapistEdit = ({ idRservation }) => {
-    const [selectedReservation, setSelectedReservation] = useState(idRservation || null);
+export const SchedulingTherapistEdit = ({ idReservation }) => {
     const { actions } = useContext(Context);
     const [calendar, setCalendar] = useState([]);
-    const [month, setMonth] = useState(1);
+    const [month, setMonth] = useState(1); // empieza en enero
     const [year, setYear] = useState(new Date().getFullYear());
     const [selectedDay, setSelectedDay] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -29,7 +28,7 @@ export const SchedulingTherapistEdit = ({ idRservation }) => {
     const closeShowSuccessModal = () => {
         handleCloseModal();
         setShowSuccessModal(false)
-        navigate("/appointment_scheduling");
+        navigate("/home");
     }
 
     const handleNextMonth = () => {
@@ -65,12 +64,13 @@ export const SchedulingTherapistEdit = ({ idRservation }) => {
         12: 'Diciembre'
     };
 
+
     const handleReservationUpdate = async () => {
         const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
         const formattedHour = `${selectedHour.toString().padStart(2, '0')}:00:00`;
 
         try {
-            const response = await actions.updateReservation(reservationId, { date: formattedDate, time: formattedHour });
+            const response = await actions.updateReservation(idReservation, { date: formattedDate, time: formattedHour });
             if (response && response.success) {
                 openShowSuccessModal();
             } else {
@@ -125,6 +125,7 @@ export const SchedulingTherapistEdit = ({ idRservation }) => {
             setShowModal(false);
         }
     };
+
 
     const handleCloseModal = () => {
         setShowModal(false);

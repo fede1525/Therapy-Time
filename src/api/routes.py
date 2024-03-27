@@ -816,3 +816,46 @@ def get_all_reservations():
         return jsonify({"success": True, "data": citas})
     except Exception as e:
         return jsonify({"success": False, "error": "Error inesperado"}), 500
+
+#Consulta una reserva por id
+@api.route('/get_reservation_by_id/<int:id>', methods=['GET'])
+def get_reservation_by_id(id):
+    try:
+        reserva = Reservation.query.get(id)
+        if reserva:
+            usuario = User.query.get(reserva.user_id)
+            cita = {
+                "id": reserva.id,
+                "fecha": reserva.date.strftime('%Y-%m-%d %H:%M'),
+                "nombre_paciente": f"{usuario.name} {usuario.lastname}",
+                "telefono": usuario.phone,
+                "link_sala_virtual": usuario.virtual_link
+            }
+            return jsonify({"success": True, "data": cita})
+        else:
+            return jsonify({"success": False, "error": "Reserva no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "error": "Error inesperado"}), 500
+
+
+
+
+@api.route('/search_user/<dni>', methods=['GET'])
+def get_user_by_dni(dni):
+    try:
+        user = User.query.filter_by(dni=dni).first()
+        if user:
+            # Serialize the required fields
+            serialized_user = {
+                "id": user.id,
+                "name": user.name,
+                "lastname": user.lastname,
+                "phone": user.phone,
+                "dni": user.dni
+            }
+            return jsonify(serialized_user), 200
+        else:
+            return "Usuario no encontrado", 404
+    except Exception as e:
+        return jsonify({"error": "Error al obtener el usuario"}), 500
+

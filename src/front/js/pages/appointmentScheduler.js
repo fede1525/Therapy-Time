@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faTrashAlt, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { NavbarTherapist } from "../component/navbar";
 import { Context } from "../store/appContext";
-import { SchedulingTherapistEdit } from "../component/editRservation"
+import { SchedulingTherapistEdit } from "../component/editRservation";
 
 export const AppointmentScheduler = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -15,7 +15,72 @@ export const AppointmentScheduler = () => {
     const [reservationIdToDelete, setReservationIdToDelete] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedReservation, setSelectedReservation] = useState(null);
+    const [users, setUsers] = useState([]);
+    const [searchValue, setSearchValue] = useState('');
+    const [searchError, setSearchError] = useState('');
+    const [formData, setFormData] = useState({
+        id: "",
+        name: "",
+        lastname: "",
+        phone: "",
+        dni: ""
+    });
 
+    useEffect(() => {
+        actions.getAllReservations();
+    }, []);
+
+    const handleSearchChange = (event) => {
+        const value = event.target.value;
+        setSearchValue(value);
+    };
+
+    const handleFormChange = (event) => {
+        const { name, value } = event.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+
+    const handleSearchSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const { success, message } = await actions.searchUserByDNI(searchValue);
+            if (success) {
+                const user = store.userByDNI;
+                if (user && user.id) {
+                    setFormData({
+                        id: user.id,
+                        name: user.name,
+                        lastname: user.lastname,
+                        phone: user.phone,
+                        dni: user.dni
+                    });
+                } else {
+                    setSearchError("No existen usuarios registrados con ese DNI");
+                }
+            } else {
+                console.log(message);
+            }
+        } catch (error) {
+            console.error("Error al buscar usuario:", error.message);
+        }
+    };
+
+
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const data = await actions.getUsers();
+                setUsers(data);
+            } catch (error) {
+                console.error("Error al obtener usuarios:", error.message);
+            }
+        };
+        fetchUsers();
+    }, []);
 
     const handleDeleteConfirmation = (reservationId) => {
         setReservationIdToDelete(reservationId);
@@ -91,24 +156,28 @@ export const AppointmentScheduler = () => {
     };
 
     const handleEdit = (idReservation) => {
-        const selectedReservation = reservations.find(reservation => reservation.id === idReservation);
-        setSelectedReservation(selectedReservation);
+        const dataReservation = reservations.find(reservation => reservation.id === idReservation);
+        setSelectedReservation(dataReservation);
         setShowEditModal(true);
     };
-    
-    
+
+    const handleKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            handleSearchSubmit();
+        }
+    };
 
     return (
         <div style={{ backgroundColor: 'white', minHeight: '100vh', paddingBottom: '7vh' }}>
             <NavbarTherapist />
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" />
             <div className="container mt-5 border" style={{ paddingTop: '2vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
-                <ul className="nav nav-tabs" >
+                <ul className="nav nav-tabs">
                     <li className="nav-item">
                         <button className={`nav-link ${activeTab === "inbox" ? "active" : "text-muted"}`} onClick={() => handleTabChange("inbox")}>Turnos asignados</button>
                     </li>
                     <li className="nav-item">
-                        <button className={`nav-link ${activeTab === "deleted" ? "active" : "text-muted"}`} onClick={() => handleTabChange("deleted")}>Nuevo turno</button>
+                        <button className={`nav-link ${activeTab === "Papelera" ? "active" : "text-muted"}`} onClick={() => handleTabChange("Papelera")}>Nuevo turno</button>
                     </li>
                 </ul>
                 <div className="container">
@@ -207,7 +276,7 @@ export const AppointmentScheduler = () => {
                                             <button type="button" className="btn-close" onClick={() => setShowEditModal(false)} aria-label="Close"></button>
                                         </div>
                                         <div className="modal-body" style={{ paddingRight: '2vh' }}>
-                                            <SchedulingTherapistEdit reservation={selectedReservation} />
+                                            <SchedulingTherapistEdit idReservation={selectedReservation ? selectedReservation.id : null} />
                                         </div>
                                     </div>
                                 </div>
@@ -217,10 +286,46 @@ export const AppointmentScheduler = () => {
                 </div>
                 <div className="container">
                     {activeTab === "Papelera" && (
-                        <div></div>
+                        <div>
+                            <form onSubmit={handleSearchSubmit}>
+                                <div className="d-flex align-items-center mb-3">
+                                    <div className="mb-3">
+                                        <input type="text" className="form-control mt-3" id="searchByDNI" placeholder="Búsqueda por DNI" value={searchValue} onChange={handleSearchChange} onKeyPress={handleKeyPress} />
+                                    </div>
+                                    <div>
+                                        <button type="submit" className="btn btn-primary">Buscar</button>
+                                    </div>
+                                </div>
+                            </form>
+                            {searchError && <span className="text-danger">{searchError}</span>}
+                            <form>
+                                <div className="row">
+                                    <div className="col-lg-6 mb-3">
+                                        <label htmlFor="name" className="form-label">Nombre</label>
+                                        <input type="text" className="form-control" id="name" name="name" value={formData.name} onChange={handleFormChange} />
+                                    </div>
+                                    <div className="col-lg-6 mb-3">
+                                        <label htmlFor="lastName" className="form-label">Apellido</label>
+                                        <input type="text" className="form-control" id="lastname" name="lastname" value={formData.lastname} onChange={handleFormChange} />
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-lg-6 mb-3">
+                                        <label htmlFor="contact" className="form-label">Contacto</label>
+                                        <input type="text" className="form-control" id="phone" name="phone" value={formData.phone} onChange={handleFormChange} />
+                                    </div>
+                                    <div className="col-lg-6 mb-3">
+                                        <label htmlFor="dni" className="form-label">DNI</label>
+                                        <input type="text" className="form-control" id="dni" name="dni" value={formData.dni} onChange={handleFormChange} />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     )}
                 </div>
             </div>
         </div>
     );
 };
+
+
