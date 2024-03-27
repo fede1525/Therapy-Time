@@ -710,9 +710,28 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error('Error creating reservation:', error);
 					throw error;
 				}
-			}
-					
+			},
+			createReservationForNonRegisteredUser: async (reservationData) => {
+				try {
+					const response = await fetch(`${process.env.BACKEND_URL}/api/reservation/non_registered`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(reservationData) // Enviar reservationData como cuerpo de la solicitud
+					});
 			
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || 'Failed to create reservation for non-registered user');
+					}
+			
+					const responseData = await response.json();
+					return responseData;
+				} catch (error) {
+					throw new Error(error.message || 'Failed to create reservation for non-registered user');
+				}
+			}
 		}
 	}
 };
