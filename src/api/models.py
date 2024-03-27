@@ -66,8 +66,10 @@ class Reservation(db.Model):
     __tablename__='reservation'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     date = db.Column(db.DateTime, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     user = db.relationship("User")
+    guest_name = db.Column(db.String(50), nullable=True)  # Nombre del usuario no registrado
+    guest_phone = db.Column(db.String(10), nullable=True)  # Teléfono del usuario no registrado
 
     def __repr__(self):     
         return f'<Reservation {self.id}>'
@@ -76,6 +78,8 @@ class Reservation(db.Model):
             "id": self.id,
             "date": self.date,
             "user_id": self.user_id,
+            "guest_name": self.guest_name,
+            "guest_phone": self.guest_phone
         }
 
 class AvailabilityDates(db.Model):

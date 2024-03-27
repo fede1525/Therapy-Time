@@ -18,7 +18,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"reset_token": ""
 				},
 			],
-			userByDNI : {},
+			userByDNI: {},
 			unavailableDates: [{
 				"id": "",
 				"date": "",
@@ -65,8 +65,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"date": "",
 				"user_id": ""
 			},
-			reservations :[],
-			reservationByID:{
+			reservations: [],
+			reservationByID: {
 
 			}
 		},
@@ -678,9 +678,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 
 					const responseData = await response.json();
-					const reservationsData = responseData.data; 
-					console.log(reservationsData); 
-			
+					const reservationsData = responseData.data;
+					console.log(reservationsData);
+
 					setStore({ reservations: reservationsData });
 					return { success: true, message: responseData.message };
 				} catch (error) {
@@ -688,18 +688,18 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message || 'Error al cargar las reservas' };
 				}
 			},
-			getReservationByID: async (id) =>{
+			getReservationByID: async (id) => {
 				try {
 					const response = await getActions().apiFetch(`/get_reservation_by_id/${id}`, 'GET');
-			
+
 					if (!response.ok) {
 						throw new Error('Error al traer la reserva');
 					}
-			
+
 					const responseData = await response.json();
-					const reservationsData = responseData.data; 
-					console.log(reservationsData); 
-			
+					const reservationsData = responseData.data;
+					console.log(reservationsData);
+
 					setStore({ reservationByID: reservationsData });
 					return { success: true, message: responseData.message };
 				} catch (error) {
@@ -710,31 +710,77 @@ const getState = ({ getStore, getActions, setStore }) => {
 			searchUserByDNI: async (dni) => {
 				try {
 					const response = await getActions().apiFetch(`/search_user/${dni}`, 'GET');
-			
+
 					if (!response.ok) {
 						throw new Error('Error al buscar usuario por DNI');
 					}
-			
+
 					const responseData = await response.json();
-			
+
 					if (responseData.error) {
 						throw new Error(responseData.error);
 					}
-			
-					const userData = responseData; // No necesitas responseData.data, ya que la respuesta ya contiene los datos del usuario.
-			
-					// Actualiza el store con los datos del usuario
+
+					const userData = responseData; 
 					setStore({ userByDNI: userData });
-			
+
 					console.log("Datos del usuario recibidos:", userData);
-			
+
 					return { success: true, message: "Usuario encontrado correctamente" };
 				} catch (error) {
 					console.error('Error al buscar usuario por DNI:', error.message);
 					return { success: false, error: error.message };
 				}
-			}
+			},
+			postNewDate: async (date, time, user_id) => {
+				try {
+					const body = {
+						date: date,
+						time: time
+					};
 			
+					const response = await fetch(`${process.env.BACKEND_URL}/api/reservation/${user_id}`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*'
+						},
+						body: JSON.stringify(body)
+					});
+			
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || 'Error creating reservation.');
+					}
+			
+					const data = await response.json();
+					return data;
+				} catch (error) {
+					console.error('Error creating reservation:', error);
+					throw error;
+				}
+			},
+			createReservationForNonRegisteredUser: async (reservationData) => {
+				try {
+					const response = await fetch(`${process.env.BACKEND_URL}/api/reservation/non_registered`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(reservationData) // Enviar reservationData como cuerpo de la solicitud
+					});
+			
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || 'Failed to create reservation for non-registered user');
+					}
+			
+					const responseData = await response.json();
+					return responseData;
+				} catch (error) {
+					throw new Error(error.message || 'Failed to create reservation for non-registered user');
+				}
+			}
 		}
 	}
 };
