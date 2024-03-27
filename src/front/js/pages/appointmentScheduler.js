@@ -4,6 +4,7 @@ import { faPencilAlt, faTrashAlt, faChevronLeft, faChevronRight } from '@fortawe
 import { NavbarTherapist } from "../component/navbar";
 import { Context } from "../store/appContext";
 import { SchedulingTherapistEdit } from "../component/editRservation";
+import { SchedulingTherapist } from "../component/schedulingTherapist"
 
 export const AppointmentScheduler = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -18,6 +19,7 @@ export const AppointmentScheduler = () => {
     const [users, setUsers] = useState([]);
     const [searchValue, setSearchValue] = useState('');
     const [searchError, setSearchError] = useState('');
+    const [searchType, setSearchType] = useState("");
     const [formData, setFormData] = useState({
         id: "",
         name: "",
@@ -26,6 +28,16 @@ export const AppointmentScheduler = () => {
         dni: ""
     });
 
+    const handleSearchTypeChange = (type) => {
+        setSearchType(type);
+    };
+
+    useEffect(() => {
+        if (activeTab === "Papelera") {
+            setSearchType("active");
+        }
+    }, [activeTab]);
+    
     useEffect(() => {
         actions.getAllReservations();
     }, []);
@@ -44,7 +56,9 @@ export const AppointmentScheduler = () => {
     };
 
     const handleSearchSubmit = async (event) => {
-        event.preventDefault();
+        if (event) {
+            event.preventDefault();
+        }
         try {
             const { success, message } = await actions.searchUserByDNI(searchValue);
             if (success) {
@@ -57,6 +71,7 @@ export const AppointmentScheduler = () => {
                         phone: user.phone,
                         dni: user.dni
                     });
+                    setSearchValue('');
                 } else {
                     setSearchError("No existen usuarios registrados con ese DNI");
                 }
@@ -67,8 +82,6 @@ export const AppointmentScheduler = () => {
             console.error("Error al buscar usuario:", error.message);
         }
     };
-
-
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -113,10 +126,6 @@ export const AppointmentScheduler = () => {
     };
 
     useEffect(() => {
-        actions.getAllReservations();
-    }, []);
-
-    useEffect(() => {
         const filterReservations = () => {
             const filteredReservations = store.reservations.filter(reservation => {
                 const reservationDate = new Date(reservation.fecha);
@@ -125,7 +134,7 @@ export const AppointmentScheduler = () => {
             setReservations(filteredReservations);
         };
         filterReservations();
-    }, [currentDate, store.reservations]);
+    }, [currentDate]); // Solo ejecutar el efecto cuando currentDate cambia, no cuando store.reservations cambia
 
     const handlePrevDay = () => {
         const prevDate = new Date(currentDate);
@@ -166,6 +175,7 @@ export const AppointmentScheduler = () => {
             handleSearchSubmit();
         }
     };
+
 
     return (
         <div style={{ backgroundColor: 'white', minHeight: '100vh', paddingBottom: '7vh' }}>
@@ -208,37 +218,40 @@ export const AppointmentScheduler = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {generateTimeSlots().map((timeSlot, index) => (
-                                            <tr key={index}>
-                                                <td>{timeSlot}</td>
-                                                {reservations.some(reservation => new Date(reservation.fecha).getHours().toString() === timeSlot.substring(0, 2)) ?
-                                                    reservations.map((reservation, index) => (
-                                                        (new Date(reservation.fecha).getHours().toString() === timeSlot.substring(0, 2)) ?
-                                                            <React.Fragment key={index}>
-                                                                <td>{reservation.nombre_paciente}</td>
-                                                                <td>{reservation.telefono}</td>
-                                                                <td>
-                                                                    {reservation.link_sala_virtual ? (
-                                                                        <a href={reservation.link_sala_virtual} target="_blank" rel="noopener noreferrer">Ingresar</a>
-                                                                    ) : null}
-                                                                </td>
-                                                                <td>
-                                                                    <FontAwesomeIcon icon={faPencilAlt} style={{ color: 'grey' }} onClick={() => handleEdit(reservation.id)} className="btn mr-2" />
-                                                                    <FontAwesomeIcon icon={faTrashAlt} style={{ color: 'grey' }} className="btn" onClick={() => handleDeleteConfirmation(reservation.id)} />
-                                                                </td>
-                                                            </React.Fragment>
-                                                            : null
-                                                    ))
-                                                    :
-                                                    <React.Fragment key={index}>
-                                                        <td>-</td>
-                                                        <td>-</td>
-                                                        <td>-</td>
-                                                        <td>-</td>
-                                                    </React.Fragment>
-                                                }
-                                            </tr>
-                                        ))}
+                                        {generateTimeSlots().map((timeSlot, index) => {
+                                            const matchingReservation = reservations.find(reservation => {
+                                                const reservationDate = new Date(reservation.fecha);
+                                                return reservationDate.getHours().toString().padStart(2, '0') === timeSlot.substring(0, 2);
+                                            });
+
+                                            return (
+                                                <tr key={index}>
+                                                    <td>{timeSlot}</td>
+                                                    {matchingReservation ? (
+                                                        <>
+                                                            <td>{matchingReservation.nombre_paciente}</td>
+                                                            <td>{matchingReservation.telefono}</td>
+                                                            <td>
+                                                                {matchingReservation.link_sala_virtual ? (
+                                                                    <a href={matchingReservation.link_sala_virtual} target="_blank" rel="noopener noreferrer">Ingresar</a>
+                                                                ) : null}
+                                                            </td>
+                                                            <td>
+                                                                <FontAwesomeIcon icon={faPencilAlt} style={{ color: 'grey' }} onClick={() => handleEdit(matchingReservation.id)} className="btn mr-2" />
+                                                                <FontAwesomeIcon icon={faTrashAlt} style={{ color: 'grey' }} className="btn" onClick={() => handleDeleteConfirmation(matchingReservation.id)} />
+                                                            </td>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <td>-</td>
+                                                            <td>-</td>
+                                                            <td>-</td>
+                                                            <td>-</td>
+                                                        </>
+                                                    )}
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
@@ -288,37 +301,71 @@ export const AppointmentScheduler = () => {
                     {activeTab === "Papelera" && (
                         <div>
                             <form onSubmit={handleSearchSubmit}>
-                                <div className="d-flex align-items-center mb-3">
-                                    <div className="mb-3">
-                                        <input type="text" className="form-control mt-3" id="searchByDNI" placeholder="Búsqueda por DNI" value={searchValue} onChange={handleSearchChange} onKeyPress={handleKeyPress} />
+                                <div className="mb-3">
+                                    <div className="form-check form-check-inline">
+                                        <input
+                                            className="form-check-input"
+                                            type="radio"
+                                            name="searchType"
+                                            id="activePatient"
+                                            value="active"
+                                            checked={searchType === "active"}
+                                            onChange={() => handleSearchTypeChange("active")}
+                                        />
+                                        <label className="form-check-label" htmlFor="activePatient">Paciente activo</label>
                                     </div>
+                                    <div className="form-check form-check-inline">
+                                        <input
+                                            className="form-check-input"
+                                            type="radio"
+                                            name="searchType"
+                                            id="newConsultation"
+                                            value="new"
+                                            checked={searchType === "new"}
+                                            onChange={() => handleSearchTypeChange("new")}
+                                        />
+                                        <label className="form-check-label" htmlFor="newConsultation">Nueva consulta</label>
+                                    </div>
+                                </div>
+                                {searchType === "active" && (
                                     <div>
-                                        <button type="submit" className="btn btn-primary">Buscar</button>
+                                        <div className="d-flex align-items-center mb-3">
+                                            <div className="mb-3">
+                                                <input type="text" className="form-control mt-3" id="searchByDNI" placeholder="Búsqueda por DNI" value={searchValue} onChange={handleSearchChange} onKeyDown={handleKeyPress} />
+                                            </div>
+                                            <div>
+                                                <button type="submit" className="btn btn-primary">Buscar</button>
+                                            </div>
+                                        </div>
+                                        {searchError && <span className="text-danger">{searchError}</span>}
+                                        <div className="row">
+                                            <div className="col-lg-6 mb-3">
+                                                <label htmlFor="name" className="form-label">Nombre</label>
+                                                <input type="text" className="form-control" id="name" name="name" value={formData.name} onChange={handleFormChange} readOnly />
+                                            </div>
+                                            <div className="col-lg-6 mb-3">
+                                                <label htmlFor="lastName" className="form-label">Apellido</label>
+                                                <input type="text" className="form-control" id="lastname" name="lastname" value={formData.lastname} onChange={handleFormChange} readOnly />
+                                            </div>
+                                        </div>
+                                        <div className="row">
+                                            <div className="col-lg-6 mb-3">
+                                                <label htmlFor="contact" className="form-label">Contacto</label>
+                                                <input type="text" className="form-control" id="phone" name="phone" value={formData.phone} onChange={handleFormChange} readOnly />
+                                            </div>
+                                            <div className="col-lg-6 mb-3">
+                                                <label htmlFor="dni" className="form-label">DNI</label>
+                                                <input type="text" className="form-control" id="dni" name="dni" value={formData.dni} onChange={handleFormChange} readOnly />
+                                            </div>
+                                        </div>
+                                        <SchedulingTherapist patientId={formData.id} />
                                     </div>
-                                </div>
-                            </form>
-                            {searchError && <span className="text-danger">{searchError}</span>}
-                            <form>
-                                <div className="row">
-                                    <div className="col-lg-6 mb-3">
-                                        <label htmlFor="name" className="form-label">Nombre</label>
-                                        <input type="text" className="form-control" id="name" name="name" value={formData.name} onChange={handleFormChange} />
+                                )}
+                                {searchType === "new" && (
+                                    <div>
+                                        <h1>Nueva Consulta Formulario</h1>
                                     </div>
-                                    <div className="col-lg-6 mb-3">
-                                        <label htmlFor="lastName" className="form-label">Apellido</label>
-                                        <input type="text" className="form-control" id="lastname" name="lastname" value={formData.lastname} onChange={handleFormChange} />
-                                    </div>
-                                </div>
-                                <div className="row">
-                                    <div className="col-lg-6 mb-3">
-                                        <label htmlFor="contact" className="form-label">Contacto</label>
-                                        <input type="text" className="form-control" id="phone" name="phone" value={formData.phone} onChange={handleFormChange} />
-                                    </div>
-                                    <div className="col-lg-6 mb-3">
-                                        <label htmlFor="dni" className="form-label">DNI</label>
-                                        <input type="text" className="form-control" id="dni" name="dni" value={formData.dni} onChange={handleFormChange} />
-                                    </div>
-                                </div>
+                                )}
                             </form>
                         </div>
                     )}

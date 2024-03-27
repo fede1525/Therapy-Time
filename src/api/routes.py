@@ -837,9 +837,7 @@ def get_reservation_by_id(id):
     except Exception as e:
         return jsonify({"success": False, "error": "Error inesperado"}), 500
 
-
-
-
+#Buscar paciente por DNI para nuevo turno
 @api.route('/search_user/<dni>', methods=['GET'])
 def get_user_by_dni(dni):
     try:
@@ -858,3 +856,29 @@ def get_user_by_dni(dni):
             return "Usuario no encontrado", 404
     except Exception as e:
         return jsonify({"error": "Error al obtener el usuario"}), 500
+
+#Crea una nueva reserva de turno realizada por el paciente 
+@api.route('/reservation/<int:user_id>', methods=['POST'])
+def create_reservation_for_user(user_id):
+    try:
+        data = request.json
+
+        if not data or 'date' not in data or 'time' not in data:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        datetime_str = f"{data['date']} {data['time']}"
+        
+        new_reservation = Reservation(
+            date=datetime.strptime(datetime_str, '%Y-%m-%d %H:%M'),
+            user_id=user_id
+        )
+
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
