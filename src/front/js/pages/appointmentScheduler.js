@@ -5,6 +5,7 @@ import { NavbarTherapist } from "../component/navbar";
 import { Context } from "../store/appContext";
 import { SchedulingTherapistEdit } from "../component/editRservation";
 import { SchedulingTherapist } from "../component/schedulingTherapist"
+import {SchedulingNonRegistered} from "../component/schedulingNonRegistered"
 
 export const AppointmentScheduler = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -27,7 +28,21 @@ export const AppointmentScheduler = () => {
         phone: "",
         dni: ""
     });
+    const [nonUserData, setNonUserData] = useState({
+        name: "",
+        lastname: "",
+        phone: "",
+        dni: ""
+    });
 
+    const handleFormChangeNonUser = (event) => {
+        const { name, value } = event.target;
+        setNonUserData({
+            ...nonUserData,
+            [name]: value
+        });
+    };
+    
     const handleSearchTypeChange = (type) => {
         setSearchType(type);
     };
@@ -37,7 +52,7 @@ export const AppointmentScheduler = () => {
             setSearchType("active");
         }
     }, [activeTab]);
-    
+
     useEffect(() => {
         actions.getAllReservations();
     }, []);
@@ -55,6 +70,7 @@ export const AppointmentScheduler = () => {
         });
     };
 
+ 
     const handleSearchSubmit = async (event) => {
         if (event) {
             event.preventDefault();
@@ -363,8 +379,62 @@ export const AppointmentScheduler = () => {
                                 )}
                                 {searchType === "new" && (
                                     <div>
-                                        <h1>Nueva Consulta Formulario</h1>
-                                    </div>
+                                        <div>
+                                            <div className="row">
+                                                <div className="col-lg-6 mb-3">
+                                                    <label htmlFor="newName" className="form-label">Nombre</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="newName"
+                                                        name="name"
+                                                        value={nonUserData.name}
+                                                        onChange={handleFormChangeNonUser}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-lg-6 mb-3">
+                                                    <label htmlFor="newLastName" className="form-label">Apellido</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="newLastName"
+                                                        name="lastname"
+                                                        value={nonUserData.lastname}
+                                                        onChange={handleFormChangeNonUser}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="row">
+                                                <div className="col-lg-6 mb-3">
+                                                    <label htmlFor="newPhone" className="form-label">Teléfono</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="newPhone"
+                                                        name="phone"
+                                                        value={nonUserData.phone}
+                                                        onChange={handleFormChangeNonUser}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-lg-6 mb-3">
+                                                    <label htmlFor="newDNI" className="form-label">DNI</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="newDNI"
+                                                        name="dni"
+                                                        value={nonUserData.dni}
+                                                        onChange={handleFormChangeNonUser}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <SchedulingNonRegistered formData={nonUserData}/>
+                                    </div> 
                                 )}
                             </form>
                         </div>

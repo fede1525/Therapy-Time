@@ -804,18 +804,29 @@ def get_all_reservations():
         citas = []
 
         for reserva in reservas:
-            usuario = User.query.get(reserva.user_id)
+            if reserva.user_id:  # Si hay un usuario registrado asociado a la reserva
+                usuario = User.query.get(reserva.user_id)
+                nombre_paciente = f"{usuario.name} {usuario.lastname}"
+                telefono = usuario.phone
+                link_sala_virtual = usuario.virtual_link
+            else:  # Si no hay un usuario registrado asociado a la reserva
+                nombre_paciente = reserva.guest_name
+                telefono = reserva.guest_phone
+                link_sala_virtual = None
+
             cita = {
                 "id": reserva.id,
                 "fecha": reserva.date.strftime('%Y-%m-%d %H:%M'),
-                "nombre_paciente": f"{usuario.name} {usuario.lastname}",
-                "telefono": usuario.phone,
-                "link_sala_virtual": usuario.virtual_link
+                "nombre_paciente": nombre_paciente,
+                "telefono": telefono,
+                "link_sala_virtual": link_sala_virtual
             }
             citas.append(cita)
+
         return jsonify({"success": True, "data": citas})
     except Exception as e:
         return jsonify({"success": False, "error": "Error inesperado"}), 500
+
 
 #Consulta una reserva por id
 @api.route('/get_reservation_by_id/<int:id>', methods=['GET'])
@@ -857,7 +868,7 @@ def get_user_by_dni(dni):
     except Exception as e:
         return jsonify({"error": "Error al obtener el usuario"}), 500
 
-#Crea una nueva reserva de turno realizada por el paciente 
+#Crea una nueva reserva de turno realizada por el terapeuta
 @api.route('/reservation/<int:user_id>', methods=['POST'])
 def create_reservation_for_user(user_id):
     try:
@@ -880,5 +891,27 @@ def create_reservation_for_user(user_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+#Crea reserva para usuario no registrado
+@api.route('/reservation/non_registered', methods=['POST'])
+def create_reservation_for_non_registered_user():
+    try:
+        data = request.json
 
+        if not data or 'date' not in data or 'guest_name' not in data or 'guest_phone' not in data:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        datetime_str = data['date']
+        
+        new_reservation = Reservation(
+            date=datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S'),
+            guest_name=data['guest_name'],
+            guest_phone=data['guest_phone']
+        )
+
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
