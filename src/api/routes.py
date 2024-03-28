@@ -18,6 +18,7 @@ from api.models import (
 )
 from api.utils import APIException, generate_sitemap
 from datetime import datetime, time
+from datetime import datetime, timedelta
 from flask import Blueprint, Flask, jsonify, json, request
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
@@ -274,7 +275,6 @@ EMAILJS_TEMPLATE_ID = 'template_ebpnklz'
 EMAILJS_USER_ID = 'sm1cI8ucvO4Tvl_jb'
 ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
 
-#Funcion para el envio de correo electronico
 def enviar_correo_recuperacion(email, token):
     datos_correo = {
         'service_id': EMAILJS_SERVICE_ID, 
@@ -312,8 +312,8 @@ def reset_password():
     token = ''.join(random.choices(string.digits, k=8))
 
     hashed_temp_code = bcrypt.generate_password_hash(token).decode("utf-8")
-
-    token_expiry = datetime.datetime.now() + datetime.timedelta(minutes=30)
+    
+    token_expiry = datetime.now() + timedelta(minutes=30)
     user.token_expiry = token_expiry
 
     user.reset_token = hashed_temp_code
@@ -323,7 +323,7 @@ def reset_password():
 
     return jsonify({"message": "El correo electrónico de recuperación ha sido enviado con exito."}), 200
 
-#Configuracion de nueva contraseña
+# Configuracion de nueva contraseña
 @api.route('/change_password', methods=['POST'])
 def change_password():
     data = request.get_json()
@@ -341,6 +341,7 @@ def change_password():
         return jsonify({"error": "Contraseña cambiada exitosamente"}), 200
     else:
         return jsonify({"error": "El token ingresado es inválido o ha expirado"}), 401
+
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

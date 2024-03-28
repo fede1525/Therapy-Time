@@ -139,7 +139,7 @@ export const Reset_password = () => {
                 )}
             </div>
             <div className="col-6 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#FAFAFA' }}>
-                <img className="animate__backInRight" style={{ width: '75vh', maxWidth: '90%', height: 'auto' }} src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/logo_login.png?raw=true" />
+                <img className="animate__backInRight" style={{ width: '75vh', maxWidth: '90%', height: 'auto' }} src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/develop/src/front/img/logo_login.png?raw=true" />
             </div>
         </div>
     );

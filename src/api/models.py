@@ -177,4 +177,10 @@ class User(db.Model):
             "virtual_link": self.virtual_link,
             "is_active": self.is_active
         }
-
+   
+def seed():
+    seeder = ResolvingSeeder(db.session)
+    seeder.register(Role)
+    seeder.register(User)
+    seeder.load_entities_from_json_file('seedData.json')
+    db.session.commit()

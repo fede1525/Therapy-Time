@@ -184,13 +184,19 @@ const getState = ({ getStore, getActions, setStore }) => {
 			//ACTIONS PARA EL RECUPERO DE CONTRASEÑA
 			handleResetPassword: async (email) => {
 				try {
-					const response = await apiFetch('/reset_password', 'POST', { email });
+					const response = await fetch(process.env.BACKEND_URL + '/api/reset_password', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+						},
+						body: JSON.stringify({ email })
+					});
+
 					const data = await response.json();
-			
 					if (!response.ok) {
 						throw new Error(data.error || 'Error al enviar la solicitud');
 					}
-			
 					return data;
 				} catch (error) {
 					throw new Error(error.message || 'Error al enviar la solicitud');
@@ -198,13 +204,20 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			handleChangePassword: async (username, token, newPassword) => {
 				try {
-					const response = await apiFetch('/change_password', 'POST', {
-						username: username,
-						token: token,
-						new_password: newPassword
+					const response = await fetch(process.env.BACKEND_URL + '/api/change_password', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+						},
+						body: JSON.stringify({
+							username: username,
+							token: token,
+							new_password: newPassword
+						})
 					});
 					const data = await response.json();
-			
+
 					if (!response.ok) {
 						if (response.status === 401) {
 							throw new Error(data.mensaje || 'El token ingresado es inválido o ha expirado');
@@ -214,7 +227,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 							throw new Error(data.mensaje || 'Error al cambiar la contraseña');
 						}
 					}
-			
+
 					return data;
 				} catch (error) {
 					throw new Error(error.message || 'Error al enviar la solicitud');
@@ -723,7 +736,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw new Error(error.message || 'Failed to create reservation for non-registered user');
 				}
 			},
-			//FCUNIONES PARA EL TURNERO DEL PACIENTE
+			//ACTIONS PARA EL TURNERO DEL PACIENTE
 			getVirtualLink: async () => {
 				try {
 					const resp = await getActions().protectedFetch("/profile_virtual_link", "GET", null)
