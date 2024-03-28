@@ -65,18 +65,21 @@ def seed():
 class Reservation(db.Model):
     __tablename__='reservation'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    date = db.Column(db.Date, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     user = db.relationship("User")
+    guest_name = db.Column(db.String(50), nullable=True) 
+    guest_phone = db.Column(db.String(10), nullable=True)
 
-    def __repr__(self):
+    def __repr__(self):     
         return f'<Reservation {self.id}>'
     def serialize(self):
         return{
             "id": self.id,
             "date": self.date,
             "user_id": self.user_id,
-            "time_id": self.time_id,
+            "guest_name": self.guest_name,
+            "guest_phone": self.guest_phone
         }
 
 class AvailabilityDates(db.Model):
@@ -160,6 +163,24 @@ class GlobalSchedulingEnabled(db.Model):
             "end_hour": self.end_hour.strftime('%H:%M') 
         }
 
+class Payment(db.Model):
+    __tablename__ = 'payment'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    date = db.Column(db.DateTime, nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.String(250), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship("User")
 
+    def __repr__(self):
+        return f'<Payment {self.id}>'
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "date": self.date.strftime('%Y-%m-%d %H:%M:%S'),
+            "amount": self.amount,
+            "description": self.description,
+            "user_id": self.user_id
+        }
 

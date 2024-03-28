@@ -18,6 +18,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"reset_token": ""
 				},
 			],
+			userByDNI: {},
 			unavailableDates: [{
 				"id": "",
 				"date": "",
@@ -37,6 +38,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"arrival_date": "",
 				}
 			],
+			preferenceId: null,
 			dates: [{
 				"date": "",
 				"times": []
@@ -52,7 +54,20 @@ const getState = ({ getStore, getActions, setStore }) => {
 				"day": "",
 				"start_hour": "",
 				"end_hour": ""
-			}]
+			}],
+			patientReservation: {
+				"id": "",
+				"date": "",
+				"user_id": ""
+			},
+			patientReservation: {
+				"id": "",
+				"date": "",
+				"user_id": ""
+			},
+			reservations: [],
+			reservationByID: {
+			}
 		},
 		actions: {
 			//Funciones globales
@@ -68,9 +83,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 					if (body !== null) {
 						params.body = JSON.stringify(body);
 						params.headers["Content-Type"] = "application/json";
-					}
-					if (body != null) {
-						params.body = JSON.stringify(body)
 					}
 					let resp = await fetch(process.env.BACKEND_URL + "api" + endpoint, params);
 
@@ -139,7 +151,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return error
 				}
 			},
-			//Funciones de login, logout y recupero de contraseña
+			//Funciones de login y logout 
 			logout: async () => {
 				await getActions().protectedFetch("/logout", "POST", null)
 				localStorage.removeItem("token")
@@ -442,6 +454,45 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},
+			createPreference: async () => {
+				try {
+					const response = await getActions().protectedFetch("/create_preference", "POST", {
+						description: "Honorarios",
+						price: 100,
+						quantity: 1,
+						currency_id: "ARS"
+					})
+
+					if (response.ok) {
+						console.log("El response vino ok del back end y tiene esta info: ", response)
+						const data = await response.json();
+						const { id } = data;
+						console.log("Este es el id: ", id)
+						let store = getStore()
+						setStore({ ...store, preferenceId: id })
+						let store2 = getStore()
+						console.log("Este es el contenido de id en el store: ", store2.preferenceId.id)
+						return id;
+					} else {
+						console.error("Error creando preferencia.");
+					}
+				} catch (error) {
+					console.error(error);
+				}
+			},
+			getPayments: async () => {
+				try {
+					const response = await getActions().protectedFetch("/get_payments", 'GET')
+
+					if (!response.ok) {
+						console.error("Error al traer los pagos.")
+					}
+
+					return await response.json()
+				} catch (error) {
+					console.error("Error: ", error)
+				}
+			},
 			//Funciones para el bloqueo de fechas individuales
 			blockMultipleHours: async (dates) => {
 				try {
@@ -473,6 +524,23 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					console.error('Error al obtener fechas bloqueadas:', error);
 					throw error;
+				}
+			},
+			fetchUnavailableDates: async () => {
+				try {
+					const response = await getActions().apiFetch('/fetch_bloquear', 'GET');
+
+					if (!response.ok) {
+						throw new Error('Failed to fetch unavailable dates');
+					}
+
+					const responseData = await response.json();
+					setStore({ unavailableDates: responseData });
+
+					return { success: true, message: 'Unavailable dates fetched successfully' };
+				} catch (error) {
+					console.error('Error fetching unavailable dates:', error);
+					return { success: false, error: error.message || 'Error fetching unavailable dates' };
 				}
 			},
 			//Funciones para el bloqueo de fechas globales

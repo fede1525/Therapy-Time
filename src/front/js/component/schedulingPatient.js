@@ -4,11 +4,13 @@ import "../../styles/calendar.css";
 import { FaTimes } from 'react-icons/fa';
 import { FaChevronLeft } from 'react-icons/fa';
 import { FaChevronRight } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
-export const SchedulingComponent = () => {
-  const { store, actions } = useContext(Context);
+export const SchedulingPatient = () => {
+  const { actions } = useContext(Context);
   const [calendar, setCalendar] = useState([]);
-  const [month, setMonth] = useState(1); //empieza en enero
+  const token = localStorage.getItem("token");
+  const [month, setMonth] = useState(1); // empieza en enero
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -17,6 +19,8 @@ export const SchedulingComponent = () => {
   const [unavailableDates, setUnavailableDates] = useState([]);
   const [extractedInfo, setExtractedInfo] = useState([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const navigate = useNavigate();
+
 
   const openShowSuccessModal = () => {
     setShowSuccessModal(true)
@@ -25,6 +29,7 @@ export const SchedulingComponent = () => {
   const closeShowSuccessModal = () => {
     handleCloseModal();
     setShowSuccessModal(false)
+    navigate("/home");
   }
 
   const handleNextMonth = () => {
@@ -62,49 +67,18 @@ export const SchedulingComponent = () => {
 
   const fetchUnavailableDates = async () => {
     try {
-      const response = await actions.APIFetch('/final_calendar', 'GET');
+      const response = await actions.addGlobalAndFinalBlocks(year, month);
       setUnavailableDates(response);
     } catch (error) {
       console.error('Error al obtener fechas no disponibles:', error);
     }
   };
 
-  const getDayOfWeek = (year, month, day) => {
-    const selectedDate = new Date(year, month - 1, day);
-    const dayOfWeekNumber = selectedDate.getDay();
-    const dayOfWeekNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    return dayOfWeekNames[dayOfWeekNumber];
-  };
-
-  const dayOfWeek = getDayOfWeek(year, month, selectedDay);
-  const filtrarPorDia = (arreglo, dia) => {
-    // Utilizar el método filter para obtener los objetos con el día especificado
-    const algo = arreglo.filter(horario => horario.day === dia)
-    return algo; 
-  };
-  const horasBloqueadasPorDia = filtrarPorDia(store.globalEnabled, dayOfWeek)
-  
+  useEffect(() => {
+    fetchUnavailableDates();
+  }, [year, month]);
 
   useEffect(() => {
-    console.log(dayOfWeek); 
-    fetchUnavailableDates();
-    function extractDateInfo(dateString) {
-      const dateObject = new Date(dateString);
-      const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
-      const year = dateObject.getFullYear();
-      const day = dateObject.getDate();
-      const hour = dateObject.getHours() + 5;
-
-      return { month, year, day, hour };
-    }
-    if (unavailableDates.length > 0) {
-      const extractedInfo = unavailableDates.map(item => {
-        const { month, year, day, hour } = extractDateInfo(item.date);
-        // console.log(extractDateInfo(item.date))
-        return { year, month, day, hour };
-      });
-      setExtractedInfo(extractedInfo);
-    }
     const currentDate = new Date(year, month - 1, 1);
     const firstDayOfWeek = currentDate.getDay();
     let day = 1;
@@ -116,36 +90,37 @@ export const SchedulingComponent = () => {
 
       for (let j = 0; j < 7; j++) {
         if (i === 0 && j < firstDayOfWeek) {
-
           row.push('');
         } else if (day <= 31) {
           row.push(day);
           day++;
         } else {
-
           row.push('');
         }
       }
       newCalendar.push(row);
     }
     setCalendar(newCalendar);
-  }, [year, month, selectedDay, showModal === true]);
+  }, [year, month]);
 
   const handleDayClick = (day) => {
     const selectedDate = new Date(year, month - 1, day);
     const currentDate = new Date();
 
     if (selectedDate < currentDate) {
-      return;
+        setSelectedHours([]);
+        setSelectedDay(null);
+        setShowModal(false);
+        return;
     }
 
     if (day) {
-      setSelectedDay(day);
-      setShowModal(true);
+        setSelectedDay(day);
+        setShowModal(true);
     } else {
-      setShowModal(false);
+        setShowModal(false);
     }
-  };
+};
 
 
   const handleCloseModal = () => {
@@ -156,77 +131,28 @@ export const SchedulingComponent = () => {
   const handleSelectHours = (data) => {
     const isSelected = selectedHours.find(item => item.id === data.id);
     if (isSelected) {
-      setSelectedHours(prevHours => prevHours.filter(item => item.id !== data.id));
+        setSelectedHours([]);
+        setSelectedHour(null);
     } else {
-      setSelectedHours(prevHours => [...prevHours, data]);
+        setSelectedHours([data]);
+        setSelectedHour(data.time);
     }
   };
 
-  const handleBlockSelectedHours = async () => {
-    await actions.apiFetch('/bloquear', 'POST', selectedHours)
-      .then(selectedHours => {
-        console.log('Hora bloqueada exitosamente:', selectedHours);
-        openShowSuccessModal();
-        setSelectedHours([])
-      })
-      .catch(error => {
-        console.error('Error al bloquear la hora:', error);
-        console.log(selectedHours)
-      });
-  }
 
-  const handleUnblockSelectedHours = async () => {
-    await actions.apiFetch('/desbloquear/multiple', 'DELETE', selectedHours)
-      .then(selectedHours => {
-        console.log('Hora bloqueada exitosamente:', selectedHours);
-        openShowSuccessModal();
-        setSelectedHours([])
-      })
-      .catch(error => {
-        console.error('Error al bloquear la hora:', error);
-        console.log(selectedHours)
-      });
-  }
+  const handleReservation = async () => {
+    const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
+    const formattedHour = `${selectedHour.toString().padStart(2, '0')}:00:00`;
 
-  const handleBlockAllHours = async () => {
     try {
-      const allHours = [];
-      for (let hour = 8; hour <= 20; hour++) {
-        const data = {
-          date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
-          time: hour,
-          id: `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`,
-        };
-        allHours.push(data);
+      const response = await actions.createReservation(formattedDate, formattedHour);
+      if (response && response.message === 'Reservation created successfully') {
+        openShowSuccessModal();
+      } else {
+        console.error('Error al realizar la reserva:', response && response.error ? response.error : 'Error desconocido');
       }
-
-      await actions.apiFetch('/bloquear', 'POST', allHours);
-      console.log('Horas bloqueadas exitosamente:', allHours);
-      openShowSuccessModal();
-      setSelectedHours([]);
     } catch (error) {
-      console.error('Error al bloquear las horas:', error);
-    }
-  };
-
-  const handleunBlockAllHours = async () => {
-    try {
-      const allHours = [];
-      for (let hour = 8; hour <= 20; hour++) {
-        const data = {
-          date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
-          time: hour,
-          id: `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`,
-        };
-        allHours.push(data);
-      }
-
-      await actions.apiFetch('/desbloquear/multiple', 'DELETE', allHours);
-      console.log('Horas bloqueadas exitosamente:', allHours);
-      openShowSuccessModal();
-      setSelectedHours([]);
-    } catch (error) {
-      console.error('Error al bloquear las horas:', error);
+      console.error('Error al realizar la reserva:', error);
     }
   };
 
@@ -256,21 +182,11 @@ export const SchedulingComponent = () => {
               item.hour === hour
             ));
             const isSelected = selectedHours.find(item => item.id === data.id);
-            const isInWorkingHours = horasBloqueadasPorDia.some((item) => (
-              hour >= parseInt(item.start_hour.split(':')[0]) && hour < parseInt(item.end_hour.split(':')[0])
-            ));
-            const hourClassNames = `card border ${
-              matchingHour ? "unavailableDate" : ""
-            } ${
-              isSelected ? "selected" : ""
-            } ${
-              !isInWorkingHours ? "unavailableByDate" : ""
-            }`;
             return (
               <div key={hour} className="col-lg-4 col-md-4 col-sm-6 mb-2">
                 <div
                   onClick={() => handleSelectHours(data)}
-                  className={hourClassNames}
+                  className={`card border ${matchingHour ? "border-danger" : ""} ${isSelected ? "selected" : ""}`}
                   style={{ height: '100%', cursor: 'pointer' }}
                 >
                   <div className="card-body d-flex align-items-center justify-content-center">
@@ -281,18 +197,16 @@ export const SchedulingComponent = () => {
             );
           })}
         </div>
-        <div className="d-flex justify-content-center mt-2 mx-0">
-          <button className='btn_horasPorFecha mx-2 ' onClick={handleBlockSelectedHours}>Bloquear selección</button>
-          <button className='btn_horasPorFecha mx-2' onClick={handleUnblockSelectedHours}>Desbloquear selección</button>
-          <button className='btn_horasPorFecha mx-2' onClick={handleBlockAllHours}>Bloquear todo el día</button>
-          <button className='btn_horasPorFecha mx-2' onClick={handleunBlockAllHours}>Desbloquear todo el día</button>
+        <div className="row mx-1 mt-2">
+          <button className='btn_horasPorFecha btn-block' onClick={handleReservation}>Reservar
+          </button>
         </div>
         <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content" style={{ textAlign: 'left' }} id="contactModal">
               <div className="modal-header justify-content-between">
                 <div>
-                  <span>Disponibilidad configurada con exito </span>
+                  <span>Su turno ha sido agendado con exito</span>
                 </div>
                 <div>
                   <button type="button" className="btn_close_contact" onClick={closeShowSuccessModal} aria-label="Close">X</button>
@@ -304,7 +218,7 @@ export const SchedulingComponent = () => {
       </div>
     );
   };
-  
+
   return (
     <div className='d-flex'>
       <div className="left-content mt-2" style={{ marginRight: '10vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
@@ -344,7 +258,7 @@ export const SchedulingComponent = () => {
       </div>
       <div>
         {showModal ? (
-          <div>
+          <div className='mt-4'>
             {renderModalContent()}
           </div>
         ) : (
@@ -356,3 +270,4 @@ export const SchedulingComponent = () => {
     </div>
   );
 };
+

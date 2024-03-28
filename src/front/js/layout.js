@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, {useContext } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import ScrollToTop from "./component/scrollToTop";
 import { BackendURL } from "./component/backendURL";
@@ -14,18 +14,21 @@ import { AppointmentScheduler } from "./pages/appointmentScheduler";
 import { IncomeControl } from "./pages/incomeControl";
 import { Inbox } from "./pages/inbox";
 import { Patients } from "./pages/patients";
-import { Payments } from "./pages/payments";
-import { PatientSchedule } from "./pages/patientSchedule";
+import { PaymentList } from "./pages/paymentList";
 import { Reset_password } from "./pages/resetPassword";
 import { EditProfile } from "./pages/editProfile";
 import { isAuthenticated } from "./authentication";
+import { Payment } from "./pages/payment"
+import { NewDate } from "./pages/newDate.js";
+import { EditDate } from "./pages/editDate.js";
+
 
 const Layout = () => {
     const basename = process.env.BASENAME || "";
     if (!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL />;
 
     const { store } = useContext(Context);
-   
+
     return (
         <div>
             <BrowserRouter basename={basename}>
@@ -38,13 +41,15 @@ const Layout = () => {
                         {!isAuthenticated() ? <Route element={<Navigate to="/login" />} path="*" /> : <>
                             <Route element={store.user.role === 1 ? <HomePatient /> : <HomeTherapist />} path="/home" />
                             <Route element={<EditProfile />} path="/editProfile" />
-                            <Route element={<Payments />} path="/payments" />
-                            <Route element={<PatientSchedule />} path="/patient_schedule" />
+                            <Route element={<Payment />} path="/payment" />
+                            <Route element={<PaymentList />} path="/payment_list" />
                             <Route element={<Scheduling />} path="/scheduling" />
-                            <Route element={<AppointmentScheduler />} path="/appointment_scheduler" />
+                            <Route element={<AppointmentScheduler />} path="/appointment_scheduling" />
                             <Route element={<IncomeControl />} path="/income_control" />
                             <Route element={<Inbox />} path="/inbox" />
                             <Route element={<Patients />} path="/patients" />
+                            <Route element={<NewDate />} path="/new_date" />
+                            <Route element={<EditDate />} path="/edit_date" />
                         </>}
                     </Routes>
                 </ScrollToTop>

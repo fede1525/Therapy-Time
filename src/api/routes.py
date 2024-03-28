@@ -1,23 +1,24 @@
 from flask import Flask, request, jsonify, Blueprint, json
-from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled, Reservation, Payment
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_bcrypt import Bcrypt
-from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import datetime, json, string, random 
-from sqlalchemy import func
-from sqlalchemy.exc import IntegrityError
 import requests
-from datetime import datetime, time, timedelta, date
+from datetime import datetime, time
+
+import datetime
 import calendar
+import mercadopago
 
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 api = Blueprint('api', __name__)
+sdk = mercadopago.SDK(os.environ.get("MERCADOPAGO_ACCESSTOKEN")) 
 
 CORS(api)
 
@@ -98,12 +99,12 @@ def delete_user(user_id):
     user_to_delete = User.query.get(user_id)
 
     if not user_to_delete:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"error": "Usuario no encontrado"}), 404
 
     db.session.delete(user_to_delete)
     db.session.commit()
 
-    return jsonify({"message": "User deleted successfully"}), 200
+    return jsonify({"message": "Usuario eliminado exitosamente"}), 200
 
 #Listar todos los usuarios (terapeuta)
 @api.route('/users', methods=['GET'])
@@ -228,7 +229,7 @@ def edit_profile():
         return "Usuario no autorizado", 403
         
     data = request.get_json()
-    print("Data received:", data)
+    print("Data recibida:", data)
 
     updated_user_data = {**user.__dict__, **data}
 
@@ -383,11 +384,11 @@ def mark_consultation_as_unread(id):
         if consultation:
             consultation.is_read = False
             db.session.commit()
-            return jsonify({"message": "Consultation marked as unread"}), 200
+            return jsonify({"message": "Consulta marcada como no leída"}), 200
         else:
-            return jsonify({"error": "Consultation not found"}), 404
+            return jsonify({"error": "Consulta no encontrada"}), 404
     except Exception as e:
-        return jsonify({"error": "Error marking consultation as unread"}), 500
+        return jsonify({"error": "Error al marcar la consulta como no leída"}), 500
 
 #Marcar las consultas como leidas
 @api.route('/consultations/<int:id>/mark_as_read', methods=['PUT'])
@@ -401,11 +402,47 @@ def mark_consultation_as_read(id):
         if consultation:
             consultation.is_read = True  # Cambiar a True para marcar como leída
             db.session.commit()
-            return jsonify({"message": "Consultation marked as read"}), 200
+            return jsonify({"message": "Consulta marcada como leída"}), 200
         else:
-            return jsonify({"error": "Consultation not found"}), 404
+            return jsonify({"error": "Consulta no encontrada"}), 404
     except Exception as e:
-        return jsonify({"error": "Error marking consultation as read"}), 500
+        return jsonify({"error": "Error al marcar la consulta como leída"}), 500
+
+#Borrado logico de las consultas
+@api.route('/deleted_consultations/<int:id>', methods=['PUT'])
+@jwt_required()
+def logical_deletion(id):
+    payload = get_jwt()
+    if payload["role"]!=2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            consultation.is_deleted = True
+            db.session.commit()
+            return jsonify({"message": "El mensaje ha sido eliminado"}),200
+        else:
+            return jsonify({"message" : "Error al eliminar el mensaje"}),404
+    except Exception as e:
+        return jsonify({"error": "Error al intentar eliminar el mensaje"}),500
+    
+#Borrado fisico de las consultas
+@api.route('/deleted_consultations/<int:id>', methods=['DELETE'])
+@jwt_required()
+def physical_deletion(id):
+    payload = get_jwt()
+    if payload["role"] != 2:
+        return "Usuario no autorizado", 403
+    try:
+        consultation = Consultation.query.get(id)
+        if consultation:
+            db.session.delete(consultation)  
+            db.session.commit()
+            return jsonify({"message": "El mensaje ha sido eliminado de forma permanente"}), 200
+        else:
+            return jsonify({"message": "La consulta no existe"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error al intentar eliminar la consulta"}), 500
 
 # Marcado de dias y franjas horarias disponibles (terapeuta) 
 # 1) Definición de opciones para los días y horas
@@ -591,6 +628,7 @@ def final_calendar():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 #Arma un listado de las horas globales bloqueadas por dia
 #Paso 1)
 english_to_spanish = {
@@ -656,6 +694,106 @@ def add_availability_dates(year, month):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Mercado pago
+@api.route('/create_preference', methods=['POST'])
+def create_preference():
+    try:
+        req_data = request.get_json()
+
+        preference_data = {
+            "items": [
+                {
+                    "title": req_data["description"],
+                    "unit_price": float(req_data["price"]),
+                    "quantity": int(req_data["quantity"]),
+                    "currency_id": "ARS"
+                }
+            ],
+            "back_urls": {
+                "success": "http://localhost:3000/",
+                "failure": "http://localhost:3000/",
+                "pending": "",
+            }, 
+            "auto_return": "approved",
+        }
+
+        preference_response = sdk.preference().create(preference_data)
+        preference_id = preference_response["response"] 
+
+        return jsonify({"id": preference_id})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/mercadopago/webhook', methods=['POST'])
+def handle_webhook():
+    try:
+        notification_data = request.get_json()
+        payment_id = notification_data["data"]["id"]
+        payment_status = notification_data["data"]["status"]
+
+        if payment_status == "approved":
+            payment_details = notification_data["data"]
+            amount = payment_details.get("amount")
+            description = payment_details.get("description")
+
+            new_payment = Payment(
+                payment_id=payment_id,
+                amount=amount,
+                description=description,
+            )
+
+            db.session.add(new_payment)
+            db.session.commit()
+
+            return jsonify({"message": "Payment successful"}), 200
+        
+        else:
+            return jsonify({"message": "Payment status: {payment_status}"}), 200
+
+    except Exception as e:
+        print(f"Error procesando webhook: {e}")
+        db.session.rollback()
+        return jsonify({"error": "Error procesando el webhook"}), 500
+
+@api.route('/get_payments', methods=['POST'])
+@jwt_required()
+def get_payments():
+    try:
+        current_user = get_jwt_identity()
+        payments = Payment.query.filter_by(user=current_user).order_by(Payment.id.desc()).limit(10).all()
+        payment_data = [payment.serialize() for payment in payments]
+
+        return jsonify({"payments": payment_data}), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Reservar turno
+@api.route('/create_reservation', methods=['POST'])
+@jwt_required()
+def create_reservation():
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.json
+
+        if not data or 'date' not in data or 'time' not in data:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        datetime_str = f"{data['date']} {data['time']}"
+        
+        new_reservation = Reservation(
+            date=datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'),
+            user_id=current_user_id 
+        )
+
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Eliminar todos los bloqueos del calendario final
 @api.route('/borrar_todo_availability_dates', methods=['DELETE'])
 def borrar_todo_availability_dates():
@@ -666,5 +804,215 @@ def borrar_todo_availability_dates():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+#Obetener link sala virtual (turnero Paciente)
+@api.route('/profile_virtual_link', methods=['GET'])
+@jwt_required()
+def get_virtual_link():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
 
+    if user is None:
+        return jsonify({"error": "Usuario no encontrado"}), 404
 
+    virtual_link = user.virtual_link
+
+    return jsonify({"virtual_link": virtual_link}), 200
+
+#Eliminar un turno (Paciente)
+@api.route('/delete_reservation/<int:reservation_id>', methods=['DELETE'])
+def delete_reservation(reservation_id):
+    try:
+        reservation = Reservation.query.get(reservation_id)
+        if reservation:
+            db.session.delete(reservation)
+            db.session.commit()
+            return jsonify({"message": "Reservación eliminada exitosamente"}), 200
+        else:
+            return jsonify({"error": "Reservación no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+#Consultar el proximo turno (Paciente)
+@api.route('/next_reservation', methods=['GET'])
+@jwt_required()
+def get_next_reservation():
+    try:
+        current_user_id = get_jwt_identity()
+        next_reservation = Reservation.query.filter(Reservation.user_id == current_user_id, Reservation.date >= datetime.now()).order_by(Reservation.date).first()
+        if next_reservation:
+            return jsonify(next_reservation.serialize()), 200
+        else:
+            return jsonify({"message": "No se encontró próxima reservación para este usuario."}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#Reservar nuevo turno (paciente)
+@api.route('/reservation', methods=['POST'])
+@jwt_required()
+def make_reservation():
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.json
+
+        if not data or 'date' not in data or 'time' not in data:
+            return jsonify({'error': 'Faltan campos obligatorios'}), 400
+
+        datetime_str = f"{data['date']} {data['time']}"
+        
+        new_reservation = Reservation(
+            date=datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'),
+            user_id=current_user_id 
+        )
+
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        return jsonify({'message': 'Reserva creada con éxito', 'reserva': new_reservation.serialize()}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+#Editar un turno paciente
+@api.route('/edit_reservation/<int:id>', methods=['PUT'])
+def update_reservation(id):
+    try:
+        data = request.json
+        reservation = Reservation.query.filter_by(id=id).first()  
+        if not reservation:
+            return jsonify({'error': 'Reserva no encontrada '}), 404
+
+        if not data or ('date' not in data and 'time' not in data):
+            return jsonify({'error': 'Faltan campos para actualizar'}), 400
+
+        if 'date' in data and 'time' in data:
+            datetime_str = f"{data['date']} {data['time']}"
+            reservation.date = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+        elif 'date' in data:
+            reservation.date = datetime.strptime(data['date'], '%Y-%m-%d')
+        elif 'time' in data:
+            reservation.time = data['time']
+
+        db.session.commit()
+
+        return jsonify({'message': 'Reserva actualizada con éxito', 'reserva': reservation.serialize()}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#Consultar todas las citas agendadas
+@api.route('/get_all_reservations', methods=['GET'])
+def get_all_reservations():
+    try:
+        reservas = Reservation.query.all()
+        citas = []
+
+        for reserva in reservas:
+            if reserva.user_id:  
+                usuario = User.query.get(reserva.user_id)
+                nombre_paciente = f"{usuario.name} {usuario.lastname}"
+                telefono = usuario.phone
+                link_sala_virtual = usuario.virtual_link
+            else:  
+                nombre_paciente = reserva.guest_name
+                telefono = reserva.guest_phone
+                link_sala_virtual = None
+
+            cita = {
+                "id": reserva.id,
+                "fecha": reserva.date.strftime('%Y-%m-%d %H:%M'),
+                "nombre_paciente": nombre_paciente,
+                "telefono": telefono,
+                "link_sala_virtual": link_sala_virtual
+            }
+            citas.append(cita)
+
+        return jsonify({"success": True, "data": citas})
+    except Exception as e:
+        return jsonify({"success": False, "error": "Error inesperado"}), 500
+
+#Consulta una reserva por id
+@api.route('/get_reservation_by_id/<int:id>', methods=['GET'])
+def get_reservation_by_id(id):
+    try:
+        reserva = Reservation.query.get(id)
+        if reserva:
+            usuario = User.query.get(reserva.user_id)
+            cita = {
+                "id": reserva.id,
+                "fecha": reserva.date.strftime('%Y-%m-%d %H:%M'),
+                "nombre_paciente": f"{usuario.name} {usuario.lastname}",
+                "telefono": usuario.phone,
+                "link_sala_virtual": usuario.virtual_link
+            }
+            return jsonify({"success": True, "data": cita})
+        else:
+            return jsonify({"success": False, "error": "Reserva no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "error": "Error inesperado"}), 500
+
+#Buscar paciente por DNI para nuevo turno
+@api.route('/search_user/<dni>', methods=['GET'])
+def get_user_by_dni(dni):
+    try:
+        user = User.query.filter_by(dni=dni).first()
+        if user:
+            serialized_user = {
+                "id": user.id,
+                "name": user.name,
+                "lastname": user.lastname,
+                "phone": user.phone,
+                "dni": user.dni
+            }
+            return jsonify(serialized_user), 200
+        else:
+            return "Usuario no encontrado", 404
+    except Exception as e:
+        return jsonify({"error": "Error al obtener el usuario"}), 500
+
+#Crea una nueva reserva de turno realizada por el terapeuta
+@api.route('/reservation/<int:user_id>', methods=['POST'])
+def create_reservation_for_user(user_id):
+    try:
+        data = request.json
+
+        if not data or 'date' not in data or 'time' not in data:
+            return jsonify({'error': 'Faltan campos obligatorios'}), 400
+
+        datetime_str = f"{data['date']} {data['time']}"
+        
+        new_reservation = Reservation(
+            date=datetime.strptime(datetime_str, '%Y-%m-%d %H:%M'),
+            user_id=user_id
+        )
+
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        return jsonify({'message': 'Reserva creada con éxito', 'reserva': new_reservation.serialize()}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#Crea reserva para usuario no registrado
+@api.route('/reservation/non_registered', methods=['POST'])
+def create_reservation_for_non_registered_user():
+    try:
+        data = request.json
+
+        if not data or 'date' not in data or 'guest_name' not in data or 'guest_phone' not in data:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        datetime_str = data['date']
+        
+        new_reservation = Reservation(
+            date=datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S'),
+            guest_name=data['guest_name'],
+            guest_phone=data['guest_phone']
+        )
+
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        return jsonify({'message': 'Reserva creada con éxito', 'reserva': new_reservation.serialize()}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
