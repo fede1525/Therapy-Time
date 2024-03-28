@@ -43,7 +43,7 @@ export const NavbarPatient = () => {
 		<nav className="navbar" style={{ backgroundColor: '#EDE9E9', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
 			<div id="home-link">
 				<Link to="/home">
-					<img style={{ maxHeight: '8vh' }} className="mt-2" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/logo_login.png?raw=true"></img>
+					<img style={{ maxHeight: '8vh' }} className="mt-2" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/logo_login.png?raw=true"></img>
 				</Link>
 			</div>
 			<div id="home-link" className="d-flex ">
