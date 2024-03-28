@@ -139,7 +139,7 @@ export const Landing = () => {
             <div className={showModal || showAboutModal ? "content-behind-modal" : ""}>
                 <div className="row">
                     <div className="columna-izquierda-top col-3 navMedium">
-                        <img className="logo" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/navbar.png?raw=true" alt="Logo" />
+                        <img className="logo" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/navbar.png?raw=true" alt="Logo" />
                     </div>
                     <div className="columna-derecha-top col-9 navMedium">
                         <div className="d-flex justify-content-between linksNav">
@@ -151,7 +151,7 @@ export const Landing = () => {
                     </div>
                     <div className="columna-derecha-top col navSmall">
                         <div className="d-flex justify-content-between linksNav linksNavSmall">
-                            <img className="logoSmall" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/navbar.png?raw=true" alt="Logo" />
+                            <img className="logoSmall" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/navbar.png?raw=true" alt="Logo" />
                             <a href="#about" className="mt-4"><p>SOBRE MI</p></a>
                             <a href="#services" className="mt-4"><p>SERVICIOS</p></a>
                             <a href="#turnos" className="mt-4"><p>TURNOS</p></a>
@@ -161,7 +161,7 @@ export const Landing = () => {
                 </div>
                 <div className="row rowAboutSmall">
                     <div className="columna-izquierda-bottom columna-izquierda-bottomSmall col-3">
-                        <img className="profile profileSmall" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/profile.png?raw=true" alt="Profile" />
+                        <img className="profile profileSmall" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/fotoPerfil.png?raw=true" alt="Profile" />
                     </div>
                     <div className="columna-derecha-bottom col-9">
                         <div className="textAbout textAboutSmall" id="about">

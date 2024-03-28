@@ -110,7 +110,7 @@ export const Login = () => {
                 </form>
             </div>
             <div className="col-6 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#FAFAFA' }}>
-                <img className="animate__backInRight" style={{ width: '75vh', maxWidth: '90%', height: 'auto' }} src="../../img/logo_login.png" />
+                <img className="animate__backInRight" style={{width: '75vh', maxWidth: '90%', height: 'auto'}} src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/logo_login.png?raw=true" />
             </div>
         </div>
     );
