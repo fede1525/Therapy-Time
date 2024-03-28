@@ -447,10 +447,23 @@ const getState = ({ getStore, getActions, setStore }) => {
 						console.log("Este es el contenido de id en el store: ", store2.preferenceId.id)
 						return id;
 					} else {
-						console.error("Error creating preference");
+						console.error("Error creando preferencia.");
 					}
 				} catch (error) {
 					console.error(error);
+				}
+			},
+			getPayments: async () => {
+				try {
+					const response = await getActions().protectedFetch("/get_payments", 'GET')
+
+					if (!response.ok) {
+						console.error("Error al traer los pagos.")
+					}
+
+					return await response.json()
+				} catch (error) {
+					console.error("Error: ", error)
 				}
 			},
 			//Funciones para el bloqueo de fechas individuales
@@ -589,7 +602,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message || 'Error al obtener las fechas bloqueadas.' };
 				}
 			},
-			getVirtualLink : async () =>{
+			getVirtualLink: async () => {
 				try {
 					const resp = await getActions().protectedFetch("/profile_virtual_link", "GET", null)
 					if (!resp.ok) {
@@ -721,7 +734,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						throw new Error(responseData.error);
 					}
 
-					const userData = responseData; 
+					const userData = responseData;
 					setStore({ userByDNI: userData });
 
 					console.log("Datos del usuario recibidos:", userData);
@@ -738,7 +751,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						date: date,
 						time: time
 					};
-			
+
 					const response = await fetch(`${process.env.BACKEND_URL}/api/reservation/${user_id}`, {
 						method: 'POST',
 						headers: {
@@ -747,12 +760,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 						},
 						body: JSON.stringify(body)
 					});
-			
+
 					if (!response.ok) {
 						const errorData = await response.json();
 						throw new Error(errorData.error || 'Error creating reservation.');
 					}
-			
+
 					const data = await response.json();
 					return data;
 				} catch (error) {
@@ -769,12 +782,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 						},
 						body: JSON.stringify(reservationData) // Enviar reservationData como cuerpo de la solicitud
 					});
-			
+
 					if (!response.ok) {
 						const errorData = await response.json();
 						throw new Error(errorData.error || 'Failed to create reservation for non-registered user');
 					}
-			
+
 					const responseData = await response.json();
 					return responseData;
 				} catch (error) {

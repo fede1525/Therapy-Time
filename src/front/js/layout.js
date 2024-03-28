@@ -15,7 +15,6 @@ import { IncomeControl } from "./pages/incomeControl";
 import { Inbox } from "./pages/inbox";
 import { Patients } from "./pages/patients";
 import { PaymentList } from "./pages/paymentList";
-import { PatientSchedule } from "./pages/patientSchedule";
 import { Reset_password } from "./pages/resetPassword";
 import { EditProfile } from "./pages/editProfile";
 import { isAuthenticated } from "./authentication";
@@ -43,7 +42,7 @@ const Layout = () => {
                             <Route element={store.user.role === 1 ? <HomePatient /> : <HomeTherapist />} path="/home" />
                             <Route element={<EditProfile />} path="/editProfile" />
                             <Route element={<Payment />} path="/payment" />
-                            <Route element={<PatientSchedule />} path="/patient_schedule" />
+                            <Route element={<PaymentList />} path="/payment_list" />
                             <Route element={<Scheduling />} path="/scheduling" />
                             <Route element={<AppointmentScheduler />} path="/appointment_scheduling" />
                             <Route element={<IncomeControl />} path="/income_control" />

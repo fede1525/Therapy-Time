@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
 import "../../styles/home.css";
-import { NavbarPatient, NavbarPatients } from "../component/navbar_patient";
+import { NavbarPatient } from "../component/navbar_patient";
 import moment from 'moment';
 import 'moment/locale/es';
 import { SchedulingPatient } from "../component/schedulingPatient"
@@ -144,7 +144,3 @@ export const HomePatient = () => {
         </div>
     );
 };
-
-
-
-

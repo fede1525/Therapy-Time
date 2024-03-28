@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, Blueprint, json
-from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled, Reservation
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled, Reservation, Payment
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -692,6 +692,7 @@ def add_availability_dates(year, month):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Mercado pago
 @api.route('/create_preference', methods=['POST'])
 def create_preference():
     try:
@@ -721,7 +722,51 @@ def create_preference():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@api.route('/mercadopago/webhook', methods=['POST'])
+def handle_webhook():
+    try:
+        notification_data = request.get_json()
+        payment_id = notification_data["data"]["id"]
+        payment_status = notification_data["data"]["status"]
+
+        if payment_status == "approved":
+            payment_details = notification_data["data"]
+            amount = payment_details.get("amount")
+            description = payment_details.get("description")
+
+            new_payment = Payment(
+                payment_id=payment_id,
+                amount=amount,
+                description=description,
+            )
+
+            db.session.add(new_payment)
+            db.session.commit()
+
+            return jsonify({"message": "Payment successful"}), 200
+        
+        else:
+            return jsonify({"message": "Payment status: {payment_status}"}), 200
+
+    except Exception as e:
+        print(f"Error procesando webhook: {e}")
+        db.session.rollback()
+        return jsonify({"error": "Error procesando el webhook"}), 500
+
+@api.route('/get_payments', methods=['POST'])
+@jwt_required()
+def get_payments():
+    try:
+        current_user = get_jwt_identity()
+        payments = Payment.query.filter_by(user=current_user).order_by(Payment.id.desc()).limit(10).all()
+        payment_data = [payment.serialize() for payment in payments]
+
+        return jsonify({"payments": payment_data}), 200
     
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Reservar turno
 @api.route('/create_reservation', methods=['POST'])
 @jwt_required()
