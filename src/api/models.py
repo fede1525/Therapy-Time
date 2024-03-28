@@ -68,8 +68,8 @@ class Reservation(db.Model):
     date = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     user = db.relationship("User")
-    guest_name = db.Column(db.String(50), nullable=True)  # Nombre del usuario no registrado
-    guest_phone = db.Column(db.String(10), nullable=True)  # Teléfono del usuario no registrado
+    guest_name = db.Column(db.String(50), nullable=True) 
+    guest_phone = db.Column(db.String(10), nullable=True)
 
     def __repr__(self):     
         return f'<Reservation {self.id}>'

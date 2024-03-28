@@ -7,10 +7,8 @@ from flask_bcrypt import Bcrypt
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import datetime, json, string, random 
-from sqlalchemy import func
-from sqlalchemy.exc import IntegrityError
 import requests
-from datetime import datetime, time, timedelta, date
+from datetime import datetime, time
 import calendar
 import mercadopago
 
@@ -98,12 +96,12 @@ def delete_user(user_id):
     user_to_delete = User.query.get(user_id)
 
     if not user_to_delete:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"error": "Usuario no encontrado"}), 404
 
     db.session.delete(user_to_delete)
     db.session.commit()
 
-    return jsonify({"message": "User deleted successfully"}), 200
+    return jsonify({"message": "Usuario eliminado exitosamente"}), 200
 
 #Listar todos los usuarios (terapeuta)
 @api.route('/users', methods=['GET'])
@@ -228,7 +226,7 @@ def edit_profile():
         return "Usuario no autorizado", 403
         
     data = request.get_json()
-    print("Data received:", data)
+    print("Data recibida:", data)
 
     updated_user_data = {**user.__dict__, **data}
 
@@ -383,11 +381,11 @@ def mark_consultation_as_unread(id):
         if consultation:
             consultation.is_read = False
             db.session.commit()
-            return jsonify({"message": "Consultation marked as unread"}), 200
+            return jsonify({"message": "Consulta marcada como no leída"}), 200
         else:
-            return jsonify({"error": "Consultation not found"}), 404
+            return jsonify({"error": "Consulta no encontrada"}), 404
     except Exception as e:
-        return jsonify({"error": "Error marking consultation as unread"}), 500
+        return jsonify({"error": "Error al marcar la consulta como no leída"}), 500
 
 #Marcar las consultas como leidas
 @api.route('/consultations/<int:id>/mark_as_read', methods=['PUT'])
@@ -401,11 +399,11 @@ def mark_consultation_as_read(id):
         if consultation:
             consultation.is_read = True  # Cambiar a True para marcar como leída
             db.session.commit()
-            return jsonify({"message": "Consultation marked as read"}), 200
+            return jsonify({"message": "Consulta marcada como leída"}), 200
         else:
-            return jsonify({"error": "Consultation not found"}), 404
+            return jsonify({"error": "Consulta no encontrada"}), 404
     except Exception as e:
-        return jsonify({"error": "Error marking consultation as read"}), 500
+        return jsonify({"error": "Error al marcar la consulta como leída"}), 500
 
 #Borrado logico de las consultas
 @api.route('/deleted_consultations/<int:id>', methods=['PUT'])
@@ -627,6 +625,7 @@ def final_calendar():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 #Arma un listado de las horas globales bloqueadas por dia
 #Paso 1)
 english_to_spanish = {
@@ -837,7 +836,7 @@ def make_reservation():
         data = request.json
 
         if not data or 'date' not in data or 'time' not in data:
-            return jsonify({'error': 'Missing required fields'}), 400
+            return jsonify({'error': 'Faltan campos obligatorios'}), 400
 
         datetime_str = f"{data['date']} {data['time']}"
         
@@ -849,7 +848,7 @@ def make_reservation():
         db.session.add(new_reservation)
         db.session.commit()
 
-        return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
+        return jsonify({'message': 'Reserva creada con éxito', 'reserva': new_reservation.serialize()}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
@@ -860,10 +859,10 @@ def update_reservation(id):
         data = request.json
         reservation = Reservation.query.filter_by(id=id).first()  
         if not reservation:
-            return jsonify({'error': 'Reservation not found '}), 404
+            return jsonify({'error': 'Reserva no encontrada '}), 404
 
         if not data or ('date' not in data and 'time' not in data):
-            return jsonify({'error': 'Missing fields to update'}), 400
+            return jsonify({'error': 'Faltan campos para actualizar'}), 400
 
         if 'date' in data and 'time' in data:
             datetime_str = f"{data['date']} {data['time']}"
@@ -875,7 +874,7 @@ def update_reservation(id):
 
         db.session.commit()
 
-        return jsonify({'message': 'Reservation updated successfully', 'reservation': reservation.serialize()}), 200
+        return jsonify({'message': 'Reserva actualizada con éxito', 'reserva': reservation.serialize()}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -887,12 +886,12 @@ def get_all_reservations():
         citas = []
 
         for reserva in reservas:
-            if reserva.user_id:  # Si hay un usuario registrado asociado a la reserva
+            if reserva.user_id:  
                 usuario = User.query.get(reserva.user_id)
                 nombre_paciente = f"{usuario.name} {usuario.lastname}"
                 telefono = usuario.phone
                 link_sala_virtual = usuario.virtual_link
-            else:  # Si no hay un usuario registrado asociado a la reserva
+            else:  
                 nombre_paciente = reserva.guest_name
                 telefono = reserva.guest_phone
                 link_sala_virtual = None
@@ -909,7 +908,6 @@ def get_all_reservations():
         return jsonify({"success": True, "data": citas})
     except Exception as e:
         return jsonify({"success": False, "error": "Error inesperado"}), 500
-
 
 #Consulta una reserva por id
 @api.route('/get_reservation_by_id/<int:id>', methods=['GET'])
@@ -937,7 +935,6 @@ def get_user_by_dni(dni):
     try:
         user = User.query.filter_by(dni=dni).first()
         if user:
-            # Serialize the required fields
             serialized_user = {
                 "id": user.id,
                 "name": user.name,
@@ -958,7 +955,7 @@ def create_reservation_for_user(user_id):
         data = request.json
 
         if not data or 'date' not in data or 'time' not in data:
-            return jsonify({'error': 'Missing required fields'}), 400
+            return jsonify({'error': 'Faltan campos obligatorios'}), 400
 
         datetime_str = f"{data['date']} {data['time']}"
         
@@ -970,7 +967,7 @@ def create_reservation_for_user(user_id):
         db.session.add(new_reservation)
         db.session.commit()
 
-        return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
+        return jsonify({'message': 'Reserva creada con éxito', 'reserva': new_reservation.serialize()}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -994,7 +991,7 @@ def create_reservation_for_non_registered_user():
         db.session.add(new_reservation)
         db.session.commit()
 
-        return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
+        return jsonify({'message': 'Reserva creada con éxito', 'reserva': new_reservation.serialize()}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
