@@ -38,7 +38,7 @@ export const NavbarTherapist = () => {
 		console.log("Cierre de sesión exitoso")
 		navigate("/")
 		return { token: localStorage.getItem("token") }
-	}
+	};
 
 	return (
 		<nav className="navbar" style={{ backgroundColor: '#EDE9E9', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>

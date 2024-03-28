@@ -1,18 +1,30 @@
-from flask import Flask, request, jsonify, Blueprint, json
-from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled, Reservation, Payment
-from api.utils import generate_sitemap, APIException
-from flask_cors import CORS
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
-from flask_bcrypt import Bcrypt
-from werkzeug.security import check_password_hash, generate_password_hash
-import os
-import datetime, json, string, random 
-import requests
-from datetime import datetime, time
-
 import datetime
-import calendar
+import json
+import os
+import random
+import requests
+import string
+from api.models import (
+    AvailabilityDates,
+    BlockedTokenList,
+    Consultation,
+    GlobalSchedulingEnabled,
+    Payment,
+    Reservation,
+    Role,
+    User,
+    db,
+    seed,
+)
+from api.utils import APIException, generate_sitemap
+from datetime import datetime, time
+from datetime import datetime, timedelta
+from flask import Blueprint, Flask, jsonify, json, request
+from flask_bcrypt import Bcrypt
+from flask_cors import CORS
+from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity, jwt_required
 import mercadopago
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 app = Flask(__name__)
@@ -22,13 +34,70 @@ sdk = mercadopago.SDK(os.environ.get("MERCADOPAGO_ACCESSTOKEN"))
 
 CORS(api)
 
-#Variables para el envio de correo electronico
-EMAILJS_SERVICE_ID = 'service_yrznk4m'
-EMAILJS_TEMPLATE_ID = 'template_ebpnklz'
-EMAILJS_USER_ID = 'sm1cI8ucvO4Tvl_jb'
-ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# Seeder
+@api.route('/seed', methods=['POST', 'GET'])
+def handle_hello():
+    seed()
+    response_body ={
+        "message": "Data cargada"
+    }
+    return jsonify(response_body, 200)
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# ENDPOINTS PARA LOGIN Y LOGOUT:
+
+# Login de usuario
+@api.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return jsonify({"error": "Usuario incorrecto"}), 404
     
-# Alta a nuevo usuario
+    if not bcrypt.check_password_hash(user.password, password):
+        return jsonify({"error": "Contraseña incorrecta"}), 401  
+
+    if bcrypt.check_password_hash(user.password, password):
+        payload = {"role": user.role_id}
+        token = create_access_token(identity=user.id, additional_claims=payload)
+        return jsonify({
+            "message": "Inicio de sesión exitoso",
+            "user": user.username,
+            "token": token,
+            "isAuthenticated": True,
+            "role": user.role_id
+        }), 200
+    else:
+        return jsonify({
+            "error": "Error en la autenticacion",
+            "isAuthenticated": False
+        }), 500
+
+# Logout de usuario
+@api.route('/logout', methods=['POST'])
+@jwt_required()
+def logout_user():
+    payload = get_jwt()
+    jti = payload['jti']
+    exp = datetime.datetime.fromtimestamp(payload['exp'])
+    blocked_token = BlockedTokenList(jti = jti, expires = exp)
+
+    db.session.add(blocked_token)
+    db.session.commit()
+
+    return jsonify({"msg": "Sesión cerrada exitosamente."}), 200
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+#ENDPOINTS PARA LA GESTION DE USUARIOS (TERAPEUTA)
+
+#Alta a nuevo usuario
 @api.route('/signup', methods=['POST'])
 @jwt_required()
 def create_user():
@@ -75,15 +144,6 @@ def create_user():
 
     return jsonify({"message": "Usuario creado exitosamente", "token": token}), 201
 
-# Seeder
-@api.route('/seed', methods=['POST', 'GET'])
-def handle_hello():
-    seed()
-    response_body ={
-        "message": "Data cargada"
-    }
-    return jsonify(response_body, 200)
-
 # Eliminar un usuario
 @api.route('/users/<int:user_id>', methods=['DELETE'])
 @jwt_required()
@@ -106,7 +166,7 @@ def delete_user(user_id):
 
     return jsonify({"message": "Usuario eliminado exitosamente"}), 200
 
-#Listar todos los usuarios (terapeuta)
+#Listar todos los usuarios
 @api.route('/users', methods=['GET'])
 @jwt_required()
 def list_users():
@@ -120,7 +180,7 @@ def list_users():
     except Exception as e:
         return jsonify({"error": "Error al obtener usuarios"}), 500
 
-#Buscar un solo usuario (terapeuta)
+#Buscar un solo usuario
 @api.route('/get_user/<int:id>', methods=['GET'])
 @jwt_required()
 def get_user(id):
@@ -133,7 +193,7 @@ def get_user(id):
     else:
         return jsonify({"message": "Usuario no encontrado"}), 404
 
-#Editar usuario (terapeuta)
+#Editar usuario
 @api.route('/edit_user/<int:id>', methods=['PUT'])
 @jwt_required()
 def edit_user(id):
@@ -158,51 +218,11 @@ def edit_user(id):
 
     return jsonify({"message": "Usuario actualizado exitosamente"}), 200
 
-# Login de usuario
-@api.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    user = User.query.filter_by(username=username).first()
-    if user is None:
-        return jsonify({"error": "Usuario incorrecto"}), 404
-    
-    if not bcrypt.check_password_hash(user.password, password):
-        return jsonify({"error": "Contraseña incorrecta"}), 401  
+#ENDPOINS PARA LA EDICION DE PERFIL DE USUARIO
 
-    if bcrypt.check_password_hash(user.password, password):
-        payload = {"role": user.role_id}
-        token = create_access_token(identity=user.id, additional_claims=payload)
-        return jsonify({
-            "message": "Inicio de sesión exitoso",
-            "user": user.username,
-            "token": token,
-            "isAuthenticated": True,
-            "role": user.role_id
-        }), 200
-    else:
-        return jsonify({
-            "error": "Error en la autenticacion",
-            "isAuthenticated": False
-        }), 500
-
-# Cierre de sesión
-@api.route('/logout', methods=['POST'])
-@jwt_required()
-def logout_user():
-    payload = get_jwt()
-    jti = payload['jti']
-    exp = datetime.datetime.fromtimestamp(payload['exp'])
-    blocked_token = BlockedTokenList(jti = jti, expires = exp)
-
-    db.session.add(blocked_token)
-    db.session.commit()
-
-    return jsonify({"msg": "Sesión cerrada exitosamente."}), 200
-
-# Conseguir el perfil de usuario (paciente)
+#Conseguir el perfil de usuario 
 @api.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
@@ -215,7 +235,7 @@ def get_profile():
 
     return jsonify(user.serialize()), 200
 
-# Editar el perfil (paciente)
+#Editar el perfil (paciente)
 @api.route('/profile_edit', methods=['PUT'])
 @jwt_required()
 def edit_profile():
@@ -245,7 +265,16 @@ def edit_profile():
 
     return jsonify({"message": "Perfil actualizado"}), 200
 
-# Funcion para el envio de correo electronico
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+#ENDPOINTS PARA EL ENVIO DE CORREO ELECTRONICO Y RECUPERACION DE CONTRASEÑA
+
+#Variables para el envio de correo electronico
+EMAILJS_SERVICE_ID = 'service_yrznk4m'
+EMAILJS_TEMPLATE_ID = 'template_ebpnklz'
+EMAILJS_USER_ID = 'sm1cI8ucvO4Tvl_jb'
+ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
+
 def enviar_correo_recuperacion(email, token):
     datos_correo = {
         'service_id': EMAILJS_SERVICE_ID, 
@@ -283,8 +312,8 @@ def reset_password():
     token = ''.join(random.choices(string.digits, k=8))
 
     hashed_temp_code = bcrypt.generate_password_hash(token).decode("utf-8")
-
-    token_expiry = datetime.datetime.now() + datetime.timedelta(minutes=30)
+    
+    token_expiry = datetime.now() + timedelta(minutes=30)
     user.token_expiry = token_expiry
 
     user.reset_token = hashed_temp_code
@@ -312,6 +341,11 @@ def change_password():
         return jsonify({"error": "Contraseña cambiada exitosamente"}), 200
     else:
         return jsonify({"error": "El token ingresado es inválido o ha expirado"}), 401
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+#ENDPOINTS PARA EL ENVIO DE CONSULTAS EXTERNAS Y FUNCIONAMIENTO DE LA BANDEJA DE ENTRADA
 
 # Enviar mensaje de primera consulta
 @api.route('/message', methods=['POST'])
@@ -341,7 +375,7 @@ def create_message():
         return jsonify({"message": "Mensaje creado exitosamente"}), 201
     except Exception as e:
         return jsonify({"error": "Error al procesar la solicitud.", "details": str(e)}), 500
-   
+
 #Listar todas las consultas
 @api.route('/consultations', methods=['GET'])
 @jwt_required()
@@ -356,7 +390,7 @@ def get_consultations():
     except Exception as e:
         return jsonify({"error": "Error al obtener usuarios"}), 500
 
-# Traer una sola consulta por su ID
+#Traer una sola consulta por su ID
 @api.route('/consultation/<int:id>', methods=['GET'])
 @jwt_required()
 def get_one_consultation(id):
@@ -425,7 +459,7 @@ def logical_deletion(id):
             return jsonify({"message" : "Error al eliminar el mensaje"}),404
     except Exception as e:
         return jsonify({"error": "Error al intentar eliminar el mensaje"}),500
-    
+
 #Borrado fisico de las consultas
 @api.route('/deleted_consultations/<int:id>', methods=['DELETE'])
 @jwt_required()
@@ -444,11 +478,17 @@ def physical_deletion(id):
     except Exception as e:
         return jsonify({"error": "Error al intentar eliminar la consulta"}), 500
 
-# Marcado de dias y franjas horarias disponibles (terapeuta) 
-# 1) Definición de opciones para los días y horas
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+#ENDPOINS PARA LA GESTION DE AGENDA
+
+#1)Agenda global:
+    
+# Definición de opciones para los días y horas
 POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 POSSIBLE_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00']
-# 2) Ruta para el endpoint POST
+
+#Almacenar horas disponibles
 @api.route('/global_enabled', methods=['POST'])
 def add_global_enabled():
     data = request.get_json()
@@ -501,7 +541,7 @@ def get_global_enabled():
             return jsonify([blocking.serialize() for blocking in global_enabled]), 200
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-        
+
 #Traer todos los horarios habilitados para un mismo dia
 @api.route('/get_global_enabled_by_day/<string:day>', methods=['GET'])
 def get_global_enabled_by_day(day):
@@ -511,7 +551,7 @@ def get_global_enabled_by_day(day):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Eliminar un solo registro de disponibilidad global
+#Eliminar un solo registro de disponibilidad global
 @api.route('/delete_global_enabled/<int:id>', methods=['DELETE'])
 def delete_global_enabled(id):
     try:
@@ -524,6 +564,8 @@ def delete_global_enabled(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+#2)Agenda por fechas:
+    
 # Bloqueo de fechas
 @api.route('/bloquear', methods=['POST'])
 def bloquear():
@@ -568,7 +610,7 @@ def bloquear():
     except Exception as e:
         return jsonify({'error': str(e)}), 500        
 
-# Desbloquear multiples horas
+#Desbloquear multiples horas
 @api.route('/desbloquear/multiple', methods=['DELETE'])
 def delete_multiple_blocked_times():
     try:
@@ -596,7 +638,7 @@ def delete_multiple_blocked_times():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Desbloquear Hora en particular
+#Desbloquear Hora en particular
 @api.route('/desbloquear/<string:id>', methods=['DELETE'])
 def delete_blocked_time(id):
     try:
@@ -618,7 +660,7 @@ def delete_blocked_time(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Treae todos los registros bloqueados del calendario final
+#Treae todos los registros bloqueados del calendario final
 @api.route('/final_calendar', methods=['GET'])
 def final_calendar():
     try:
@@ -628,73 +670,20 @@ def final_calendar():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-#Arma un listado de las horas globales bloqueadas por dia
-#Paso 1)
-english_to_spanish = {
-            'Monday': 'Lunes',
-            'Tuesday': 'Martes',
-            'Wednesday': 'Miércoles',
-            'Thursday': 'Jueves',
-            'Friday': 'Viernes',
-            'Saturday': 'Sábado',
-            'Sunday': 'Domingo'
-        }
-#Paso 2)
-def get_unincluded_hours_by_day(day_of_week):
-    unincluded_hours_by_day = {day: [] for day in POSSIBLE_DAYS}
-
-    schedule_entries = GlobalSchedulingEnabled.query.filter_by(day=day_of_week).all()
-
-    for entry in schedule_entries:
-        start_hour = entry.start_hour.strftime('%H:%M')
-        end_hour = entry.end_hour.strftime('%H:%M')
-        
-        included_hours = POSSIBLE_HOURS[POSSIBLE_HOURS.index(start_hour):POSSIBLE_HOURS.index(end_hour) + 1]
-
-        unincluded_hours_by_day[day_of_week] += [hour for hour in POSSIBLE_HOURS if hour not in included_hours]
-
-    return unincluded_hours_by_day
-#Paso 3) (Prueba en postman)
-@api.route('/unincluded_hours_by_day', methods=['GET'])
-def get_unincluded_hours_by_day_endpoint():
+#Eliminar todos los bloqueos del calendario final
+@api.route('/borrar_todo_availability_dates', methods=['DELETE'])
+def borrar_todo_availability_dates():
     try:
-        unincluded_hours_by_day = get_unincluded_hours_by_day()
-        return jsonify(unincluded_hours_by_day), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-#Almacena todas las horas bloqueadas a nivel global en AvailabilityDates
-@api.route('/add_availability_dates/<int:year>/<int:month>', methods=['POST'])
-def add_availability_dates(year, month):
-    try:
-        first_day = datetime(year, month, 1)
-        last_day = datetime(year, month, calendar.monthrange(year, month)[1])
-
-        for day in range(1, last_day.day + 1):
-            date = datetime(year, month, day)
-
-            day_of_week = date.strftime('%A')
-            day_of_week_spanish = english_to_spanish[day_of_week]
-
-            unincluded_hours = get_unincluded_hours_by_day(day_of_week_spanish)
-
-            for hour in unincluded_hours[day_of_week_spanish]:
-                hour_without_zero = str(int(hour.split(':')[0]))
-
-                date_time = datetime.combine(date.date(), datetime.strptime(hour, '%H:%M').time())
-                id = int(f"{year}{month:02d}{day:02d}{hour[:2]}")
-                new_availability_date = AvailabilityDates(id=id, date=date_time, time=hour_without_zero)
-                db.session.add(new_availability_date)
-                
+        db.session.query(AvailabilityDates).delete()
         db.session.commit()
-
-        return jsonify({'message': 'Fechas de disponibilidad agregadas correctamente'}), 200
-
+        return jsonify({'message': 'Todos los registros de AvailabilityDates han sido borrados'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-# Mercado pago
+#ENDPOINTS PARA MERCADOPAGO
+
 @api.route('/create_preference', methods=['POST'])
 def create_preference():
     try:
@@ -769,42 +758,11 @@ def get_payments():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Reservar turno
-@api.route('/create_reservation', methods=['POST'])
-@jwt_required()
-def create_reservation():
-    try:
-        current_user_id = get_jwt_identity()
-        data = request.json
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-        if not data or 'date' not in data or 'time' not in data:
-            return jsonify({'error': 'Missing required fields'}), 400
+#ENDPOINTS PARA LA GESTION DE TURNOS (HOME DEL PACIENTE)
 
-        datetime_str = f"{data['date']} {data['time']}"
-        
-        new_reservation = Reservation(
-            date=datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'),
-            user_id=current_user_id 
-        )
-
-        db.session.add(new_reservation)
-        db.session.commit()
-
-        return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Eliminar todos los bloqueos del calendario final
-@api.route('/borrar_todo_availability_dates', methods=['DELETE'])
-def borrar_todo_availability_dates():
-    try:
-        db.session.query(AvailabilityDates).delete()
-        db.session.commit()
-        return jsonify({'message': 'Todos los registros de AvailabilityDates han sido borrados'}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-#Obetener link sala virtual (turnero Paciente)
+#Obetener link sala virtual
 @api.route('/profile_virtual_link', methods=['GET'])
 @jwt_required()
 def get_virtual_link():
@@ -818,7 +776,7 @@ def get_virtual_link():
 
     return jsonify({"virtual_link": virtual_link}), 200
 
-#Eliminar un turno (Paciente)
+#Eliminar un turno
 @api.route('/delete_reservation/<int:reservation_id>', methods=['DELETE'])
 def delete_reservation(reservation_id):
     try:
@@ -830,9 +788,9 @@ def delete_reservation(reservation_id):
         else:
             return jsonify({"error": "Reservación no encontrada"}), 404
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
-#Consultar el proximo turno (Paciente)
+        return jsonify({"error": str(e)}), 500 
+
+#Consultar el proximo turno
 @api.route('/next_reservation', methods=['GET'])
 @jwt_required()
 def get_next_reservation():
@@ -846,7 +804,7 @@ def get_next_reservation():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-#Reservar nuevo turno (paciente)
+#Reservar nuevo turno 
 @api.route('/reservation', methods=['POST'])
 @jwt_required()
 def make_reservation():
@@ -869,8 +827,8 @@ def make_reservation():
 
         return jsonify({'message': 'Reserva creada con éxito', 'reserva': new_reservation.serialize()}), 201
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
+        return jsonify({"error": str(e)}), 500   
+
 #Editar un turno paciente
 @api.route('/edit_reservation/<int:id>', methods=['PUT'])
 def update_reservation(id):
@@ -896,6 +854,10 @@ def update_reservation(id):
         return jsonify({'message': 'Reserva actualizada con éxito', 'reserva': reservation.serialize()}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+#ENDPOINTS PARA EL TURNERO (TERAPEUTA)
 
 #Consultar todas las citas agendadas
 @api.route('/get_all_reservations', methods=['GET'])

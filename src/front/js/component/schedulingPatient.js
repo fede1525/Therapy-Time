@@ -21,16 +21,15 @@ export const SchedulingPatient = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const navigate = useNavigate();
 
-
   const openShowSuccessModal = () => {
     setShowSuccessModal(true)
-  }
+  };
 
   const closeShowSuccessModal = () => {
     handleCloseModal();
     setShowSuccessModal(false)
     navigate("/home");
-  }
+  };
 
   const handleNextMonth = () => {
     if (month === 12) {
@@ -64,19 +63,6 @@ export const SchedulingPatient = () => {
     11: 'Noviembre',
     12: 'Diciembre'
   };
-
-  const fetchUnavailableDates = async () => {
-    try {
-      const response = await actions.addGlobalAndFinalBlocks(year, month);
-      setUnavailableDates(response);
-    } catch (error) {
-      console.error('Error al obtener fechas no disponibles:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchUnavailableDates();
-  }, [year, month]);
 
   useEffect(() => {
     const currentDate = new Date(year, month - 1, 1);
@@ -120,8 +106,7 @@ export const SchedulingPatient = () => {
     } else {
         setShowModal(false);
     }
-};
-
+  };
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -138,7 +123,6 @@ export const SchedulingPatient = () => {
         setSelectedHour(data.time);
     }
   };
-
 
   const handleReservation = async () => {
     const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;

@@ -5,8 +5,6 @@ import { NavbarPatient } from "../component/navbar_patient"
 import { PaymentTable } from "../component/paymentTable"
 
 export const PaymentList = () => {
-
-
     return (
         <div className="container">
             <NavbarPatient />

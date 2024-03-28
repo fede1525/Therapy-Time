@@ -1,26 +1,26 @@
-import React, {useContext } from "react";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import React, { useContext } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ScrollToTop from "./component/scrollToTop";
 import { BackendURL } from "./component/backendURL";
 import { Context } from "./store/appContext";
 import injectContext from "./store/appContext";
-import { Landing } from "./pages/landing";
-import { Login } from "./pages/login"
-import { Recovery } from "./pages/recovery";
+import { AppointmentScheduler } from "./pages/appointmentScheduler";
+import { EditDate } from "./pages/editDate.js";
+import { EditProfile } from "./pages/editProfile";
 import { HomePatient } from "./pages/homePatient";
 import { HomeTherapist } from "./pages/homeTherapist";
-import { Scheduling } from "./pages/scheduling.js";
-import { AppointmentScheduler } from "./pages/appointmentScheduler";
 import { IncomeControl } from "./pages/incomeControl";
 import { Inbox } from "./pages/inbox";
-import { Patients } from "./pages/patients";
-import { PaymentList } from "./pages/paymentList";
-import { Reset_password } from "./pages/resetPassword";
-import { EditProfile } from "./pages/editProfile";
 import { isAuthenticated } from "./authentication";
-import { Payment } from "./pages/payment"
+import { Landing } from "./pages/landing";
+import { Login } from "./pages/login";
 import { NewDate } from "./pages/newDate.js";
-import { EditDate } from "./pages/editDate.js";
+import { Patients } from "./pages/patients";
+import { Payment } from "./pages/payment";
+import { PaymentList } from "./pages/paymentList";
+import { Recovery } from "./pages/recovery";
+import { Reset_password } from "./pages/resetPassword";
+import { Scheduling } from "./pages/scheduling.js";
 
 
 const Layout = () => {

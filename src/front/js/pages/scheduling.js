@@ -10,46 +10,57 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 
 export const Scheduling = () => {
-  const { actions, store } = useContext(Context);
-  const [selectedDay, setSelectedDay] = useState('');
-  const [scheduleData, setScheduleData] = useState([]);
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const {actions, store } = useContext(Context);
+  const [activeTab, setActiveTab] = useState('global');
   const [dayOfWeek, setDayOfWeek] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formDisabled, setFormDisabled] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
-  const [activeTab, setActiveTab] = useState('global');
   const POSSIBLE_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
   const POSSIBLE_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
-
-  const openSuccessModal = () => {
-    setShowSuccessModal(true);
-  };
-
+  const [scheduleData, setScheduleData] = useState([]);
+  const [selectedDay, setSelectedDay] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [startTime, setStartTime] = useState('');
+  
   const closeSuccessModal = () => {
     setShowSuccessModal(false);
   };
 
-  const handleDayChange = (day) => {
-    setSelectedDay(day);
-    setDayOfWeek(day);
-    const dayData = store.globalEnabled.filter(item => item.day === day);
-    setScheduleData(dayData);
-    setStartTime('');
-    setEndTime('');
-    setErrorMessage('');
-    setFormDisabled(false);
-  };
+  const filterAvailableEndHours = () => {
+    if (!startTime) return [];
 
-  const handleStartTimeChange = (e) => {
-    setStartTime(e.target.value);
-    setEndTime('');
-  };
+    let availableHours = [];
+    let lastSelectedHourIndex = POSSIBLE_HOURS.indexOf(startTime);
 
-  const handleEndTimeChange = (e) => {
-    setEndTime(e.target.value);
+    for (let i = lastSelectedHourIndex + 1; i < POSSIBLE_HOURS.length; i++) {
+      let hour = POSSIBLE_HOURS[i];
+      let isAvailable = true;
+
+      for (let j = 0; j < scheduleData.length; j++) {
+        if (hour >= scheduleData[j].start_hour && hour <= scheduleData[j].end_hour) {
+          isAvailable = false;
+          if (hour === scheduleData[j].start_hour) {
+            availableHours.push(hour);
+          }
+          break;
+        }
+      }
+      if (!isAvailable) {
+        break;
+      }
+      availableHours.push(hour);
+    }
+    return availableHours;
+  };
+  
+  const filterAvailableStartHours = () => {
+    let availableHours = POSSIBLE_HOURS.filter(hour => {
+      return !scheduleData.some(slot => (slot.start_hour <= hour && hour < slot.end_hour));
+    });
+    availableHours = availableHours.filter(hour => hour !== '20:00');
+    return availableHours;
   };
 
   const handleAddSchedule = () => {
@@ -66,6 +77,17 @@ export const Scheduling = () => {
     setHasChanges(true);
   };
 
+  const handleDayChange = (day) => {
+    setSelectedDay(day);
+    setDayOfWeek(day);
+    const dayData = store.globalEnabled.filter(item => item.day === day);
+    setScheduleData(dayData);
+    setStartTime('');
+    setEndTime('');
+    setErrorMessage('');
+    setFormDisabled(false);
+  };
+
   const handleDeleteSchedule = async (id) => {
     try {
       await actions.deleteGlobalEnabled(id);
@@ -75,6 +97,10 @@ export const Scheduling = () => {
     } catch (error) {
       console.error("Error al eliminar el registro de disponibilidad global:", error);
     }
+  };
+
+  const handleEndTimeChange = (e) => {
+    setEndTime(e.target.value);
   };
 
   const handleSave = async () => {
@@ -106,6 +132,19 @@ export const Scheduling = () => {
     }
   };
 
+  const handleStartTimeChange = (e) => {
+    setStartTime(e.target.value);
+    setEndTime('');
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
+  const openSuccessModal = () => {
+    setShowSuccessModal(true);
+  };
+
   useEffect(() => {
     actions.getGlobalEnabled();
     setFormDisabled(true);
@@ -116,45 +155,6 @@ export const Scheduling = () => {
     setEndTime('');
     setErrorMessage('');
   }, []);
-
-  const filterAvailableStartHours = () => {
-    let availableHours = POSSIBLE_HOURS.filter(hour => {
-      return !scheduleData.some(slot => (slot.start_hour <= hour && hour < slot.end_hour));
-    });
-    availableHours = availableHours.filter(hour => hour !== '20:00');
-    return availableHours;
-  };
-
-  const filterAvailableEndHours = () => {
-    if (!startTime) return [];
-
-    let availableHours = [];
-    let lastSelectedHourIndex = POSSIBLE_HOURS.indexOf(startTime);
-
-    for (let i = lastSelectedHourIndex + 1; i < POSSIBLE_HOURS.length; i++) {
-      let hour = POSSIBLE_HOURS[i];
-      let isAvailable = true;
-
-      for (let j = 0; j < scheduleData.length; j++) {
-        if (hour >= scheduleData[j].start_hour && hour <= scheduleData[j].end_hour) {
-          isAvailable = false;
-          if (hour === scheduleData[j].start_hour) {
-            availableHours.push(hour);
-          }
-          break;
-        }
-      }
-      if (!isAvailable) {
-        break;
-      }
-      availableHours.push(hour);
-    }
-    return availableHours;
-  };
-
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
 
   return (
     <div style={{ backgroundColor: 'white', minHeight: '100vh', minWidth: '100vw' }}>
@@ -281,7 +281,6 @@ export const Scheduling = () => {
     </div>
   );
 };
-
 
 
 

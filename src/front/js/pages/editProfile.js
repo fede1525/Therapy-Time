@@ -143,8 +143,6 @@ export const EditProfile = () => {
             const result = await actions.editProfile(changes);
             console.log("Profile updated successfully:", result);
 
-            fetchData();
-
             setUsername('');
             setPassword('');
             setConfirmPassword('');
@@ -184,7 +182,7 @@ export const EditProfile = () => {
                                             maxLength={50}
                                             onChange={handleInputChange}
                                             readOnly={!editable}
-                                            style={{ backgroundColor: editable ? 'white' : '#FAFAFA'}}
+                                            style={{ backgroundColor: editable ? 'white' : '#FAFAFA' }}
                                         />
                                     </div>
                                 </div>

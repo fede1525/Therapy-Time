@@ -1,76 +1,70 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			user: [
-				{
-					"id": "",
-					"role": "",
-					"username": "",
-					"name": "",
-					"lastname": "",
-					"dni": "",
-					"email": "",
-					"phone": "",
-					"password": "",
-					"virtual_link": "",
-					"is_active": "",
-					"isAuthenticated": false,
-					"reset_token": ""
-				},
-			],
-			userByDNI: {},
-			unavailableDates: [{
-				"id": "",
-				"date": "",
-				"time": ""
-			}],
 			consultations: [
 				{
-					"id": "",
-					"name": "",
-					"lastname": "",
 					"age": "",
-					"phone": "",
-					"consultation": "",
-					"is_read": false,
-					"is_deleted": false,
 					"arrival_date ": "",
 					"arrival_date": "",
+					"consultation": "",
+					"id": "",
+					"is_deleted": false,
+					"is_read": false,
+					"lastname": "",
+					"name": "",
+					"phone": ""
 				}
 			],
-			preferenceId: null,
 			dates: [{
 				"date": "",
 				"times": []
 			}],
 			globalEnabled: [{
-				"id": "",
 				"day": "",
-				"start_hour": "",
-				"end_hour": ""
+				"end_hour": "",
+				"id": "",
+				"start_hour": ""
 			}],
 			globalEnabledByDay: [{
-				"id": "",
 				"day": "",
-				"start_hour": "",
-				"end_hour": ""
+				"end_hour": "",
+				"id": "",
+				"start_hour": ""
 			}],
 			patientReservation: {
-				"id": "",
 				"date": "",
+				"id": "",
 				"user_id": ""
 			},
-			patientReservation: {
-				"id": "",
-				"date": "",
-				"user_id": ""
-			},
+			preferenceId: null,
 			reservations: [],
-			reservationByID: {
-			}
+			reservationByID: {},
+			unavailableDates: [{
+				"date": "",
+				"id": "",
+				"time": ""
+			}],
+			user: [
+				{
+					"dni": "",
+					"email": "",
+					"id": "",
+					"isActive": "",
+					"isAuthenticated": false,
+					"lastname": "",
+					"name": "",
+					"password": "",
+					"phone": "",
+					"reset_token": "",
+					"role": "",
+					"username": "",
+					"virtual_link": ""
+				}
+			],
+			userByDNI: {}
 		},
 		actions: {
-			//Funciones globales
+			//ACTIONS GLOBALES
 			apiFetch: async (endpoint, method = 'GET', body = null) => {
 				try {
 					let params = {
@@ -151,7 +145,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return error
 				}
 			},
-			//Funciones de login y logout 
+			//ACTIONS DE LOGIN Y LOGOUT
 			logout: async () => {
 				await getActions().protectedFetch("/logout", "POST", null)
 				localStorage.removeItem("token")
@@ -187,7 +181,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				}
 			},
-			//Funciones para el recupero de contraseña		
+			//ACTIONS PARA EL RECUPERO DE CONTRASEÑA
 			handleResetPassword: async (email) => {
 				try {
 					const response = await fetch(process.env.BACKEND_URL + '/api/reset_password', {
@@ -239,7 +233,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw new Error(error.message || 'Error al enviar la solicitud');
 				}
 			},
-			//Funciones para la gestion de pacientes
+			//ACTIONS PARA LA GESTION DE PACIENTES
 			createUser: async (body) => {
 				try {
 					if (!body.username || !body.name || !body.lastname || !body.dni || !body.phone || !body.email) {
@@ -322,7 +316,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},
-			//Funciones para la edicion de perfil		
+			//ACTIONS PARA LA EDICION DE PERFIL		
 			getUserData: async () => {
 				try {
 					const resp = await getActions().protectedFetch("/profile", "GET", null)
@@ -351,7 +345,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error
 				}
 			},
-			//Funciones para el envio y lectura de consultas externas
+			//ACTIONS PARA EL ENVIO Y LECTURA DE CONSULTAS EXTERNAS
 			sendMessage: async (name, lastname, age, phone, consultation, arrival_date) => {
 				try {
 					const response = await getActions().apiFetch('/message', 'POST', {
@@ -454,6 +448,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},
+			//ACTIONS PARA MERCADO PAGO
 			createPreference: async () => {
 				try {
 					const response = await getActions().protectedFetch("/create_preference", "POST", {
@@ -493,7 +488,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error: ", error)
 				}
 			},
-			//Funciones para el bloqueo de fechas individuales
+			//ACTIONS PARA LA GESTION DE AGENDA
 			blockMultipleHours: async (dates) => {
 				try {
 					const data = {
@@ -543,22 +538,29 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message || 'Error fetching unavailable dates' };
 				}
 			},
-			//Funciones para el bloqueo de fechas globales
 			addGlobalEnabled: async (data) => {
 				try {
-					const response = await getActions().apiFetch('/global_enabled', 'POST', data);
-
-					if (!response.ok) {
-						throw new Error('Error al agregar disponibilidad global');
-					}
-					const responseData = await response.json();
-					const updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData];
-					setStore({ globalEnabled: updatedGlobalEnabled });
-					return responseData;
+				  const response = await getActions().apiFetch('/global_enabled', 'POST', data);
+			  
+				  if (!response.ok) {
+					throw new Error('Error al agregar disponibilidad global');
+				  }
+			  
+				  const responseData = await response.json();
+				  let updatedGlobalEnabled = [];
+			  
+				  if (Array.isArray(responseData)) {
+					updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData];
+				  } else if (typeof responseData === 'object') {
+					updatedGlobalEnabled = [...getStore().globalEnabled, responseData];
+				  }
+			  
+				  setStore({ globalEnabled: updatedGlobalEnabled });
+				  return responseData;
 				} catch (error) {
-					console.error("Error al agregar disponibilidad global:", error);
-					const errorMessage = error.message || 'Error de red';
-					return { success: false, error: errorMessage };
+				  console.error("Error al agregar disponibilidad global:", error);
+				  const errorMessage = error.message || 'Error de red';
+				  return { success: false, error: errorMessage };
 				}
 			},
 			getGlobalEnabled: async () => {
@@ -622,6 +624,168 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					console.error('Error fetching unavailable dates:', error);
 					return { success: false, error: error.message || 'Error fetching unavailable dates' };
+				}
+			},
+			//ACTIONS PARA EL TURNERO DEL TERAPEUTA
+			getAllReservations: async () => {
+				try {
+					const response = await getActions().apiFetch('/get_all_reservations', 'GET');
+
+					if (!response.ok) {
+						throw new Error('Error al traer las reservas');
+					}
+
+					const responseData = await response.json();
+					const reservationsData = responseData.data;
+					console.log(reservationsData);
+
+					setStore({ reservations: reservationsData });
+					return { success: true, message: responseData.message };
+				} catch (error) {
+					console.error('Error: ', error);
+					return { success: false, error: error.message || 'Error al cargar las reservas' };
+				}
+			},
+			updateReservation: async (reservationId, dataToUpdate) => {
+				try {
+					const response = await getActions().apiFetch(`/edit_reservation/${reservationId}`, 'PUT', dataToUpdate);
+
+					if (!response.ok) {
+						throw new Error('Failed to update reservation');
+					}
+
+					const responseData = await response.json();
+					return { success: true, message: responseData.message, reservation: responseData.reservation };
+
+				} catch (error) {
+					console.error("Error:", error);
+					return { success: false, error: error.message || 'Error al actualizar la reserva' };
+				}
+			},
+			deleteReservation: async (reservationId) => {
+				try {
+					const resp = await getActions().apiFetch(`/delete_reservation/${reservationId}`, "DELETE");
+					if (!resp.ok) {
+						console.error("Error al intentar cancelar la reserva: ", resp);
+						return { error: "Error al intentar cancelar la reserva" };
+					}
+					return { message: "Reserva cancelada exitosamente" };
+				} catch (error) {
+					console.error("Error al intentar cancelar la reserva: ", error);
+					return { error: "Error al intentar cancelar la reserva" };
+				}
+			},
+			searchUserByDNI: async (dni) => {
+				try {
+					const response = await getActions().apiFetch(`/search_user/${dni}`, 'GET');
+
+					if (!response.ok) {
+						throw new Error('Error al buscar usuario por DNI');
+					}
+
+					const responseData = await response.json();
+
+					if (responseData.error) {
+						throw new Error(responseData.error);
+					}
+
+					const userData = responseData; 
+					setStore({ userByDNI: userData });
+
+					console.log("Datos del usuario recibidos:", userData);
+
+					return { success: true, message: "Usuario encontrado correctamente" };
+				} catch (error) {
+					console.error('Error al buscar usuario por DNI:', error.message);
+					return { success: false, error: error.message };
+				}
+			},
+			postNewDate : async (date, time, userId) => {
+				try {
+					const body = {
+						date: date,
+						time: time
+					};
+			
+					const response = await getActions().apiFetch(`/reservation/${userId}`, 'POST', body);
+					console.log(response);
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || 'Error creating reservation.');
+					}
+			
+					const data = await response.json();
+					return data;
+				} catch (error) {
+					console.error('Error creating reservation:', error);
+					throw error;
+				}
+			},
+			createReservationForNonRegisteredUser: async (reservationData) => {
+				try {
+					const response = await getActions().apiFetch('/reservation/non_registered', 'POST', reservationData);
+			
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || 'Failed to create reservation for non-registered user');
+					}
+			
+					const responseData = await response.json();
+					return responseData;
+				} catch (error) {
+					throw new Error(error.message || 'Failed to create reservation for non-registered user');
+				}
+			},
+			//ACTIONS PARA EL TURNERO DEL PACIENTE
+			getVirtualLink: async () => {
+				try {
+					const resp = await getActions().protectedFetch("/profile_virtual_link", "GET", null)
+					if (!resp.ok) {
+						console.error("Error al traer el link de sala virtual: ", resp)
+						return { error: "Error al traer el link de sala virtual" }
+					}
+					return resp.json()
+				} catch (error) {
+					console.error("Error: ", error)
+					return { error: "Error al traer el link de sala virtual" }
+				}
+			},
+			getPatientReservation: async () => {
+				try {
+					const resp = await getActions().protectedFetch("/next_reservation", "GET", null)
+					if (!resp.ok) {
+						console.error("Error consultar el proximo truno: ", resp)
+						return { error: "Error consultar el proximo truno" }
+					}
+					return resp.json()
+				} catch (error) {
+					console.error("Error: ", error)
+					return { error: "Error consultar el proximo truno" }
+				}
+			},
+			createReservation: async (date, time) => {
+				try {
+					const token = localStorage.getItem("token");
+					if (!token) {
+						throw new Error("Token not found.");
+					}
+
+					const body = {
+						date: date,
+						time: time
+					};
+
+					const response = await getActions().protectedFetch("/reservation", "POST", body);
+					const data = await response.json();
+
+					if (!response.ok) {
+						throw new Error(data.error || "Error creating reservation.");
+					}
+
+					return data;
+				} catch (error) {
+					console.error("Error creating reservation:", error);
+					throw error;
 				}
 			}
 		}

@@ -8,17 +8,18 @@ import { NavbarTherapist } from "../component/navbar"
 import { faLink } from '@fortawesome/free-solid-svg-icons';
 
 export const Patients = () => {
-    const { store, actions } = useContext(Context);
-    const [showModal, setShowModal] = useState(false);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [showInactive, setShowInactive] = useState(false);
-    const [nameFilter, setNameFilter] = useState("");
-    const [dniFilter, setDniFilter] = useState("");
-    const [showModalEdit, setShowModalEdit] = useState(false);
-    const [successAction, setSuccessAction] = useState("");
-    const [isActive, setIsActive] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [dniFilter, setDniFilter] = useState("");
+    const [isActive, setIsActive] = useState(true);
+    const [nameFilter, setNameFilter] = useState("");
     const [patientsPerPage] = useState(10);
+    const [showInactive, setShowInactive] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [showModalEdit, setShowModalEdit] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successAction, setSuccessAction] = useState("");
+    const { actions, store } = useContext(Context);
+
     const [userData, setUserData] = useState({
         id: "",
         role_id: 1,
@@ -31,6 +32,7 @@ export const Patients = () => {
         virtual_link: "",
         is_active: true
     });
+
     const initialUserData = {
         id: "",
         role_id: 1,
@@ -48,21 +50,21 @@ export const Patients = () => {
         actions.getUsers();
     }, []);
 
-    //Apertura y cierre de modales
     const openModal = () => {
         setShowModal(true);
         setUserData(initialUserData);
     };
+
     const closeModal = () => {
         setShowModal(false);
         setShowModalEdit(false);
     };
+
     const closeSuccessModal = () => {
         setShowSuccessModal(false);
         actions.getUsers();
     };
 
-    //Alta de nuevos usuarios
     const handleSubmit = async () => {
         const validationMessages = validateForm(userData, false);
         setErrorMessages(validationMessages);
@@ -95,7 +97,6 @@ export const Patients = () => {
         }
     };
 
-    //Filtros de busqueda/listado
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === "is_active") {
@@ -111,15 +112,19 @@ export const Patients = () => {
             }));
         }
     };
+
     const toggleShowInactive = () => {
         setShowInactive(!showInactive);
     };
+
     const handleChangeNameFilter = (e) => {
         setNameFilter(e.target.value);
     };
+
     const handleChangeDniFilter = (e) => {
         setDniFilter(e.target.value);
     };
+
     const filteredUsers = store.user.length > 0 ? store.user.filter(user => {
         const nameMatches = (user.name && user.name.toLowerCase().includes(nameFilter.toLowerCase())) || (user.lastname && user.lastname.toLowerCase().includes(nameFilter.toLowerCase()));
         const dniMatches = user.dni && user.dni.includes(dniFilter);
@@ -131,7 +136,6 @@ export const Patients = () => {
     const sortedInactiveFilteredUsers = inactiveFilteredUsers.sort((a, b) => a.name.localeCompare(b.name));
     const sortedFilteredUsers = [...sortedActiveFilteredUsers, ...sortedInactiveFilteredUsers];
 
-    //Edicion de usuario
     const handleGetUser = async (id) => {
         try {
             const data = await actions.getUser(id);
@@ -143,6 +147,7 @@ export const Patients = () => {
             console.error("Error al obtener el usuario:", error.message);
         }
     };
+
     const handleSaveChanges = async () => {
         const validationMessages = validateForm(userData, true);
         setErrorMessages(validationMessages);
@@ -162,7 +167,6 @@ export const Patients = () => {
         }
     };
 
-    //Validaciones
     const [errorMessages, setErrorMessages] = useState({
         username: "",
         name: "",
@@ -171,12 +175,14 @@ export const Patients = () => {
         phone: "",
         email: ""
     });
+
     const handleInputFocus = (fieldName) => {
         setErrorMessages(prevErrors => ({
             ...prevErrors,
             [fieldName]: ""
         }));
     };
+
     const validateForm = (data, isEditing) => {
         const errors = {};
         if (data.username.trim() === "") {
@@ -228,12 +234,12 @@ export const Patients = () => {
         }
         return errors;
     };
+
     const isValidEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
         return emailRegex.test(email);
     };
 
-    //Paginacion
     const paginate = pageNumber => setCurrentPage(pageNumber);
     const visibleUsers = (showInactive ? sortedFilteredUsers : sortedActiveFilteredUsers);
 
