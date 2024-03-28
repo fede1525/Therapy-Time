@@ -455,7 +455,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			getPayments: async () => {
 				try {
-					const response = await getActions().protectedFetch("/get_payments", 'GET')
+					const response = await getActions().protectedFetch("/get_payments", 'GET', null)
 
 					if (!response.ok) {
 						console.error("Error al traer los pagos.")

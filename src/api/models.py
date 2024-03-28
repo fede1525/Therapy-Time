@@ -183,4 +183,3 @@ class Payment(db.Model):
             "description": self.description,
             "user_id": self.user_id
         }
-
