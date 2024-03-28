@@ -12,6 +12,15 @@ export const Recovery = () => {
     const [loading, setLoading] = useState(false);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
 
+    const handleEmailChange = (e) => {
+        setEmailInput(e.target.value);
+    };
+
+    const handleEmailFocus = () => {
+        setEmailError(""); 
+        setError("");
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!emailRegex.test(emailInput)) {
@@ -31,16 +40,7 @@ export const Recovery = () => {
             setLoading(false);
             setError(error.message || 'Error al enviar la solicitud de recuperación de contraseña.');
         }   
-    }
-
-    const handleEmailChange = (e) => {
-        setEmailInput(e.target.value);
-    }
-
-    const handleEmailFocus = () => {
-        setEmailError(""); 
-        setError("");
-    }
+    };
 
     return (
         <div className="d-flex justify-content-center vh-100">

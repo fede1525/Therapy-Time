@@ -20,12 +20,12 @@ export const SchedulingComponent = () => {
 
   const openShowSuccessModal = () => {
     setShowSuccessModal(true)
-  }
+  };
 
   const closeShowSuccessModal = () => {
     handleCloseModal();
     setShowSuccessModal(false)
-  }
+  };
 
   const handleNextMonth = () => {
     if (month === 12) {
@@ -77,13 +77,14 @@ export const SchedulingComponent = () => {
   };
 
   const dayOfWeek = getDayOfWeek(year, month, selectedDay);
+  
   const filtrarPorDia = (arreglo, dia) => {
     // Utilizar el método filter para obtener los objetos con el día especificado
     const algo = arreglo.filter(horario => horario.day === dia)
     return algo; 
   };
+
   const horasBloqueadasPorDia = filtrarPorDia(store.globalEnabled, dayOfWeek)
-  
 
   useEffect(() => {
     console.log(dayOfWeek); 
@@ -147,7 +148,6 @@ export const SchedulingComponent = () => {
     }
   };
 
-
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedHours([])
@@ -173,7 +173,7 @@ export const SchedulingComponent = () => {
         console.error('Error al bloquear la hora:', error);
         console.log(selectedHours)
       });
-  }
+  };
 
   const handleUnblockSelectedHours = async () => {
     await actions.apiFetch('/desbloquear/multiple', 'DELETE', selectedHours)
@@ -186,7 +186,7 @@ export const SchedulingComponent = () => {
         console.error('Error al bloquear la hora:', error);
         console.log(selectedHours)
       });
-  }
+  };
 
   const handleBlockAllHours = async () => {
     try {

@@ -1,4 +1,3 @@
-/* home.css */
 
 .selected {
   background-color: #C47C7A !important;
@@ -9,7 +8,6 @@
   border-radius: 5px;
   color:grey;
 }
-
 .btn_horasPorFecha:hover{
   background-color: grey;
   color: white;
@@ -126,14 +124,12 @@ transition: background-color 0.3s, border-radius 0.3s;
 background-color: #C47C7A; 
 color: #fff; 
 }
-
 .matching-hour{
   background-color: red;
 }
 td {
   position: relative;
 }
-/* Estilo de la pestañita */
 .pestanita {
   position: relative;
   padding: 10px;

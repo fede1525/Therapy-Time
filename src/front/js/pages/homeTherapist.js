@@ -27,7 +27,6 @@ export const HomeTherapist = () => {
                     <Link to="/inbox" className="textLink">Bandeja de entrada</Link>
                 </div>
                 <div className="logo-container">
-                
                 </div>
             </div>
         </div>

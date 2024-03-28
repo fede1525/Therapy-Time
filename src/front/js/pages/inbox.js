@@ -31,34 +31,39 @@ export const Inbox = () => {
         actions.getConsultations();
     }, []);
 
-    //Apertura y cierre de modales
     const openModalSuccess = () => {
         setModalSuccess(true);
-    }
+    };
+
     const closeModalSuccess = () => {
         setModalSuccess(false);
-    }
+    };
+
     const closeConfirmationModal = () => { 
         setShowConfirmationModalInbox(false);
-    }
+    };
+
     const openConfirmationModalDeleted = () =>{
         setShowConfirmationModalDeleted(true)
-    }
+    };
+
     const closeConfirmationModalDeleted = () =>{
         setShowConfirmationModalDeleted(false)
-    }
+    };
+
     const closeModalConsultation = () =>{
         setShowModalConsultation(false)
-    }
+    };
+
     const openModalConsultation = ()=>{
         setShowModalConsultation(true)
-    }
-    
-    //Filtros de busqueda-seleccion
+    };
+
     const handleNameFilterChange = (event) => {
         setNameFilter(event.target.value);
         setShowUnreadOnly(false);
     };   
+
     const handleMarkAsUnread = async () => {
         try {
             await Promise.all(selectedConsultations.map(id => actions.changeStatusConsultation(id)));
@@ -69,6 +74,7 @@ export const Inbox = () => {
             console.error("Error al marcar las consultas como no leídas:", error.message);
         }
     }; 
+
     const handleDeleteSelectedConsultations = async () => {
         try {
             setShowConfirmationModalInbox(true);
@@ -76,6 +82,7 @@ export const Inbox = () => {
             console.error("Error al eliminar las consultas seleccionadas:", error.message);
         }
     };
+    
     const filteredConsultations = store.consultations
     .filter(consultation => {
         if (activeTab === "inbox") {
@@ -90,6 +97,7 @@ export const Inbox = () => {
     )
     .filter(consultation => !showUnreadOnly || !consultation.is_read) 
     .sort((a, b) => new Date(b.arrival_date) - new Date(a.arrival_date));
+    
     const handleConsultationClick = async (id, event) => {
         try {
             if (event && event.target.tagName.toLowerCase() !== "input") { 
@@ -107,9 +115,7 @@ export const Inbox = () => {
             console.error("Error al obtener la consulta:", error.message);
         }
     };
-    
-    
-    //Funciones para tab inbox
+
     const handleDeleteSingleConsultation = async (id) => {
         try {
             setShowConfirmationModalInbox(true);
@@ -118,6 +124,7 @@ export const Inbox = () => {
             console.error("Error al eliminar la consulta:", error.message);
         }
     };    
+
     const confirmDeletion = async () => {
         try {
             setShowConfirmationModalInbox(false);
@@ -130,6 +137,7 @@ export const Inbox = () => {
             console.error("Error al eliminar las consultas seleccionadas:", error.message);
         }
     };
+
     const handleCheckboxChange = (consultationId) => {
         setSelectedConsultations(prevState => {
             if (prevState.includes(consultationId)) {
@@ -138,7 +146,8 @@ export const Inbox = () => {
                 return [...prevState, consultationId];
             }
         });
-    };  
+    }; 
+
     const handleMarkAsUnreadSingle = async (id) => {
         try {
             await actions.changeStatusConsultation(id);
@@ -148,7 +157,6 @@ export const Inbox = () => {
         }
     };
 
-    //Funciones para tab papelera
     const confirmPhysicalDeletion = async (id) => {
         try {
             await Promise.all(id.map(id => actions.physicalDeletionMessage(id)));
@@ -159,7 +167,8 @@ export const Inbox = () => {
         } catch (error) {
             console.error("Error al eliminar permanentemente las consultas seleccionadas:", error.message);
         }
-    }
+    };
+
     const handlePhysicalDeletion = async (id) => {
         try {
             setSelectedConsultations([id]); 
@@ -168,11 +177,11 @@ export const Inbox = () => {
             console.error("Error al eliminar el mensaje:", error.message);
         }
     };
+
     const handlePermanentDeletion = async () => {
         openConfirmationModalDeleted();
     };
 
-    //Paginacion
     const indexOfLastConsultation = currentPage * consultationPerPage;
     const indexOfFirstConsultation = indexOfLastConsultation - consultationPerPage;
     const currentConsultations = filteredConsultations.slice(indexOfFirstConsultation, indexOfLastConsultation);

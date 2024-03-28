@@ -16,13 +16,13 @@ export const Landing = () => {
         consultation: ""
     });
 
-    //Apertura y cierre de modales
     const openModal = () => {
         setShowModal(true);
-    }
+    };
+
     const openSuccessModal = () => {
         setShowSuccessModal(true);
-    }
+    };
 
     const resetForm = () => {
         setFormData({
@@ -38,20 +38,23 @@ export const Landing = () => {
         resetForm(); 
         setShowModal(false);
     };
+
     const closeSuccessModal = () => {
         setShowSuccessModal(false);
     };
+
     const openShowAboutModal = () => {
         setShowAboutModal(true)
     };
+
     const closeShowAboutModal = () => {
         setShowAboutModal(false)
     };
 
-    //Envio del formulario
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
+
     const getCurrentDateTime = () => {
         const now = new Date();
         const year = now.getFullYear();
@@ -61,6 +64,7 @@ export const Landing = () => {
         const minutes = now.getMinutes().toString().padStart(2, '0');
         return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
+
     const handleSubmit = async () => {
         const validationMessages = validateForm(formData);
         setErrorMessages(validationMessages);
@@ -86,7 +90,6 @@ export const Landing = () => {
         }
     };
 
-    //Validaciones
     const [errorMessages, setErrorMessages] = useState({
         name: "",
         lastname: "",
@@ -94,12 +97,14 @@ export const Landing = () => {
         phone: "",
         consultation: ""
     });
+
     const handleInputFocus = (fieldName) => {
         setErrorMessages(prevErrors => ({
             ...prevErrors,
             [fieldName]: ""
         }));
     };
+    
     const validateForm = (data) => {
         const errors = {};
         if (!data.name || data.name.trim() === "") {
