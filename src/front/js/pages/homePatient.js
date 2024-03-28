@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
+import "../../styles/home.css";
 import { NavbarPatient } from "../component/navbar_patient";
 import moment from 'moment';
 import 'moment/locale/es';
@@ -105,7 +106,7 @@ export const HomePatient = () => {
                                 <button className="btn" disabled={true} style={{ width: '98%', height: '8vh', backgroundColor: '#bdb5b5', color: 'white', fontSize: '3vh', pointerEvents: 'none', display: 'block', textDecoration: 'none' }}>Modificar</button>
                             )}
                         </div>
-                        <button className="btn btn-block" disabled={!nextReservation} style={{ width: '99%', height: '8vh', fontFamily: 'Jura, sans-serif', backgroundColor: '#bdb5b5', color: 'white', fontSize: '3vh' }}>Abonar con Mercado Pago</button>
+                        <Link to="/payment"><button className="btn btn-block" disabled={!nextReservation} style={{ width: '99%', height: '8vh', fontFamily: 'Jura, sans-serif', backgroundColor: '#bdb5b5', color: 'white', fontSize: '3vh' }}>Abonar con Mercado Pago</button></Link>
                     </div>
                     <div className="col-6 p-4 d-flex flex-column align-items-center justify-content-center" style={{ height: '60vh', backgroundColor: '#FAFAFA', color: 'grey', borderLeftColor: '#EDE9E9', borderLeftWidth: '2vh', borderLeftStyle: 'solid' }}>
                         <div className="p-4 border d-flex flex-column align-items-center justify-content-center" style={{ height: '50vh' }}>
@@ -144,7 +145,3 @@ export const HomePatient = () => {
         </div>
     );
 };
-
-
-
-

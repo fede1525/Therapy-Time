@@ -1,18 +1,21 @@
 from flask import Flask, request, jsonify, Blueprint, json
-from api.models import db, User, BlockedTokenList, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled, Reservation
-from api.models import db, User, BlockedTokenList, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled, Reservation
+from api.models import db, User, BlockedTokenList, Role, seed, Consultation, AvailabilityDates, GlobalSchedulingEnabled, Reservation, Payment
+from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_bcrypt import Bcrypt
+from werkzeug.security import check_password_hash, generate_password_hash
+import os
 import datetime, json, string, random 
 import requests
 from datetime import datetime, time
 import calendar
-
+import mercadopago
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 api = Blueprint('api', __name__)
+sdk = mercadopago.SDK(os.environ.get("MERCADOPAGO_ACCESSTOKEN")) 
 
 CORS(api)
 
@@ -622,6 +625,172 @@ def final_calendar():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+#Arma un listado de las horas globales bloqueadas por dia
+#Paso 1)
+english_to_spanish = {
+            'Monday': 'Lunes',
+            'Tuesday': 'Martes',
+            'Wednesday': 'Miércoles',
+            'Thursday': 'Jueves',
+            'Friday': 'Viernes',
+            'Saturday': 'Sábado',
+            'Sunday': 'Domingo'
+        }
+#Paso 2)
+def get_unincluded_hours_by_day(day_of_week):
+    unincluded_hours_by_day = {day: [] for day in POSSIBLE_DAYS}
+
+    schedule_entries = GlobalSchedulingEnabled.query.filter_by(day=day_of_week).all()
+
+    for entry in schedule_entries:
+        start_hour = entry.start_hour.strftime('%H:%M')
+        end_hour = entry.end_hour.strftime('%H:%M')
+        
+        included_hours = POSSIBLE_HOURS[POSSIBLE_HOURS.index(start_hour):POSSIBLE_HOURS.index(end_hour) + 1]
+
+        unincluded_hours_by_day[day_of_week] += [hour for hour in POSSIBLE_HOURS if hour not in included_hours]
+
+    return unincluded_hours_by_day
+#Paso 3) (Prueba en postman)
+@api.route('/unincluded_hours_by_day', methods=['GET'])
+def get_unincluded_hours_by_day_endpoint():
+    try:
+        unincluded_hours_by_day = get_unincluded_hours_by_day()
+        return jsonify(unincluded_hours_by_day), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+#Almacena todas las horas bloqueadas a nivel global en AvailabilityDates
+@api.route('/add_availability_dates/<int:year>/<int:month>', methods=['POST'])
+def add_availability_dates(year, month):
+    try:
+        first_day = datetime(year, month, 1)
+        last_day = datetime(year, month, calendar.monthrange(year, month)[1])
+
+        for day in range(1, last_day.day + 1):
+            date = datetime(year, month, day)
+
+            day_of_week = date.strftime('%A')
+            day_of_week_spanish = english_to_spanish[day_of_week]
+
+            unincluded_hours = get_unincluded_hours_by_day(day_of_week_spanish)
+
+            for hour in unincluded_hours[day_of_week_spanish]:
+                hour_without_zero = str(int(hour.split(':')[0]))
+
+                date_time = datetime.combine(date.date(), datetime.strptime(hour, '%H:%M').time())
+                id = int(f"{year}{month:02d}{day:02d}{hour[:2]}")
+                new_availability_date = AvailabilityDates(id=id, date=date_time, time=hour_without_zero)
+                db.session.add(new_availability_date)
+                
+        db.session.commit()
+
+        return jsonify({'message': 'Fechas de disponibilidad agregadas correctamente'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Mercado pago
+@api.route('/create_preference', methods=['POST'])
+def create_preference():
+    try:
+        req_data = request.get_json()
+
+        preference_data = {
+            "items": [
+                {
+                    "title": req_data["description"],
+                    "unit_price": float(req_data["price"]),
+                    "quantity": int(req_data["quantity"]),
+                    "currency_id": "ARS"
+                }
+            ],
+            "back_urls": {
+                "success": "http://localhost:3000/",
+                "failure": "http://localhost:3000/",
+                "pending": "",
+            }, 
+            "auto_return": "approved",
+        }
+
+        preference_response = sdk.preference().create(preference_data)
+        preference_id = preference_response["response"] 
+
+        return jsonify({"id": preference_id})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/mercadopago/webhook', methods=['POST'])
+def handle_webhook():
+    try:
+        notification_data = request.get_json()
+        payment_id = notification_data["data"]["id"]
+        payment_status = notification_data["data"]["status"]
+
+        if payment_status == "approved":
+            payment_details = notification_data["data"]
+            amount = payment_details.get("amount")
+            description = payment_details.get("description")
+
+            new_payment = Payment(
+                payment_id=payment_id,
+                amount=amount,
+                description=description,
+            )
+
+            db.session.add(new_payment)
+            db.session.commit()
+
+            return jsonify({"message": "Payment successful"}), 200
+        
+        else:
+            return jsonify({"message": "Payment status: {payment_status}"}), 200
+
+    except Exception as e:
+        print(f"Error procesando webhook: {e}")
+        db.session.rollback()
+        return jsonify({"error": "Error procesando el webhook"}), 500
+
+@api.route('/get_payments', methods=['POST'])
+@jwt_required()
+def get_payments():
+    try:
+        current_user = get_jwt_identity()
+        payments = Payment.query.filter_by(user=current_user).order_by(Payment.id.desc()).limit(10).all()
+        payment_data = [payment.serialize() for payment in payments]
+
+        return jsonify({"payments": payment_data}), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Reservar turno
+@api.route('/create_reservation', methods=['POST'])
+@jwt_required()
+def create_reservation():
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.json
+
+        if not data or 'date' not in data or 'time' not in data:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        datetime_str = f"{data['date']} {data['time']}"
+        
+        new_reservation = Reservation(
+            date=datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'),
+            user_id=current_user_id 
+        )
+
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        return jsonify({'message': 'Reservation created successfully', 'reservation': new_reservation.serialize()}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Eliminar todos los bloqueos del calendario final
 @api.route('/borrar_todo_availability_dates', methods=['DELETE'])
 def borrar_todo_availability_dates():
@@ -677,7 +846,7 @@ def get_next_reservation():
 #Reservar nuevo turno (paciente)
 @api.route('/reservation', methods=['POST'])
 @jwt_required()
-def create_reservation():
+def make_reservation():
     try:
         current_user_id = get_jwt_identity()
         data = request.json
@@ -698,7 +867,7 @@ def create_reservation():
         return jsonify({'message': 'Reserva creada con éxito', 'reserva': new_reservation.serialize()}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
 #Editar un turno paciente
 @api.route('/edit_reservation/<int:id>', methods=['PUT'])
 def update_reservation(id):
@@ -842,3 +1011,5 @@ def create_reservation_for_non_registered_user():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+if __name__ == '__main__':
+    app.run(debug=True)
