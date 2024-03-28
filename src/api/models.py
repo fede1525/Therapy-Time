@@ -163,6 +163,24 @@ class GlobalSchedulingEnabled(db.Model):
             "end_hour": self.end_hour.strftime('%H:%M') 
         }
 
+class Payment(db.Model):
+    __tablename__ = 'payment'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    date = db.Column(db.DateTime, nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.String(250), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship("User")
 
+    def __repr__(self):
+        return f'<Payment {self.id}>'
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "date": self.date.strftime('%Y-%m-%d %H:%M:%S'),
+            "amount": self.amount,
+            "description": self.description,
+            "user_id": self.user_id
+        }
 

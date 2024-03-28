@@ -82,11 +82,11 @@ export const Login = () => {
                                 value={password}
                                 placeholder="Ingrese su contraseña"
                                 onChange={handleInputChange}
-                                style={{ paddingRight: '40px' }} 
+                                style={{ paddingRight: '40px' }}
                             />
                             <div className="input-group-append" style={{ position: 'absolute', right: 0, top: 0 }}>
                                 <button className="btn" type="button" id="button-addon-password" onClick={toggleShowPassword}>
-                                    <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} className="eye-icon" style={{color:'#B2A79F'}}/>
+                                    <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} className="eye-icon" style={{ color: '#B2A79F' }} />
                                 </button>
                             </div>
                         </div>
@@ -95,11 +95,11 @@ export const Login = () => {
                         <p className="text-danger">{errorMessage}</p>
                     )}
                     <div className="text-end link mb-4">
-                        <Link to="/recovery" style={{color:'#a76f6d', fontSize: '15px'}}>¿Olvidaste tu contraseña?</Link>
+                        <Link to="/recovery" style={{ color: '#a76f6d', fontSize: '15px' }}>¿Olvidaste tu contraseña?</Link>
                     </div>
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Link to='/' style={{color:'#8A97A6'}}>&#x27F5; Volver</Link>
+                            <Link to='/' style={{ color: '#8A97A6' }}>&#x27F5; Volver</Link>
                         </div>
                         <div className="text-end">
                             <button type="submit" className="btn" style={{ backgroundColor: '#8A97A6', color: 'whitesmoke' }}>
@@ -112,6 +112,6 @@ export const Login = () => {
             <div className="col-6 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#FAFAFA' }}>
                 <img className="animate__backInRight" style={{width: '75vh', maxWidth: '90%', height: 'auto'}} src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/logo_login.png?raw=true" />
             </div>
-        </div>  
+        </div>
     );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import { Context } from "../store/appContext";
 import "../../styles/calendar.css";
@@ -63,8 +62,8 @@ export const SchedulingComponent = () => {
 
   const fetchUnavailableDates = async () => {
     try {
-      const response = await actions.addGlobalAndFinalBlocks(year, month); 
-      setUnavailableDates(response); 
+      const response = await actions.addGlobalAndFinalBlocks(year, month);
+      setUnavailableDates(response);
     } catch (error) {
       console.error('Error al obtener fechas no disponibles:', error);
     }
@@ -104,11 +103,11 @@ export const SchedulingComponent = () => {
   const handleDayClick = (day) => {
     const selectedDate = new Date(year, month - 1, day);
     const currentDate = new Date();
-  
+
     if (selectedDate < currentDate) {
       return;
     }
-  
+
     if (day) {
       setSelectedDay(day);
       setShowModal(true);
@@ -116,7 +115,7 @@ export const SchedulingComponent = () => {
       setShowModal(false);
     }
   };
-  
+
 
   const handleCloseModal = () => {
     setShowModal(false);

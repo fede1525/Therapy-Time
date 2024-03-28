@@ -51,9 +51,9 @@ export const NavbarPatient = () => {
 					<p id="turns-button" className="navTherapist mt-3">Turnero</p>
 				</Link>
 				<div>
-					<p className="navTherapist mt-3" style={{color: '#8A97A6', fontSize: '3vh'}}>|</p>
+					<p className="navTherapist mt-3" style={{ color: '#8A97A6', fontSize: '3vh' }}>|</p>
 				</div>
-				<Link to="/home" style={{ color: '#8A97A6', fontSize: '3vh', marginLeft: '3vh' }}>
+				<Link to="/payment_list" style={{ color: '#8A97A6', fontSize: '3vh', marginLeft: '3vh' }}>
 					<p id="turns-button" className="navTherapist mt-3">  Mis pagos</p>
 				</Link>
 			</div>
