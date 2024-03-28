@@ -67,7 +67,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			reservations: [],
 			reservationByID: {
-
 			}
 		},
 		actions: {
@@ -124,7 +123,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return error
 				}
 			},
-			//Funciones de login, logout y recupero de contraseña
+			//Funciones de login y logout 
 			logout: async () => {
 				await getActions().protectedFetch("/logout", "POST", null)
 				localStorage.removeItem("token")
@@ -499,6 +498,23 @@ const getState = ({ getStore, getActions, setStore }) => {
 					throw error;
 				}
 			},
+			fetchUnavailableDates: async () => {
+				try {
+					const response = await getActions().apiFetch('/fetch_bloquear', 'GET');
+
+					if (!response.ok) {
+						throw new Error('Failed to fetch unavailable dates');
+					}
+
+					const responseData = await response.json();
+					setStore({ unavailableDates: responseData });
+
+					return { success: true, message: 'Unavailable dates fetched successfully' };
+				} catch (error) {
+					console.error('Error fetching unavailable dates:', error);
+					return { success: false, error: error.message || 'Error fetching unavailable dates' };
+				}
+			},
 			//Funciones para el bloqueo de fechas globales
 			addGlobalEnabled: async (data) => {
 				try {
@@ -602,6 +618,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message || 'Error al obtener las fechas bloqueadas.' };
 				}
 			},
+			//Funciones para el home del paciente
 			getVirtualLink: async () => {
 				try {
 					const resp = await getActions().protectedFetch("/profile_virtual_link", "GET", null)
@@ -682,6 +699,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message || 'Error al actualizar la reserva' };
 				}
 			},
+			//Funciones para el turnero del terapeuta
 			getAllReservations: async () => {
 				try {
 					const response = await getActions().apiFetch('/get_all_reservations', 'GET');
@@ -780,7 +798,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						headers: {
 							'Content-Type': 'application/json'
 						},
-						body: JSON.stringify(reservationData) // Enviar reservationData como cuerpo de la solicitud
+						body: JSON.stringify(reservationData) 
 					});
 
 					if (!response.ok) {

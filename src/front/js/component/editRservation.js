@@ -28,7 +28,7 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
     const closeShowSuccessModal = () => {
         handleCloseModal();
         setShowSuccessModal(false)
-        navigate("/home");
+        navigate("/appointment_scheduling");
     }
 
     const handleNextMonth = () => {
@@ -192,7 +192,7 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
                         <div className="modal-content" style={{ textAlign: 'left' }} id="contactModal">
                             <div className="modal-header justify-content-between">
                                 <div>
-                                    <span>Reserva actualizada con exito</span>
+                                    <span>¡El turno se ha actualizado con exito!</span>
                                 </div>
                                 <div>
                                     <button type="button" className="btn_close_contact" onClick={closeShowSuccessModal} aria-label="Close">X</button>
@@ -248,7 +248,7 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
                         {renderModalContent()}
                     </div>
                 ) : (
-                    <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '120%' }}>
+                    <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '110%' }}>
                         No se ha seleccionado ninguna fecha del calendario
                     </div>
                 )}

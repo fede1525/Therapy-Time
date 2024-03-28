@@ -177,23 +177,32 @@ export const Scheduling = () => {
                       <tr>
                         <th style={{ width: '10%' }}>Día</th>
                         {POSSIBLE_HOURS.map((hour, index) => (
-                          <th key={index} style={{ width: '4%' }}>{hour}</th>
+                          <th key={index} style={{ width: '4%' }}>
+                            {hour !== '20:00' ? hour : null}
+                          </th>
                         ))}
+
                         <th style={{ width: '5%' }}>Editar</th>
                       </tr>
                     </thead>
                     <tbody>
                       {POSSIBLE_DAYS.map((day, index) => (
-                        <tr key={index}>
-                          <td><strong>{day}</strong></td>
-                          {POSSIBLE_HOURS.map((hour, hourIndex) => (
-                            <td key={hourIndex} style={{ backgroundColor: store.globalEnabled.some(item => item.day === day && hour >= item.start_hour && hour < item.end_hour) ? '#a9a9a9' : 'transparent', width: '4%'}}>
-                            </td>
-                          ))}
-                          <td style={{ width: '7%', textAlign: 'center' }}>
-                            <FontAwesomeIcon icon={faPencilAlt} onClick={() => handleDayChange(day)} />
-                          </td>
-                        </tr>
+                          <tr key={index}>
+                              <td><strong>{day}</strong></td>
+                              {POSSIBLE_HOURS.map((hour, hourIndex) => (
+                                  <td key={hourIndex} style={{ 
+                                      backgroundColor: store.globalEnabled.some(item => 
+                                          item.day === day && 
+                                          ((hour === '19:00' && (startTime === '19:00' && hour === '19:00' || endTime === '20:00' && hour === '20:00')) || (hour >= item.start_hour && hour < item.end_hour))
+                                      ) ? '#a9a9a9' : 'transparent',
+                                      width: '4%',
+                                  }}>
+                                  </td>
+                              ))}
+                              <td style={{ width: '7%', textAlign: 'center' }}>
+                                  <FontAwesomeIcon icon={faPencilAlt} onClick={() => handleDayChange(day)} />
+                              </td>
+                          </tr>
                       ))}
                     </tbody>
                   </table>
