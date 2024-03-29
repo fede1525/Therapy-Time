@@ -22,14 +22,13 @@
   border-color: rgb(196, 124, 122); 
   color: white;
   background-color: #A9A9A9;
-  pointer-events: none;
 }
 .unavailableByDate{
   border-color: #A9A9A9 !important;
   box-shadow: 2px 2px rgba(0, 0, 0, 0.75) !important;
   color: rgba(0, 0, 0, 0.75);
   background-color: #A9A9A9;
-  pointer-events: none;
+  cursor: not-allowed !important;
 }
 .calendar {
   width: 80%;

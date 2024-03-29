@@ -9,7 +9,8 @@ import { useNavigate } from 'react-router-dom';
 export const SchedulingPatientEdit = () => {
   const { actions } = useContext(Context);
   const [calendar, setCalendar] = useState([]);
-  const [month, setMonth] = useState(1); // empieza en enero
+  const currentMonth = new Date().getMonth() + 1;
+  const [month, setMonth] = useState(currentDate); // empieza en enero
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);

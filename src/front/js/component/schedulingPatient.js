@@ -10,7 +10,8 @@ export const SchedulingPatient = () => {
   const { actions } = useContext(Context);
   const [calendar, setCalendar] = useState([]);
   const token = localStorage.getItem("token");
-  const [month, setMonth] = useState(1); // empieza en enero
+  const currentMonth = new Date().getMonth() + 1;
+  const [month, setMonth] = useState(currentMonth); // empieza en enero
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);
