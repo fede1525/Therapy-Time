@@ -22,6 +22,7 @@ export const EditProfile = () => {
     const [dniError, setDniError] = useState('');
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
+    const [showSuccessModal, setShowSuccessModal] = useState(false)
 
     const navigate = useNavigate();
 
@@ -143,21 +144,19 @@ export const EditProfile = () => {
             const result = await actions.editProfile(changes);
             console.log("Profile updated successfully:", result);
 
-            setUsername('');
-            setPassword('');
-            setConfirmPassword('');
-            setName('');
-            setLastname('');
-            setDni('');
-            setEmail('');
             setPasswordError('');
             setConfirmError('');
             setEmailError('');
             setDniError('');
+            setShowSuccessModal(true)
         } catch (error) {
             console.error("Error actualizando el perfil:", error);
         }
     };
+
+    const closeSuccessModal = () => {
+        setShowSuccessModal(false)
+    }
 
     const handleEdit = () => {
         setEditable(!editable);
@@ -333,7 +332,21 @@ export const EditProfile = () => {
                     </div>
                 </div>
             </div>
+            <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content" style={{ textAlign: 'left' }} id="contactModal">
+                        <div className="modal-header justify-content-end">
+                            <button type="button" className="btn_close_contact" onClick={closeSuccessModal} aria-label="Close">X</button>
+                        </div>
+                        <div className="modal-body">
+                            <span>Los cambios se han guardado con éxito.</span>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-guardar-contact" onClick={closeSuccessModal}>Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
-
