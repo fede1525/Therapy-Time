@@ -793,12 +793,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			createReservationForNonRegisteredUser: async (reservationData) => {
 				try {
-					const response = await fetch(`${process.env.BACKEND_URL}/api/reservation/non_registered`, {
+					const response = await fetch(`${process.env.BACKEND_URL}api/reservation/non_registered`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json'
 						},
-						body: JSON.stringify(reservationData) 
+						body: JSON.stringify(reservationData)
 					});
 
 					if (!response.ok) {

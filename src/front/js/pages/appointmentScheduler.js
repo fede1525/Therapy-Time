@@ -5,7 +5,7 @@ import { NavbarTherapist } from "../component/navbar";
 import { Context } from "../store/appContext";
 import { SchedulingTherapistEdit } from "../component/editRservation";
 import { SchedulingTherapist } from "../component/schedulingTherapist"
-import {SchedulingNonRegistered} from "../component/schedulingNonRegistered"
+import { SchedulingNonRegistered } from "../component/schedulingNonRegistered"
 import "../../styles/inbox.css";
 import "../../styles/landing.css";
 
@@ -44,7 +44,7 @@ export const AppointmentScheduler = () => {
             [name]: value
         });
     };
-    
+
     const handleSearchTypeChange = (type) => {
         setSearchType(type);
     };
@@ -72,7 +72,7 @@ export const AppointmentScheduler = () => {
         });
     };
 
- 
+
     const handleSearchSubmit = async (event) => {
         if (event) {
             event.preventDefault();
@@ -90,8 +90,10 @@ export const AppointmentScheduler = () => {
                         dni: user.dni
                     });
                     setSearchValue('');
+                } else if (dni.length > 8) {
+                    setSearchError("El DNI debe tener 8 números.")
                 } else {
-                    setSearchError("No existen usuarios registrados con ese DNI");
+                    setSearchError("No existen usuarios registrados con ese DNI.");
                 }
             } else {
                 console.log(message);
@@ -310,7 +312,7 @@ export const AppointmentScheduler = () => {
                             </div>
                             <div className={`modal fade ${showEditModal ? 'show d-block' : 'd-none'}`} id="editModal" tabIndex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
                                 <div className="modal-dialog modal-dialog-centered modal-xl">
-                                    <div className="modal-content" style={{ textAlign: 'left', fontFamily: 'Nanum Gothic, sans-serif'  }}>
+                                    <div className="modal-content" style={{ textAlign: 'left', fontFamily: 'Nanum Gothic, sans-serif' }}>
                                         <div className="modal-header">
                                             <h5 className="modal-title" id="editModalLabel">Editar turno</h5>
                                             <button type="button" className="btn-close" onClick={() => setShowEditModal(false)} aria-label="Close"></button>
@@ -358,35 +360,35 @@ export const AppointmentScheduler = () => {
                                     <div>
                                         <div className="d-flex align-items-center mb-3">
                                             <div>
-                                                <input type="text" className="form-control mt-3" id="searchByDNI" placeholder="Búsqueda por DNI" value={searchValue} onChange={handleSearchChange} onKeyDown={handleKeyPress}  onFocus={handleDniInputFocus} />
+                                                <input type="text" className="form-control mt-3" id="searchByDNI" placeholder="Búsqueda por DNI" value={searchValue} onChange={handleSearchChange} onKeyDown={handleKeyPress} onFocus={handleDniInputFocus} />
                                             </div>
                                             <div className="mt-3">
                                                 <button type="submit" className="btn btn-guardar-contact">Buscar</button>
                                             </div>
                                         </div>
-                                        {searchError && <span className="text-danger">{searchError}</span>} 
+                                        {searchError && <span className="text-danger">{searchError}</span>}
                                         <div className="row">
                                             <div className="col-lg-6 mb-2">
                                                 <label htmlFor="name" className="form-label">Nombre:</label>
-                                                <input style={{backgroundColor:'#FAFAFA'}} type="text" className="form-control" id="name" name="name" value={formData.name} onChange={handleFormChange} readOnly />
+                                                <input style={{ backgroundColor: '#FAFAFA' }} type="text" className="form-control" id="name" name="name" value={formData.name} onChange={handleFormChange} readOnly />
                                             </div>
                                             <div className="col-lg-6 mb-2">
                                                 <label htmlFor="lastName" className="form-label">Apellido:</label>
-                                                <input style={{backgroundColor:'#FAFAFA'}} type="text" className="form-control" id="lastname" name="lastname" value={formData.lastname} onChange={handleFormChange} readOnly />
+                                                <input style={{ backgroundColor: '#FAFAFA' }} type="text" className="form-control" id="lastname" name="lastname" value={formData.lastname} onChange={handleFormChange} readOnly />
                                             </div>
                                         </div>
                                         <div className="row">
                                             <div className="col-lg-6 mb-3">
                                                 <label htmlFor="contact" className="form-label">Contacto:</label>
-                                                <input style={{backgroundColor:'#FAFAFA'}} type="text" className="form-control" id="phone" name="phone" value={formData.phone} onChange={handleFormChange} readOnly />
+                                                <input style={{ backgroundColor: '#FAFAFA' }} type="text" className="form-control" id="phone" name="phone" value={formData.phone} onChange={handleFormChange} readOnly />
                                             </div>
                                             <div className="col-lg-6 mb-3">
                                                 <label htmlFor="dni" className="form-label">DNI:</label>
-                                                <input style={{backgroundColor:'#FAFAFA'}} type="text" className="form-control" id="dni" name="dni" value={formData.dni} onChange={handleFormChange} readOnly />
+                                                <input style={{ backgroundColor: '#FAFAFA' }} type="text" className="form-control" id="dni" name="dni" value={formData.dni} onChange={handleFormChange} readOnly />
                                             </div>
                                         </div>
                                         <div className="mt-2 mb-3">
-                                            <SchedulingTherapist patientId={formData.id}/>
+                                            <SchedulingTherapist patientId={formData.id} />
                                         </div>
                                     </div>
                                 )}
@@ -404,7 +406,7 @@ export const AppointmentScheduler = () => {
                                                         value={nonUserData.name}
                                                         onChange={handleFormChangeNonUser}
                                                         required
-                                                        style={{backgroundColor:'#FAFAFA'}}
+                                                        style={{ backgroundColor: '#FAFAFA' }}
                                                     />
                                                 </div>
                                                 <div className="col-lg-6 mb-3">
@@ -417,7 +419,7 @@ export const AppointmentScheduler = () => {
                                                         value={nonUserData.lastname}
                                                         onChange={handleFormChangeNonUser}
                                                         required
-                                                        style={{backgroundColor:'#FAFAFA'}}
+                                                        style={{ backgroundColor: '#FAFAFA' }}
                                                     />
                                                 </div>
                                             </div>
@@ -432,7 +434,7 @@ export const AppointmentScheduler = () => {
                                                         value={nonUserData.phone}
                                                         onChange={handleFormChangeNonUser}
                                                         required
-                                                        style={{backgroundColor:'#FAFAFA'}}
+                                                        style={{ backgroundColor: '#FAFAFA' }}
                                                     />
                                                 </div>
                                                 <div className="col-lg-6 mb-3">
@@ -445,15 +447,15 @@ export const AppointmentScheduler = () => {
                                                         value={nonUserData.dni}
                                                         onChange={handleFormChangeNonUser}
                                                         required
-                                                        style={{backgroundColor:'#FAFAFA'}}
+                                                        style={{ backgroundColor: '#FAFAFA' }}
                                                     />
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="mt-2 mb-3">
-                                            <SchedulingNonRegistered formData={nonUserData}/>
+                                            <SchedulingNonRegistered formData={nonUserData} />
                                         </div>
-                                    </div> 
+                                    </div>
                                 )}
                             </form>
                         </div>
