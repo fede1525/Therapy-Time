@@ -12,6 +12,15 @@ export const Recovery = () => {
     const [loading, setLoading] = useState(false);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
 
+    const handleEmailChange = (e) => {
+        setEmailInput(e.target.value);
+    };
+
+    const handleEmailFocus = () => {
+        setEmailError(""); 
+        setError("");
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!emailRegex.test(emailInput)) {
@@ -31,16 +40,7 @@ export const Recovery = () => {
             setLoading(false);
             setError(error.message || 'Error al enviar la solicitud de recuperación de contraseña.');
         }   
-    }
-
-    const handleEmailChange = (e) => {
-        setEmailInput(e.target.value);
-    }
-
-    const handleEmailFocus = () => {
-        setEmailError(""); 
-        setError("");
-    }
+    };
 
     return (
         <div className="d-flex justify-content-center vh-100">
@@ -75,7 +75,7 @@ export const Recovery = () => {
                 )}
             </div>
             <div className="col-6 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#FAFAFA' }}>
-                <img className="animate__backInRight" style={{width: '75vh', maxWidth: '90%', height: 'auto'}} src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/logo_login.png?raw=true" />
+                <img className="animate__backInRight" style={{width: '75vh', maxWidth: '90%', height: 'auto'}} src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/logo_login.png?raw=true" />
             </div>
         </div>  
     );

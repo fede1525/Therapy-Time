@@ -5,7 +5,6 @@ import "../../styles/home.css";
 import { NavbarPatient } from "../component/navbar_patient";
 import moment from 'moment';
 import 'moment/locale/es';
-import "../../styles/inbox.css";
 import "../../styles/landing.css";
 
 export const HomePatient = () => {

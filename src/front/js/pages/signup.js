@@ -3,13 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 
 export const Signup = () => {
-  const { actions } = useContext(Context);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const {actions } = useContext(Context);
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  
+  const handleInputChange = () => {
+    setErrorMessage('');
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -36,10 +40,6 @@ export const Signup = () => {
       setPassword('');
       setConfirmPassword('');
     }
-  };
-
-  const handleInputChange = () => {
-    setErrorMessage('');
   };
 
   return (

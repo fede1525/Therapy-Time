@@ -30,6 +30,7 @@ export const AppointmentScheduler = () => {
         phone: "",
         dni: ""
     });
+
     const [nonUserData, setNonUserData] = useState({
         name: "",
         lastname: "",
@@ -71,7 +72,6 @@ export const AppointmentScheduler = () => {
             [name]: value
         });
     };
-
 
     const handleSearchSubmit = async (event) => {
         if (event) {
@@ -128,7 +128,7 @@ export const AppointmentScheduler = () => {
             console.log("Reserva cancelada exitosamente");
             setShowSuccessModal(false);
             setModalSuccess(true);
-            actions.getAllReservations(); // Actualizar la tabla después de eliminar la reserva
+            actions.getAllReservations();
         }
     };
 
@@ -154,7 +154,7 @@ export const AppointmentScheduler = () => {
             setReservations(filteredReservations);
         };
         filterReservations();
-    }, [currentDate]); // Solo ejecutar el efecto cuando currentDate cambia, no cuando store.reservations cambia
+    }, [currentDate]);
 
     const handlePrevDay = () => {
         const prevDate = new Date(currentDate);

@@ -19,7 +19,28 @@ export const Reset_password = () => {
     });
     const [showSuccess, setShowSuccess] = useState(false);
     const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
-    
+
+    const clearError = (field) => {
+        if (field === 'global') {
+            setErrors({ ...errors, global: "" });
+        } else {
+            setErrors({ ...errors, [field]: "" });
+            if (errors.global) {
+                setErrors({ ...errors, global: "" });
+            }
+        }
+    };
+
+    const errorTextStyle = {
+        color: 'red',
+        maxWidth: '50vh',
+        wordWrap: 'break-word'
+    };
+
+    const handleGoToLogin = () =>{
+        navigate('/login');
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
@@ -53,27 +74,7 @@ export const Reset_password = () => {
             setErrors({ ...errors, global: error.message || 'Error al restablecer la contraseña' });
         }
     };
-    
-    const handleGoToLogin = () =>{
-        navigate('/login');
-    }
 
-    const clearError = (field) => {
-        if (field === 'global') {
-            setErrors({ ...errors, global: "" });
-        } else {
-            setErrors({ ...errors, [field]: "" });
-            if (errors.global) {
-                setErrors({ ...errors, global: "" });
-            }
-        }
-    }
-    const errorTextStyle = {
-        color: 'red',
-        maxWidth: '50vh',
-        wordWrap: 'break-word'
-    };
-    
     return (
         <div className="d-flex justify-content-center vh-100">
             <div className="col-6 d-flex flex-column align-items-center justify-content-center formLogin" style={{ backgroundColor: '#EDE9E9' }}>
@@ -138,7 +139,7 @@ export const Reset_password = () => {
                 )}
             </div>
             <div className="col-6 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#FAFAFA' }}>
-                <img className="animate__backInRight" style={{ width: '75vh', maxWidth: '90%', height: 'auto' }} src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/prototype/src/front/img/logo_login.png?raw=true" />
+                <img className="animate__backInRight" style={{ width: '75vh', maxWidth: '90%', height: 'auto' }} src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/develop/src/front/img/logo_login.png?raw=true" />
             </div>
         </div>
     );

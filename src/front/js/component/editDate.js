@@ -23,13 +23,13 @@ export const SchedulingPatientEdit = () => {
 
   const openShowSuccessModal = () => {
     setShowSuccessModal(true)
-  }
+  };
 
   const closeShowSuccessModal = () => {
     handleCloseModal();
     setShowSuccessModal(false)
     navigate("/home");
-  }
+  };
 
   const handleNextMonth = () => {
     if (month === 12) {
@@ -151,7 +151,6 @@ export const SchedulingPatientEdit = () => {
       setShowModal(false);
     }
   };
-
 
   const handleCloseModal = () => {
     setShowModal(false);

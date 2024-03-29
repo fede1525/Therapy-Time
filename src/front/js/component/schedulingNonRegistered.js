@@ -21,7 +21,8 @@ export const SchedulingNonRegistered = ({ formData }) => {
     const closeShowSuccessModal = () => {
         handleCloseModal();
         setShowSuccessModal(false)
-    }
+    };
+
     useEffect(() => {
         const currentDate = new Date(year, month - 1, 1);
         const firstDayOfWeek = currentDate.getDay();
@@ -101,24 +102,19 @@ export const SchedulingNonRegistered = ({ formData }) => {
     };
 
     const handleReservation = async () => {
-        // Formatear la fecha y la hora
         const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}T${selectedHour.toString().padStart(2, '0')}:00:00`;
-    
-        // Concatenar nombre y apellido
+
         const guestName = `${formData.name} ${formData.lastname}`;
-    
-        // Crear el objeto de datos de reserva
+
         const reservationData = {
-            date: formattedDate, // Fecha y hora concatenadas
-            guest_name: guestName, // Nombre completo como guest_name
-            guest_phone: formData.phone, // Teléfono como guest_phone
+            date: formattedDate, 
+            guest_name: guestName,
+            guest_phone: formData.phone,
         };
-    
+
         try {
-            // Enviar la solicitud al backend
             const response = await actions.createReservationForNonRegisteredUser(reservationData);
             if (response && response.message === 'Reservation created successfully') {
-                // Mostrar modal de éxito si la reserva se crea correctamente
                 setShowSuccessModal(true);
             } else {
                 console.error('Error al realizar la reserva:', response && response.error ? response.error : 'Error desconocido');
@@ -127,8 +123,6 @@ export const SchedulingNonRegistered = ({ formData }) => {
             console.error('Error al realizar la reserva:', error);
         }
     };
-    
-    
     
     const meses = {
         1: 'Enero',

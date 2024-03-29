@@ -23,13 +23,13 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
 
     const openShowSuccessModal = () => {
         setShowSuccessModal(true)
-    }
+    };
 
     const closeShowSuccessModal = () => {
         handleCloseModal();
         setShowSuccessModal(false)
         navigate("/appointment_scheduling");
-    }
+    };
 
     const handleNextMonth = () => {
         if (month === 12) {
@@ -63,7 +63,6 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
         11: 'Noviembre',
         12: 'Diciembre'
     };
-
 
     const handleReservationUpdate = async () => {
         const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
@@ -125,7 +124,6 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
             setShowModal(false);
         }
     };
-
 
     const handleCloseModal = () => {
         setShowModal(false);
@@ -256,4 +254,4 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
         </div>
     );
 };
-            
+                

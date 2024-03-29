@@ -66,7 +66,6 @@ export const SchedulingTherapist = ({ patientId }) => {
         12: 'Diciembre'
     };
 
-
     useEffect(() => {
         const currentDate = new Date(year, month - 1, 1);
         const firstDayOfWeek = currentDate.getDay();
@@ -111,7 +110,6 @@ export const SchedulingTherapist = ({ patientId }) => {
         }
     };
 
-
     const handleCloseModal = () => {
         setShowModal(false);
         setSelectedHours([])
@@ -128,15 +126,18 @@ export const SchedulingTherapist = ({ patientId }) => {
         }
     };
 
-
     const handleReservation = async () => {
         const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
         const formattedHour = `${selectedHour.toString().padStart(2, '0')}:00`;
+        console.log("Formatted Date:", formattedDate);
+        console.log("Formatted Hour:", formattedHour);
+        console.log("Patient ID:", patientId);
     
         try {
             const response = await actions.postNewDate(formattedDate, formattedHour, patientId);
-            if (response && response.message === 'Reservation created successfully') {
-                console.log(patientId)
+            console.log("Response from server:", response);
+            if (response && response.message === 'Reserva creada con éxito') {
+                console.log("Reserva exitosa");
                 openShowSuccessModal();
             } else {
                 console.error('Error al realizar la reserva:', response && response.error ? response.error : 'Error desconocido');
@@ -146,8 +147,6 @@ export const SchedulingTherapist = ({ patientId }) => {
         }
     };
     
-
-
     const renderModalContent = () => {
         const hours = Array.from({ length: 12 }, (_, index) => index + 8);
         return (
