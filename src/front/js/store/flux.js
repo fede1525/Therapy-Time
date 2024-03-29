@@ -540,27 +540,27 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			addGlobalEnabled: async (data) => {
 				try {
-				  const response = await getActions().apiFetch('/global_enabled', 'POST', data);
-			  
-				  if (!response.ok) {
-					throw new Error('Error al agregar disponibilidad global');
-				  }
-			  
-				  const responseData = await response.json();
-				  let updatedGlobalEnabled = [];
-			  
-				  if (Array.isArray(responseData)) {
-					updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData];
-				  } else if (typeof responseData === 'object') {
-					updatedGlobalEnabled = [...getStore().globalEnabled, responseData];
-				  }
-			  
-				  setStore({ globalEnabled: updatedGlobalEnabled });
-				  return responseData;
+					const response = await getActions().apiFetch('/global_enabled', 'POST', data);
+
+					if (!response.ok) {
+						throw new Error('Error al agregar disponibilidad global');
+					}
+
+					const responseData = await response.json();
+					let updatedGlobalEnabled = [];
+
+					if (Array.isArray(responseData)) {
+						updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData];
+					} else if (typeof responseData === 'object') {
+						updatedGlobalEnabled = [...getStore().globalEnabled, responseData];
+					}
+
+					setStore({ globalEnabled: updatedGlobalEnabled });
+					return responseData;
 				} catch (error) {
-				  console.error("Error al agregar disponibilidad global:", error);
-				  const errorMessage = error.message || 'Error de red';
-				  return { success: false, error: errorMessage };
+					console.error("Error al agregar disponibilidad global:", error);
+					const errorMessage = error.message || 'Error de red';
+					return { success: false, error: errorMessage };
 				}
 			},
 			getGlobalEnabled: async () => {
@@ -689,7 +689,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						throw new Error(responseData.error);
 					}
 
-					const userData = responseData; 
+					const userData = responseData;
 					setStore({ userByDNI: userData });
 
 					console.log("Datos del usuario recibidos:", userData);
@@ -700,20 +700,20 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message };
 				}
 			},
-			postNewDate : async (date, time, userId) => {
+			postNewDate: async (date, time, userId) => {
 				try {
 					const body = {
 						date: date,
 						time: time
 					};
-			
+
 					const response = await getActions().apiFetch(`/reservation/${userId}`, 'POST', body);
 					console.log(response);
 					if (!response.ok) {
 						const errorData = await response.json();
 						throw new Error(errorData.error || 'Error creating reservation.');
 					}
-			
+
 					const data = await response.json();
 					return data;
 				} catch (error) {
@@ -724,12 +724,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 			createReservationForNonRegisteredUser: async (reservationData) => {
 				try {
 					const response = await getActions().apiFetch('/reservation/non_registered', 'POST', reservationData);
-			
+
 					if (!response.ok) {
 						const errorData = await response.json();
 						throw new Error(errorData.error || 'Failed to create reservation for non-registered user');
 					}
-			
+
 					const responseData = await response.json();
 					return responseData;
 				} catch (error) {
@@ -901,7 +901,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					const response = await fetch(`${process.env.BACKEND_URL}api/reservation/non_registered`, {
 						method: 'POST',
 						headers: {
-							'Content-Type': 'application/json'
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*'
 						},
 						body: JSON.stringify(reservationData)
 					});

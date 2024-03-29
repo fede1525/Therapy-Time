@@ -6,7 +6,6 @@ import { Context } from "../store/appContext";
 import { SchedulingTherapistEdit } from "../component/editRservation";
 import { SchedulingTherapist } from "../component/schedulingTherapist"
 import { SchedulingNonRegistered } from "../component/schedulingNonRegistered"
-import "../../styles/inbox.css";
 import "../../styles/landing.css";
 
 export const AppointmentScheduler = () => {
@@ -56,6 +55,7 @@ export const AppointmentScheduler = () => {
         }
     }, [activeTab]);
 
+
     useEffect(() => {
         actions.getAllReservations();
     }, []);
@@ -90,11 +90,12 @@ export const AppointmentScheduler = () => {
                         dni: user.dni
                     });
                     setSearchValue('');
-                } else if (dni.length > 8) {
+                } else if (dni.length > 8 || dni.length < 8) {
                     setSearchError("El DNI debe tener 8 números.")
                 } else {
                     setSearchError("No existen usuarios registrados con ese DNI.");
                 }
+
             } else {
                 console.log(message);
             }
@@ -139,22 +140,40 @@ export const AppointmentScheduler = () => {
     const closeModalSuccess = () => {
         setModalSuccess(false);
         actions.getAllReservations();
+        setFormData({
+            id: "",
+            name: "",
+            lastname: "",
+            phone: "",
+            dni: ""
+        })
     };
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
+        setFormData({
+            id: "",
+            name: "",
+            lastname: "",
+            phone: "",
+            dni: ""
+        })
     };
 
     useEffect(() => {
         const filterReservations = () => {
-            const filteredReservations = store.reservations.filter(reservation => {
-                const reservationDate = new Date(reservation.fecha);
-                return reservationDate.toDateString() === currentDate.toDateString();
-            });
-            setReservations(filteredReservations);
+            if (activeTab === "inbox") {
+                const filteredReservations = store.reservations.filter(reservation => {
+                    const reservationDate = new Date(reservation.fecha);
+                    return reservationDate.toDateString() === currentDate.toDateString();
+                });
+                setReservations(filteredReservations);
+            } else {
+                setReservations(store.reservations);
+            }
         };
         filterReservations();
-    }, [currentDate]);
+    }, [currentDate, activeTab, store.reservations]);
 
     const handlePrevDay = () => {
         const prevDate = new Date(currentDate);
