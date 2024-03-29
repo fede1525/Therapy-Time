@@ -2,7 +2,6 @@ import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
 import "../../styles/home.css";
-import { NavbarPatient } from "../component/navbar_patient";
 import moment from 'moment';
 import 'moment/locale/es';
 import "../../styles/landing.css";
@@ -76,10 +75,9 @@ export const HomePatient = () => {
     };
 
     return (
-        <div className="text-center homepatient conteiner-fluid" style={{ height: '100vh', backgroundColor: '#EDE9E9' }}>
-            <NavbarPatient />
-            <div className="container mt-5" style={{ fontFamily: 'Nanum Gothic, sans-serif' }}>
-                <div className="row p-4 ">
+        <div className="text-center homepatient conteiner-fluid" style={{ height: '87.8vh', backgroundColor: '#EDE9E9' }}>
+            <div className="container" style={{ fontFamily: 'Nanum Gothic, sans-serif', paddingTop:'11vh' }}>
+                <div className="row">
                     <div className="col-6 p-4" style={{ height: '60vh', backgroundColor: '#FAFAFA', backgroundImage: 'url(https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/dating_blocking/src/front/img/logoPaciente.png?raw=true)' }}>
                         <h2 style={{ textAlign: 'left', maxWidth: '40%', color: '#808080' }}>Tu próximo</h2>
                         <div className="d-flex">

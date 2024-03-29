@@ -20,7 +20,6 @@ export const SchedulingNonRegistered = ({ formData }) => {
     const [extractedInfo, setExtractedInfo] = useState([]);
     const closeShowSuccessModal = () => {
         handleCloseModal();
-        setShowSuccessModal(false)
     };
 
     useEffect(() => {

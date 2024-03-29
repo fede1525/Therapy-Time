@@ -7,7 +7,6 @@ import { PaymentTable } from "../component/paymentTable"
 export const PaymentList = () => {
     return (
         <div className="container">
-            <NavbarPatient />
             <PaymentTable />
         </div>
     )

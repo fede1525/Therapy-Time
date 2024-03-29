@@ -10,7 +10,6 @@ export const NewDate = () => {
 
     return (
         <div style={{ backgroundColor: '#EDE9E9', minHeight: '100vh', minWidth: '100vw' }}>
-            <NavbarPatient />
             <div className="container border p-4 mt-5" style={{backgroundColor:'white'}}>
               <SchedulingPatient />
             </div>

@@ -149,6 +149,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			logout: async () => {
 				await getActions().protectedFetch("/logout", "POST", null)
 				localStorage.removeItem("token")
+				localStorage.removeItem("data")
 			},
 			loginUser: async (username, password) => {
 				try {
@@ -163,10 +164,15 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 					const responseData = await response.json();
 					const token = responseData.token || "";
+					console.log(responseData)
 
 					localStorage.setItem('token', token);
+					localStorage.setItem('data', JSON.stringify(responseData) );
 					console.log("Token almacenado en localStorage:", token);
-					setStore({ user: responseData });
+					setStore({ 
+						user: responseData,
+						isAuthenticated: true
+					});
 					return { success: true, message: responseData.message };
 
 				} catch (error) {

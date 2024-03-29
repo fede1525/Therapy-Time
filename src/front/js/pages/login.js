@@ -1,9 +1,10 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import "../../styles/login.css";
+import big_logo from "../../img/big_logo.png";
 
 export const Login = () => {
     const { actions } = useContext(Context);
@@ -12,6 +13,14 @@ export const Login = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+
+    const checkLogin = () =>{
+        JSON.parse(localStorage.getItem('data')).isAuthenticated && navigate("/home")
+    };
+
+    // //useEffect ( ()=>{
+    //     checkLogin();
+    // },[]
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -109,7 +118,7 @@ export const Login = () => {
                 </form>
             </div>
             <div className="col-6 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#FAFAFA' }}>
-                <img className="animate__backInRight" style={{width: '75vh', maxWidth: '90%', height: 'auto'}} src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/logo_login.png?raw=true" />
+                <img className="animate__backInRight" style={{width: '75vh', maxWidth: '90%', height: 'auto'}} src={big_logo} />
             </div>
         </div>
     );

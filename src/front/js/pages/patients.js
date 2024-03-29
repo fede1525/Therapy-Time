@@ -245,7 +245,6 @@ export const Patients = () => {
 
     return (
         <div style={{ backgroundColor: 'white', minHeight: '100vh', minWidth: '100vw' }}>
-            <NavbarTherapist />
             <div className="container mt-5 border" style={{ paddingTop: '2vh' }}>
                 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" />
                 <div className="d-flex justify-content-start align-items-center mb-3" style={{ fontFamily: 'Nanum Gothic, sans-serif' }}>
