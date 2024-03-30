@@ -30,6 +30,29 @@ export const AppointmentScheduler = () => {
         dni: ""
     });
 
+    const clearForm = () => {
+        setFormData({
+            id: "",
+            name: "",
+            lastname: "",
+            phone: "",
+            dni: ""
+        });
+    };
+
+    const clearNonUserForm = () => {
+        setNonUserData({
+            name: "",
+            lastname: "",
+            phone: "",
+            dni: ""
+        });
+    };
+
+    const updateReservations = () => {
+        actions.getAllReservations();
+    };
+
     const [nonUserData, setNonUserData] = useState({
         name: "",
         lastname: "",
@@ -405,7 +428,7 @@ export const AppointmentScheduler = () => {
                                             </div>
                                         </div>
                                         <div className="mt-2 mb-3">
-                                            <SchedulingTherapist patientId={formData.id} />
+                                            <SchedulingTherapist patientId={formData.id}  clearForm={clearForm} updateReservations={updateReservations} />
                                         </div>
                                     </div>
                                 )}
@@ -470,7 +493,7 @@ export const AppointmentScheduler = () => {
                                             </div>
                                         </div>
                                         <div className="mt-2 mb-3">
-                                            <SchedulingNonRegistered formData={nonUserData} />
+                                            <SchedulingNonRegistered formData={nonUserData} clearNonUserForm={clearNonUserForm} updateReservations={updateReservations} />
                                         </div>
                                     </div>
                                 )}

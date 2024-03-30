@@ -6,7 +6,7 @@ import { FaChevronLeft } from 'react-icons/fa';
 import { FaChevronRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-export const SchedulingNonRegistered = ({ formData }) => {
+export const SchedulingNonRegistered = ({ formData, clearNonUserForm, updateReservations }) => {
     const { actions } = useContext(Context);
     const [calendar, setCalendar] = useState([]);
     const [month, setMonth] = useState(1); // empieza en enero
@@ -22,7 +22,7 @@ export const SchedulingNonRegistered = ({ formData }) => {
     const closeShowSuccessModal = () => {
         handleCloseModal();
         setShowSuccessModal(false)
-
+        clearNonUserForm();
     };
 
     useEffect(() => {
@@ -118,10 +118,11 @@ export const SchedulingNonRegistered = ({ formData }) => {
             const response = await actions.createReservationForNonRegisteredUser(reservationData);
             if (response && response.message === 'Reservation created successfully') {
                 setShowSuccessModal(true);
-
+            
             } else {
                 setShowSuccessModal(true);
                 console.error('Error al realizar la reserva:', response && response.error ? response.error : 'Error desconocido');
+                updateReservations();
             }
         } catch (error) {
             console.error('Error al realizar la reserva:', error);

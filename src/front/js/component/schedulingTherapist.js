@@ -6,7 +6,7 @@ import { FaChevronLeft } from 'react-icons/fa';
 import { FaChevronRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-export const SchedulingTherapist = ({ patientId }) => {
+export const SchedulingTherapist = ({ patientId, clearForm, updateReservations }) => {
     const { actions } = useContext(Context);
     const [calendar, setCalendar] = useState([]);
     const [month, setMonth] = useState(1); // empieza en enero
@@ -31,6 +31,7 @@ export const SchedulingTherapist = ({ patientId }) => {
     const closeShowSuccessModal = () => {
         handleCloseModal();
         setShowSuccessModal(false)
+        clearForm();
     }
 
     const handleNextMonth = () => {
@@ -139,6 +140,7 @@ export const SchedulingTherapist = ({ patientId }) => {
             if (response && response.message === 'Reserva creada con éxito') {
                 console.log("Reserva exitosa");
                 openShowSuccessModal();
+                updateReservations();
             } else {
                 console.error('Error al realizar la reserva:', response && response.error ? response.error : 'Error desconocido');
             }

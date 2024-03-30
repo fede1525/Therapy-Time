@@ -25,17 +25,24 @@ export const Product = () => {
     }, []);
 
     return (
-        <div className="container d-grid align-items-center" style={{ marginTop: '150px' }}>
-            <div className='card-product' >
-                <div className="card d-flex align-items-center justify-content-center" style={{ backgroundColor: '#EDE9E9' }}>
-                    <img className="w-50 pb-4" src={big_logo} alt='product stuff' />
-                    <h3 style={{ fontSize: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}>Consulta psicologica</h3>
-                    <p style={{ fontSize: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}> {description}</p>
-                    <p style={{ fontSize: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}>Total: ${price}</p>
-                    <div className="wallet-container">
-                        {
-                            preferenceIdLocal && <Wallet initialization={{ preferenceId: preferenceIdLocal.id }} />
-                        }
+        <div className='d-flex justify-content-center align-items-cernter' style={{ borderBottom: 'solid #FAFAFA 0.8vh', borderLeft: 'solid #FAFAFA 1vh', paddingLeft: '5vh', paddingBottom: '5vh', Width: '500vh' }}>
+            <div className="container d-grid align-items-center">
+                <div className='card-product' style={{ maxWidth: '100%', backgroundColor:'#FAFAFA' }}>
+                    <div className="card d-flex align-items-center justify-content-center" >
+                        <img className=" pb-4 pt-4" src={big_logo} alt='product stuff' style={{ maxWidth: '65%', paddingLeft: '3vh', paddingRight: '3vh' }} />
+                        <div className='d-flex'>
+                            <h5 style={{ marginRight: '2vh', fontFamily: "'Nanum Gothic', sans-serif", color: '#8A97A6', fontWeight: 'bolder' }}>Concepto: </h5>
+                            <h5 style={{ fontFamily: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}>Consulta psicologica</h5>
+                        </div>
+                        <div className='d-flex'>
+                            <h5 style={{ marginRight: '2vh', fontFamily: "'Nanum Gothic', sans-serif", color: '#8A97A6', fontWeight: 'bolder' }}>{description}:</h5>
+                            <h5 style={{ fontFamily: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}>Total: ${price}</h5>
+                        </div>
+                        <div className="wallet-container pb-4">
+                            {
+                                preferenceIdLocal && <Wallet initialization={{ preferenceId: preferenceIdLocal.id }} />
+                            }
+                        </div>
                     </div>
                 </div>
             </div>

@@ -156,6 +156,7 @@ export const EditProfile = () => {
 
     const closeSuccessModal = () => {
         setShowSuccessModal(false)
+        window.location.reload();
     }
 
     const handleEdit = () => {
