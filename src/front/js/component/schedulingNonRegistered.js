@@ -18,8 +18,11 @@ export const SchedulingNonRegistered = ({ formData }) => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const navigate = useNavigate();
     const [extractedInfo, setExtractedInfo] = useState([]);
+
     const closeShowSuccessModal = () => {
         handleCloseModal();
+        setShowSuccessModal(false)
+
     };
 
     useEffect(() => {
@@ -106,7 +109,7 @@ export const SchedulingNonRegistered = ({ formData }) => {
         const guestName = `${formData.name} ${formData.lastname}`;
 
         const reservationData = {
-            date: formattedDate, 
+            date: formattedDate,
             guest_name: guestName,
             guest_phone: formData.phone,
         };
@@ -115,14 +118,16 @@ export const SchedulingNonRegistered = ({ formData }) => {
             const response = await actions.createReservationForNonRegisteredUser(reservationData);
             if (response && response.message === 'Reservation created successfully') {
                 setShowSuccessModal(true);
+
             } else {
+                setShowSuccessModal(true);
                 console.error('Error al realizar la reserva:', response && response.error ? response.error : 'Error desconocido');
             }
         } catch (error) {
             console.error('Error al realizar la reserva:', error);
         }
     };
-    
+
     const meses = {
         1: 'Enero',
         2: 'Febrero',

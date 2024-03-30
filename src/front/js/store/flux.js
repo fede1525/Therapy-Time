@@ -483,7 +483,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			getPayments: async () => {
 				try {
-					const response = await getActions().protectedFetch("/get_payments", 'GET')
+					const response = await getActions().protectedFetch("/get_payments", 'GET', null)
 
 					if (!response.ok) {
 						console.error("Error al traer los pagos.")
@@ -546,27 +546,27 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			addGlobalEnabled: async (data) => {
 				try {
-				  const response = await getActions().apiFetch('/global_enabled', 'POST', data);
-			  
-				  if (!response.ok) {
-					throw new Error('Error al agregar disponibilidad global');
-				  }
-			  
-				  const responseData = await response.json();
-				  let updatedGlobalEnabled = [];
-			  
-				  if (Array.isArray(responseData)) {
-					updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData];
-				  } else if (typeof responseData === 'object') {
-					updatedGlobalEnabled = [...getStore().globalEnabled, responseData];
-				  }
-			  
-				  setStore({ globalEnabled: updatedGlobalEnabled });
-				  return responseData;
+					const response = await getActions().apiFetch('/global_enabled', 'POST', data);
+
+					if (!response.ok) {
+						throw new Error('Error al agregar disponibilidad global');
+					}
+
+					const responseData = await response.json();
+					let updatedGlobalEnabled = [];
+
+					if (Array.isArray(responseData)) {
+						updatedGlobalEnabled = [...getStore().globalEnabled, ...responseData];
+					} else if (typeof responseData === 'object') {
+						updatedGlobalEnabled = [...getStore().globalEnabled, responseData];
+					}
+
+					setStore({ globalEnabled: updatedGlobalEnabled });
+					return responseData;
 				} catch (error) {
-				  console.error("Error al agregar disponibilidad global:", error);
-				  const errorMessage = error.message || 'Error de red';
-				  return { success: false, error: errorMessage };
+					console.error("Error al agregar disponibilidad global:", error);
+					const errorMessage = error.message || 'Error de red';
+					return { success: false, error: errorMessage };
 				}
 			},
 			getGlobalEnabled: async () => {
@@ -695,7 +695,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						throw new Error(responseData.error);
 					}
 
-					const userData = responseData; 
+					const userData = responseData;
 					setStore({ userByDNI: userData });
 
 					console.log("Datos del usuario recibidos:", userData);
@@ -706,20 +706,20 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { success: false, error: error.message };
 				}
 			},
-			postNewDate : async (date, time, userId) => {
+			postNewDate: async (date, time, userId) => {
 				try {
 					const body = {
 						date: date,
 						time: time
 					};
-			
+
 					const response = await getActions().apiFetch(`/reservation/${userId}`, 'POST', body);
 					console.log(response);
 					if (!response.ok) {
 						const errorData = await response.json();
 						throw new Error(errorData.error || 'Error creating reservation.');
 					}
-			
+
 					const data = await response.json();
 					return data;
 				} catch (error) {
@@ -730,12 +730,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 			createReservationForNonRegisteredUser: async (reservationData) => {
 				try {
 					const response = await getActions().apiFetch('/reservation/non_registered', 'POST', reservationData);
-			
+
 					if (!response.ok) {
 						const errorData = await response.json();
 						throw new Error(errorData.error || 'Failed to create reservation for non-registered user');
 					}
-			
+
 					const responseData = await response.json();
 					return responseData;
 				} catch (error) {
@@ -792,6 +792,136 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					console.error("Error creating reservation:", error);
 					throw error;
+				}
+			},
+			updateReservation: async (reservationId, dataToUpdate) => {
+				try {
+					const response = await getActions().apiFetch(`/edit_reservation/${reservationId}`, 'PUT', dataToUpdate);
+
+					if (!response.ok) {
+						throw new Error('Failed to update reservation');
+					}
+
+					const responseData = await response.json();
+					return { success: true, message: responseData.message, reservation: responseData.reservation };
+
+				} catch (error) {
+					console.error("Error:", error);
+					return { success: false, error: error.message || 'Error al actualizar la reserva' };
+				}
+			},
+			//Funciones para el turnero del terapeuta
+			getAllReservations: async () => {
+				try {
+					const response = await getActions().apiFetch('/get_all_reservations', 'GET');
+
+					if (!response.ok) {
+						throw new Error('Error al traer las reservas');
+					}
+
+					const responseData = await response.json();
+					const reservationsData = responseData.data;
+					console.log(reservationsData);
+
+					setStore({ reservations: reservationsData });
+					return { success: true, message: responseData.message };
+				} catch (error) {
+					console.error('Error: ', error);
+					return { success: false, error: error.message || 'Error al cargar las reservas' };
+				}
+			},
+			getReservationByID: async (id) => {
+				try {
+					const response = await getActions().apiFetch(`/get_reservation_by_id/${id}`, 'GET');
+
+					if (!response.ok) {
+						throw new Error('Error al traer la reserva');
+					}
+
+					const responseData = await response.json();
+					const reservationsData = responseData.data;
+					console.log(reservationsData);
+
+					setStore({ reservationByID: reservationsData });
+					return { success: true, message: responseData.message };
+				} catch (error) {
+					console.error('Error: ', error);
+					return { success: false, error: error.message || 'Error al traer la reserva' };
+				}
+			},
+			searchUserByDNI: async (dni) => {
+				try {
+					const response = await getActions().apiFetch(`/search_user/${dni}`, 'GET');
+
+					if (!response.ok) {
+						throw new Error('Error al buscar usuario por DNI');
+					}
+
+					const responseData = await response.json();
+
+					if (responseData.error) {
+						throw new Error(responseData.error);
+					}
+
+					const userData = responseData;
+					setStore({ userByDNI: userData });
+
+					console.log("Datos del usuario recibidos:", userData);
+
+					return { success: true, message: "Usuario encontrado correctamente" };
+				} catch (error) {
+					console.error('Error al buscar usuario por DNI:', error.message);
+					return { success: false, error: error.message };
+				}
+			},
+			postNewDate: async (date, time, user_id) => {
+				try {
+					const body = {
+						date: date,
+						time: time
+					};
+
+					const response = await fetch(`${process.env.BACKEND_URL}/api/reservation/${user_id}`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*'
+						},
+						body: JSON.stringify(body)
+					});
+
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || 'Error creating reservation.');
+					}
+
+					const data = await response.json();
+					return data;
+				} catch (error) {
+					console.error('Error creating reservation:', error);
+					throw error;
+				}
+			},
+			createReservationForNonRegisteredUser: async (reservationData) => {
+				try {
+					const response = await fetch(`${process.env.BACKEND_URL}api/reservation/non_registered`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*'
+						},
+						body: JSON.stringify(reservationData)
+					});
+
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || 'Failed to create reservation for non-registered user');
+					}
+
+					const responseData = await response.json();
+					return responseData;
+				} catch (error) {
+					throw new Error(error.message || 'Failed to create reservation for non-registered user');
 				}
 			}
 		}

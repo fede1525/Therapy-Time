@@ -5,6 +5,8 @@ import { NavbarPatient } from "../component/navbar_patient"
 import { PaymentTable } from "../component/paymentTable"
 
 export const PaymentList = () => {
+    const {actions, store} = useContext(Context)
+
     return (
         <div className="container">
             <PaymentTable />

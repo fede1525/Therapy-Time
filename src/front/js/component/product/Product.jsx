@@ -25,13 +25,13 @@ export const Product = () => {
     }, []);
 
     return (
-        <div className="container">
-            <div className='card-product'>
-                <div className="card">
-                    <img className="w-25" src={big_logo} alt='product stuff' />
-                    <h3>Consulta psicologica</h3>
-                    <p>{description}</p>
-                    <p>Total: ${price}</p>
+        <div className="container d-grid align-items-center" style={{ marginTop: '150px' }}>
+            <div className='card-product' >
+                <div className="card d-flex align-items-center justify-content-center" style={{ backgroundColor: '#EDE9E9' }}>
+                    <img className="w-50 pb-4" src={big_logo} alt='product stuff' />
+                    <h3 style={{ fontSize: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}>Consulta psicologica</h3>
+                    <p style={{ fontSize: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}> {description}</p>
+                    <p style={{ fontSize: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}>Total: ${price}</p>
                     <div className="wallet-container">
                         {
                             preferenceIdLocal && <Wallet initialization={{ preferenceId: preferenceIdLocal.id }} />
