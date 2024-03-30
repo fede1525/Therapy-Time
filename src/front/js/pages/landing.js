@@ -2,6 +2,8 @@ import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { Context } from "../store/appContext";
 import "../../styles/landing.css";
+import profile_photo from "../../img/profile_photo.png";
+import logo_landing from "../../img/logo_landing.png";
 
 export const Landing = () => {
     const { actions, store } = useContext(Context);
@@ -26,16 +28,16 @@ export const Landing = () => {
 
     const resetForm = () => {
         setFormData({
-        name: "",
-        lastname: "",
-        age: "",
-        phone: "",
-        consultation: ""
+            name: "",
+            lastname: "",
+            age: "",
+            phone: "",
+            consultation: ""
         });
     };
 
     const closeModal = () => {
-        resetForm(); 
+        resetForm();
         setShowModal(false);
     };
 
@@ -104,7 +106,7 @@ export const Landing = () => {
             [fieldName]: ""
         }));
     };
-    
+
     const validateForm = (data) => {
         const errors = {};
         if (!data.name || data.name.trim() === "") {
@@ -144,7 +146,7 @@ export const Landing = () => {
             <div className={showModal || showAboutModal ? "content-behind-modal" : ""}>
                 <div className="row">
                     <div className="columna-izquierda-top col-3 navMedium">
-                        <img className="logo" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/navbar.png?raw=true" alt="Logo" />
+                        <img className="logo" src={logo_landing} alt="Logo" />
                     </div>
                     <div className="columna-derecha-top col-9 navMedium">
                         <div className="d-flex justify-content-between linksNav">
@@ -156,7 +158,7 @@ export const Landing = () => {
                     </div>
                     <div className="columna-derecha-top col navSmall">
                         <div className="d-flex justify-content-between linksNav linksNavSmall">
-                            <img className="logoSmall" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/navbar.png?raw=true" alt="Logo" />
+                            <img className="logoSmall" src={logo_landing} alt="Logo" />
                             <a href="#about" className="mt-4"><p>SOBRE MI</p></a>
                             <a href="#services" className="mt-4"><p>SERVICIOS</p></a>
                             <a href="#turnos" className="mt-4"><p>TURNOS</p></a>
@@ -166,7 +168,7 @@ export const Landing = () => {
                 </div>
                 <div className="row rowAboutSmall">
                     <div className="columna-izquierda-bottom columna-izquierda-bottomSmall col-3">
-                        <img className="profile profileSmall" src="https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/therapist-_scheduling-_system/src/front/img/fotoPerfil.png?raw=true" alt="Profile" />
+                        <img className="profile profileSmall" src={profile_photo} />
                     </div>
                     <div className="columna-derecha-bottom col-9">
                         <div className="textAbout textAboutSmall" id="about">
@@ -216,7 +218,7 @@ export const Landing = () => {
             </div>
             <div className={`modal fade  ${showModal ? 'show d-block' : 'd-none'}`} id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content" style={{textAlign:'left'}} id='contactModal'>
+                    <div className="modal-content" style={{ textAlign: 'left' }} id='contactModal'>
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="exampleModalLabel">Formulario de contacto</h1>
                             <button type="button" className="btn_close_contact" onClick={closeModal}>X</button>
@@ -270,7 +272,7 @@ export const Landing = () => {
             </div>
             <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content" style={{textAlign:'left'}} id='contactModal'>
+                    <div className="modal-content" style={{ textAlign: 'left' }} id='contactModal'>
                         <div className="modal-header justify-content-end">
                             <button type="button" className="btn_close_contact" onClick={closeSuccessModal} aria-label="Close">X</button>
                         </div>
@@ -287,7 +289,7 @@ export const Landing = () => {
             </div>
             <div className={`modal fade ${showAboutModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content" style={{textAlign:'left'}} id='contactModal'>
+                    <div className="modal-content" style={{ textAlign: 'left' }} id='contactModal'>
                         <div className="modal-header justify-content-end">
                             <button type="button" className="btn_close_contact" onClick={closeShowAboutModal} aria-label="Close" style={{ float: 'right' }}>X</button>
                         </div>

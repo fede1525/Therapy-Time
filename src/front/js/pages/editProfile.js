@@ -164,7 +164,6 @@ export const EditProfile = () => {
 
     return (
         <div>
-            <NavbarTherapist />
             <div style={{ backgroundColor: 'white', height: '85vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <div className="container p-3" style={{ borderTopRightRadius: '5vh', borderLeft: '#EDE9E9 solid 0.5vh', borderBottom: '#EDE9E9 solid 0.5vh', margin: '50vh' }} >
                     <div className="p-5 " style={{ backgroundColor: '#EDE9E9' }}>

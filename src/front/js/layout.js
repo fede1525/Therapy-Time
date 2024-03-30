@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ScrollToTop from "./component/scrollToTop";
 import { BackendURL } from "./component/backendURL";
@@ -21,6 +21,7 @@ import { PaymentList } from "./pages/paymentList";
 import { Recovery } from "./pages/recovery";
 import { Reset_password } from "./pages/resetPassword";
 import { Scheduling } from "./pages/scheduling.js";
+import { Navbar } from "./component/generalNavbar.js"
 
 
 const Layout = () => {
@@ -28,18 +29,24 @@ const Layout = () => {
     if (!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL />;
 
     const { store } = useContext(Context);
+    const userRole = JSON.parse(localStorage.getItem('data'))
+
+    useEffect ( () =>{
+       console.log(userRole)
+    }, [])
 
     return (
         <div>
             <BrowserRouter basename={basename}>
                 <ScrollToTop>
+                    <Navbar />
                     <Routes>
                         <Route element={<Landing />} path="/" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Recovery />} path="/recovery" />
                         <Route element={<Reset_password />} path="/reset_password" />
                         {!isAuthenticated() ? <Route element={<Navigate to="/login" />} path="*" /> : <>
-                            <Route element={store.user.role === 1 ? <HomePatient /> : <HomeTherapist />} path="/home" />
+                            <Route element={userRole.role === 1 ? <HomePatient /> : <HomeTherapist />} path="/home" />
                             <Route element={<EditProfile />} path="/editProfile" />
                             <Route element={<Payment />} path="/payment" />
                             <Route element={<PaymentList />} path="/payment_list" />

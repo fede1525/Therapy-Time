@@ -227,7 +227,6 @@ export const AppointmentScheduler = () => {
 
     return (
         <div style={{ backgroundColor: 'white', minHeight: '100vh', paddingBottom: '7vh' }}>
-            <NavbarTherapist />
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" />
             <div className="container mt-5 border" style={{ paddingTop: '2vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
                 <ul className="nav nav-tabs">
@@ -271,7 +270,6 @@ export const AppointmentScheduler = () => {
                                                 const reservationDate = new Date(reservation.fecha);
                                                 return reservationDate.getHours().toString().padStart(2, '0') === timeSlot.substring(0, 2);
                                             });
-
                                             return (
                                                 <tr key={index}>
                                                     <td>{timeSlot}</td>

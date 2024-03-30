@@ -8,11 +8,8 @@ export const PaymentList = () => {
     const {actions, store} = useContext(Context)
 
     return (
-        <div>
-            <NavbarPatient />
-            <div className="container">
-                <PaymentTable />
-            </div>
+        <div className="container">
+            <PaymentTable />
         </div>
     )
 }

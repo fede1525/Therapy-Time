@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react'
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react'
 import { Context } from "../../store/appContext.js"
 import "./Product.module.css"
-import Logo from "../../../img/logo_login.png"
+import big_logo from "../../../img/big_logo.png";
 
 export const Product = () => {
     const { store, actions } = useContext(Context)
@@ -28,7 +28,7 @@ export const Product = () => {
         <div className="container d-grid align-items-center" style={{ marginTop: '150px' }}>
             <div className='card-product' >
                 <div className="card d-flex align-items-center justify-content-center" style={{ backgroundColor: '#EDE9E9' }}>
-                    <img className="w-50 pb-4" src={Logo} alt='product stuff' />
+                    <img className="w-50 pb-4" src={big_logo} alt='product stuff' />
                     <h3 style={{ fontSize: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}>Consulta psicologica</h3>
                     <p style={{ fontSize: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}> {description}</p>
                     <p style={{ fontSize: "'Nanum Gothic', sans-serif", color: '#8A97A6' }}>Total: ${price}</p>
