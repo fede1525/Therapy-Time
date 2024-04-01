@@ -4,7 +4,7 @@ import { faPencilAlt, faTrashAlt, faChevronLeft, faChevronRight } from '@fortawe
 import { NavbarTherapist } from "../component/navbar";
 import { Context } from "../store/appContext";
 import { SchedulingTherapistEdit } from "../component/editRservation";
-import { F } from "../component/schedulingTherapist"
+import { SchedulingTherapist } from "../component/schedulingTherapist"
 import { SchedulingNonRegistered } from "../component/schedulingNonRegistered"
 import "../../styles/landing.css";
 

@@ -7,7 +7,7 @@ import { FaChevronRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 export const SchedulingTherapistEdit = ({ idReservation }) => {
-    const { actions } = useContext(Context);
+    const { actions, store } = useContext(Context);
     const [calendar, setCalendar] = useState([]);
     const currentMonth = new Date().getMonth() + 1;
     const [month, setMonth] = useState(currentMonth); // empieza en enero
@@ -81,7 +81,54 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
         }
     };
 
+    const fetchUnavailableDates = async () => {
+        try {
+            const response = await actions.APIFetch('/final_calendar', 'GET');
+            setUnavailableDates(response);
+        } catch (error) {
+            console.error('Error al obtener fechas no disponibles:', error);
+        }
+    };
+
+    const getDayOfWeek = (year, month, day) => {
+        const selectedDate = new Date(year, month - 1, day);
+        const dayOfWeekNumber = selectedDate.getDay();
+        const dayOfWeekNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        return dayOfWeekNames[dayOfWeekNumber];
+    };
+
+    const dayOfWeek = getDayOfWeek(year, month, selectedDay);
+
+    const filtrarPorDia = (arreglo, dia) => {
+        // Utilizar el método filter para obtener los objetos con el día especificado
+        const algo = arreglo.filter(horario => horario.day === dia)
+        return algo;
+    };
+
+    const horasBloqueadasPorDia = filtrarPorDia(store.globalEnabled, dayOfWeek)
+
     useEffect(() => {
+        console.log(dayOfWeek);
+        fetchUnavailableDates();
+        function extractDateInfo(dateString) {
+            const dateObject = new Date(dateString);
+            const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
+            const year = dateObject.getFullYear();
+            const day = dateObject.getDate();
+            const hour = dateObject.getHours() + 5;
+
+            return { month, year, day, hour };
+        }
+        if (unavailableDates.length > 0) {
+            const extractedInfo = unavailableDates.map(item => {
+                const { month, year, day, hour } = extractDateInfo(item.date);
+                // console.log(extractDateInfo(item.date))
+                return { year, month, day, hour };
+            });
+            setExtractedInfo(extractedInfo);
+        } else {
+            setExtractedInfo([])
+        }
         const currentDate = new Date(year, month - 1, 1);
         const firstDayOfWeek = currentDate.getDay();
         let day = 1;
@@ -93,18 +140,20 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
 
             for (let j = 0; j < 7; j++) {
                 if (i === 0 && j < firstDayOfWeek) {
+
                     row.push('');
                 } else if (day <= 31) {
                     row.push(day);
                     day++;
                 } else {
+
                     row.push('');
                 }
             }
             newCalendar.push(row);
         }
         setCalendar(newCalendar);
-    }, [year, month]);
+    }, [year, month, selectedDay, showModal === true]);
 
     const handleDayClick = (day) => {
         const selectedDate = new Date(year, month - 1, day);
@@ -168,11 +217,18 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
                             item.hour === hour
                         ));
                         const isSelected = selectedHours.find(item => item.id === data.id);
+                        const isInWorkingHours = horasBloqueadasPorDia.some((item) => (
+                            hour >= parseInt(item.start_hour.split(':')[0]) && hour < parseInt(item.end_hour.split(':')[0])
+                        ));
+                        const hourClassNames = `card border ${matchingHour ? "unavailableDateTherapist" : ""
+                            } ${isSelected ? "selected" : ""
+                            } ${!isInWorkingHours ? "unavailableByDateTherapist" : ""
+                            }`;
                         return (
                             <div key={hour} className="col-lg-4 col-md-4 col-sm-6 mb-2">
                                 <div
                                     onClick={() => handleSelectHours(data)}
-                                    className={`card border ${matchingHour ? "border-danger" : ""} ${isSelected ? "selected" : ""}`}
+                                    className={hourClassNames}
                                     style={{ height: '100%', cursor: 'pointer' }}
                                 >
                                     <div className="card-body d-flex align-items-center justify-content-center">
@@ -255,4 +311,4 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
         </div>
     );
 };
-                
+
