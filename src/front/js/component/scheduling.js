@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Context } from "../store/appContext";
-import "../../styles/calendar.css";
+import "../../styles/calendarTherapist.css";
 import { FaTimes } from 'react-icons/fa';
 import { FaChevronLeft } from 'react-icons/fa';
 import { FaChevronRight } from 'react-icons/fa';
@@ -8,11 +8,11 @@ import { FaChevronRight } from 'react-icons/fa';
 export const SchedulingComponent = () => {
   const { store, actions } = useContext(Context);
   const [calendar, setCalendar] = useState([]);
-  const [month, setMonth] = useState(1); //empieza en enero
+  const currentMonth = new Date().getMonth() + 1;
+  const [month, setMonth] = useState(currentMonth); //empieza en enero
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [selectedHour, setSelectedHour] = useState(null);
   const [selectedHours, setSelectedHours] = useState([]);
   const [unavailableDates, setUnavailableDates] = useState([]);
   const [extractedInfo, setExtractedInfo] = useState([]);
@@ -77,18 +77,19 @@ export const SchedulingComponent = () => {
   };
 
   const dayOfWeek = getDayOfWeek(year, month, selectedDay);
-  
+
   const filtrarPorDia = (arreglo, dia) => {
     // Utilizar el método filter para obtener los objetos con el día especificado
     const algo = arreglo.filter(horario => horario.day === dia)
-    return algo; 
+    return algo;
   };
 
   const horasBloqueadasPorDia = filtrarPorDia(store.globalEnabled, dayOfWeek)
 
   useEffect(() => {
-    console.log(dayOfWeek); 
+    console.log(dayOfWeek);
     fetchUnavailableDates();
+    actions.getGlobalEnabled();
     function extractDateInfo(dateString) {
       const dateObject = new Date(dateString);
       const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
@@ -105,6 +106,8 @@ export const SchedulingComponent = () => {
         return { year, month, day, hour };
       });
       setExtractedInfo(extractedInfo);
+    } else {
+      setExtractedInfo([])
     }
     const currentDate = new Date(year, month - 1, 1);
     const firstDayOfWeek = currentDate.getDay();
@@ -259,13 +262,10 @@ export const SchedulingComponent = () => {
             const isInWorkingHours = horasBloqueadasPorDia.some((item) => (
               hour >= parseInt(item.start_hour.split(':')[0]) && hour < parseInt(item.end_hour.split(':')[0])
             ));
-            const hourClassNames = `card border ${
-              matchingHour ? "unavailableDate" : ""
-            } ${
-              isSelected ? "selected" : ""
-            } ${
-              !isInWorkingHours ? "unavailableByDate" : ""
-            }`;
+            const hourClassNames = `card border ${matchingHour ? "unavailableDateTherapist" : ""
+              } ${isSelected ? "selected" : ""
+              } ${!isInWorkingHours ? "unavailableByDateTherapist" : ""
+              }`;
             return (
               <div key={hour} className="col-lg-4 col-md-4 col-sm-6 mb-2">
                 <div
@@ -304,7 +304,7 @@ export const SchedulingComponent = () => {
       </div>
     );
   };
-  
+
   return (
     <div className='d-flex'>
       <div className="left-content mt-2" style={{ marginRight: '10vh', fontFamily: 'Nanum Gothic, sans-serif' }}>

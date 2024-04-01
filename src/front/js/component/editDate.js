@@ -7,9 +7,10 @@ import { FaChevronRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 export const SchedulingPatientEdit = () => {
-  const { actions } = useContext(Context);
+  const { actions, store } = useContext(Context);
   const [calendar, setCalendar] = useState([]);
-  const [month, setMonth] = useState(1); // empieza en enero
+  const currentMonth = new Date().getMonth() + 1;
+  const [month, setMonth] = useState(currentMonth); // empieza en enero
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -66,7 +67,7 @@ export const SchedulingPatientEdit = () => {
 
   const fetchUnavailableDates = async () => {
     try {
-      const response = await actions.addGlobalAndFinalBlocks(year, month);
+      const response = await actions.APIFetch('/final_calendar', 'GET');
       setUnavailableDates(response);
     } catch (error) {
       console.error('Error al obtener fechas no disponibles:', error);
@@ -107,7 +108,45 @@ export const SchedulingPatientEdit = () => {
     }
   };
 
+  const getDayOfWeek = (year, month, day) => {
+    const selectedDate = new Date(year, month - 1, day);
+    const dayOfWeekNumber = selectedDate.getDay();
+    const dayOfWeekNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    return dayOfWeekNames[dayOfWeekNumber];
+  };
+
+  const dayOfWeek = getDayOfWeek(year, month, selectedDay);
+
+  const filtrarPorDia = (arreglo, dia) => {
+    // Utilizar el método filter para obtener los objetos con el día especificado
+    const algo = arreglo.filter(horario => horario.day === dia)
+    return algo;
+  };
+
+  const horasBloqueadasPorDia = filtrarPorDia(store.globalEnabled, dayOfWeek)
+
   useEffect(() => {
+    console.log(dayOfWeek);
+    actions.getGlobalEnabled();
+    function extractDateInfo(dateString) {
+      const dateObject = new Date(dateString);
+      const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
+      const year = dateObject.getFullYear();
+      const day = dateObject.getDate();
+      const hour = dateObject.getHours() + 5;
+
+      return { month, year, day, hour };
+    }
+    if (unavailableDates.length > 0) {
+      const extractedInfo = unavailableDates.map(item => {
+        const { month, year, day, hour } = extractDateInfo(item.date);
+        // console.log(extractDateInfo(item.date))
+        return { year, month, day, hour };
+      });
+      setExtractedInfo(extractedInfo);
+    } else {
+      setExtractedInfo([])
+    }
     const currentDate = new Date(year, month - 1, 1);
     const firstDayOfWeek = currentDate.getDay();
     let day = 1;
@@ -119,18 +158,20 @@ export const SchedulingPatientEdit = () => {
 
       for (let j = 0; j < 7; j++) {
         if (i === 0 && j < firstDayOfWeek) {
+
           row.push('');
         } else if (day <= 31) {
           row.push(day);
           day++;
         } else {
+
           row.push('');
         }
       }
       newCalendar.push(row);
     }
     setCalendar(newCalendar);
-  }, [year, month]);
+  }, [year, month, selectedDay, showModal === true]);
 
   const handleDayClick = (day) => {
     const selectedDate = new Date(year, month - 1, day);
@@ -182,31 +223,38 @@ export const SchedulingPatientEdit = () => {
         </div>
         <div className="row">
           {hours.map((hour, index) => {
-                        const data = {
-                          date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
-                          time: hour,
-                          id: `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`,
-                        };
-                        const matchingHour = extractedInfo.some((item) => (
-                          item.year === 2024 &&
-                          item.month === month &&
-                          item.day === selectedDay &&
-                          item.hour === hour
-                        ));
-                        const isSelected = selectedHours.find(item => item.id === data.id);
-                        return (
-                          <div key={hour} className="col-lg-4 col-md-4 col-sm-6 mb-2">
-                            <div
-                              onClick={() => handleSelectHours(data)}
-                              className={`card border ${matchingHour ? "border-danger" : ""} ${isSelected ? "selected" : ""}`}
-                              style={{ height: '100%', cursor: 'pointer' }}
-                            >
-                              <div className="card-body d-flex align-items-center justify-content-center">
-                                <p className="card-title mb-0">{hour}:00 - {hour + 1}:00</p>
-                              </div>
-                            </div>
-                          </div>
-                        );
+            const data = {
+              date: `2024-${month > 9 ? '' : '0'}${month}-${selectedDay > 9 ? '' : '0'}${selectedDay} ${hour > 9 ? '' : '0'}${hour}:00:00`,
+              time: hour,
+              id: `2024${month > 9 ? '' : '0'}${month}${selectedDay > 9 ? '' : '0'}${selectedDay}${hour > 9 ? '' : '0'}${hour}`,
+            };
+            const matchingHour = extractedInfo.some((item) => (
+              item.year === 2024 &&
+              item.month === month &&
+              item.day === selectedDay &&
+              item.hour === hour
+            ));
+            const isSelected = selectedHours.find(item => item.id === data.id);
+            const isInWorkingHours = horasBloqueadasPorDia.some((item) => (
+              hour >= parseInt(item.start_hour.split(':')[0]) && hour < parseInt(item.end_hour.split(':')[0])
+            ));
+            const hourClassNames = `card border ${matchingHour ? "unavailableDateTherapist" : ""
+              } ${isSelected ? "selected" : ""
+              } ${!isInWorkingHours ? "unavailableByDateTherapist" : ""
+              }`;
+            return (
+              <div key={hour} className="col-lg-4 col-md-4 col-sm-6 mb-2">
+                <div
+                  onClick={() => handleSelectHours(data)}
+                  className={hourClassNames}
+                  style={{ height: '100%', cursor: 'pointer' }}
+                >
+                  <div className="card-body d-flex align-items-center justify-content-center">
+                    <p className="card-title mb-0">{hour}:00 - {hour + 1}:00</p>
+                  </div>
+                </div>
+              </div>
+            );
           })}
         </div>
         <div className="row mx-1 mt-2">
@@ -229,56 +277,56 @@ export const SchedulingPatientEdit = () => {
       </div>
     );
   };
-            
+
   return (
-      <div className='d-flex'>
-        <div className="left-content mt-2" style={{ marginRight: '10vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
-          <div className="calendar-header d-flex justify-content-between aling-items-center">
-            <div className="button-container">
-              <FaChevronLeft style={{ color: 'grey' }} onClick={handlePreviousMonth} />
-            </div>
-            <h5 className='mt-2'>{meses[month]} de {year}</h5>
-            <div className="button-container">
-              <FaChevronRight style={{ color: 'grey' }} onClick={handleNextMonth} />
-            </div>
+    <div className='d-flex'>
+      <div className="left-content mt-2" style={{ marginRight: '10vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
+        <div className="calendar-header d-flex justify-content-between aling-items-center">
+          <div className="button-container">
+            <FaChevronLeft style={{ color: 'grey' }} onClick={handlePreviousMonth} />
           </div>
-          <table className="calendar" style={{ color: '#7E7E7E' }}>
-            <thead style={{ backgroundColor: '#FAFAFA' }}>
-              <tr>
-                <th style={{ width: '14.28%' }}>Domingo</th>
-                <th style={{ width: '14.28%' }}>Lunes</th>
-                <th style={{ width: '14.28%' }}>Martes</th>
-                <th style={{ width: '14.28%' }}>Miércoles</th>
-                <th style={{ width: '14.28%' }}>Jueves</th>
-                <th style={{ width: '14.28%' }}>Viernes</th>
-                <th style={{ width: '14.28%' }}>Sábado</th>
+          <h5 className='mt-2'>{meses[month]} de {year}</h5>
+          <div className="button-container">
+            <FaChevronRight style={{ color: 'grey' }} onClick={handleNextMonth} />
+          </div>
+        </div>
+        <table className="calendar" style={{ color: '#7E7E7E' }}>
+          <thead style={{ backgroundColor: '#FAFAFA' }}>
+            <tr>
+              <th style={{ width: '14.28%' }}>Domingo</th>
+              <th style={{ width: '14.28%' }}>Lunes</th>
+              <th style={{ width: '14.28%' }}>Martes</th>
+              <th style={{ width: '14.28%' }}>Miércoles</th>
+              <th style={{ width: '14.28%' }}>Jueves</th>
+              <th style={{ width: '14.28%' }}>Viernes</th>
+              <th style={{ width: '14.28%' }}>Sábado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {calendar.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {row.map((cell, cellIndex) => (
+                  <td key={cellIndex} className='pestanita' onClick={() => handleDayClick(cell)}>
+                    {cell}
+                  </td>
+                ))}
               </tr>
-            </thead>
-            <tbody>
-              {calendar.map((row, rowIndex) => (
-                <tr key={rowIndex}>
-                  {row.map((cell, cellIndex) => (
-                    <td key={cellIndex} className='pestanita' onClick={() => handleDayClick(cell)}>
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div>
-          {showModal ? (
-            <div className='mt-4'>
-              {renderModalContent()}
-            </div>
-          ) : (
-            <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '110%'}}>
-              No se ha seleccionado ninguna fecha del calendario
-            </div>
-          )}
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
+      <div>
+        {showModal ? (
+          <div className='mt-4'>
+            {renderModalContent()}
+          </div>
+        ) : (
+          <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '120%' }}>
+            No se ha seleccionado ninguna fecha del calendario
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
-            
+

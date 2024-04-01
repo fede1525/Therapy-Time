@@ -81,6 +81,7 @@ export const AppointmentScheduler = () => {
 
     useEffect(() => {
         actions.getAllReservations();
+        actions.getGlobalEnabled();
     }, []);
 
     const handleSearchChange = (event) => {
