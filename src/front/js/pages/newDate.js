@@ -9,10 +9,13 @@ export const NewDate = () => {
     const { actions } = useContext(Context);
 
     return (
-        <div style={{ backgroundColor: '#EDE9E9', minHeight: '100vh', minWidth: '100vw' }}>
-            <NavbarPatient />
-            <div className="container border p-4 mt-5" style={{backgroundColor:'white'}}>
-              <SchedulingPatient />
+        <div className="text-center homepatient conteiner-fluid" style={{ height: '87.8vh', backgroundColor: '#EDE9E9' }}>
+            <div className="container" style={{ fontFamily: 'Nanum Gothic, sans-serif', paddingTop: '11vh' }}>
+                <div>
+                    <div className="container border p-4 " style={{backgroundColor:'white'}}>
+                        <SchedulingPatient />
+                    </div>
+                </div>
             </div>
         </div>
     );

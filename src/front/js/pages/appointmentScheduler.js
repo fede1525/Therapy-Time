@@ -30,6 +30,29 @@ export const AppointmentScheduler = () => {
         dni: ""
     });
 
+    const clearForm = () => {
+        setFormData({
+            id: "",
+            name: "",
+            lastname: "",
+            phone: "",
+            dni: ""
+        });
+    };
+
+    const clearNonUserForm = () => {
+        setNonUserData({
+            name: "",
+            lastname: "",
+            phone: "",
+            dni: ""
+        });
+    };
+
+    const updateReservations = () => {
+        actions.getAllReservations();
+    };
+
     const [nonUserData, setNonUserData] = useState({
         name: "",
         lastname: "",
@@ -54,6 +77,7 @@ export const AppointmentScheduler = () => {
             setSearchType("active");
         }
     }, [activeTab]);
+
 
     useEffect(() => {
         actions.getAllReservations();
@@ -90,9 +114,12 @@ export const AppointmentScheduler = () => {
                         dni: user.dni
                     });
                     setSearchValue('');
+                } else if (dni.length > 8 || dni.length < 8) {
+                    setSearchError("El DNI debe tener 8 números.")
                 } else {
-                    setSearchError("No existen usuarios registrados con ese DNI");
+                    setSearchError("No existen usuarios registrados con ese DNI.");
                 }
+
             } else {
                 console.log(message);
             }
@@ -137,22 +164,40 @@ export const AppointmentScheduler = () => {
     const closeModalSuccess = () => {
         setModalSuccess(false);
         actions.getAllReservations();
+        setFormData({
+            id: "",
+            name: "",
+            lastname: "",
+            phone: "",
+            dni: ""
+        })
     };
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
+        setFormData({
+            id: "",
+            name: "",
+            lastname: "",
+            phone: "",
+            dni: ""
+        })
     };
 
     useEffect(() => {
         const filterReservations = () => {
-            const filteredReservations = store.reservations.filter(reservation => {
-                const reservationDate = new Date(reservation.fecha);
-                return reservationDate.toDateString() === currentDate.toDateString();
-            });
-            setReservations(filteredReservations);
+            if (activeTab === "inbox") {
+                const filteredReservations = store.reservations.filter(reservation => {
+                    const reservationDate = new Date(reservation.fecha);
+                    return reservationDate.toDateString() === currentDate.toDateString();
+                });
+                setReservations(filteredReservations);
+            } else {
+                setReservations(store.reservations);
+            }
         };
         filterReservations();
-    }, [currentDate]);
+    }, [currentDate, activeTab, store.reservations]);
 
     const handlePrevDay = () => {
         const prevDate = new Date(currentDate);
@@ -206,7 +251,6 @@ export const AppointmentScheduler = () => {
 
     return (
         <div style={{ backgroundColor: 'white', minHeight: '100vh', paddingBottom: '7vh' }}>
-            <NavbarTherapist />
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" />
             <div className="container mt-5 border" style={{ paddingTop: '2vh', fontFamily: 'Nanum Gothic, sans-serif' }}>
                 <ul className="nav nav-tabs">
@@ -250,7 +294,6 @@ export const AppointmentScheduler = () => {
                                                 const reservationDate = new Date(reservation.fecha);
                                                 return reservationDate.getHours().toString().padStart(2, '0') === timeSlot.substring(0, 2);
                                             });
-
                                             return (
                                                 <tr key={index}>
                                                     <td>{timeSlot}</td>
@@ -386,7 +429,7 @@ export const AppointmentScheduler = () => {
                                             </div>
                                         </div>
                                         <div className="mt-2 mb-3">
-                                            <SchedulingTherapist patientId={formData.id} />
+                                            <SchedulingTherapist patientId={formData.id}  clearForm={clearForm} updateReservations={updateReservations} />
                                         </div>
                                     </div>
                                 )}
@@ -451,7 +494,7 @@ export const AppointmentScheduler = () => {
                                             </div>
                                         </div>
                                         <div className="mt-2 mb-3">
-                                            <SchedulingNonRegistered formData={nonUserData} />
+                                            <SchedulingNonRegistered formData={nonUserData} clearNonUserForm={clearNonUserForm} updateReservations={updateReservations} />
                                         </div>
                                     </div>
                                 )}

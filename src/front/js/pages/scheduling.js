@@ -158,7 +158,6 @@ export const Scheduling = () => {
 
   return (
     <div style={{ backgroundColor: 'white', minHeight: '100vh', minWidth: '100vw' }}>
-      <NavbarTherapist />
       <div className="container mt-5 border" style={{ paddingTop: '1vh' }}>
         <ul className="nav nav-tabs">
           <li className="nav-item">

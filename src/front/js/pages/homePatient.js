@@ -2,7 +2,6 @@ import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
 import "../../styles/home.css";
-import { NavbarPatient } from "../component/navbar_patient";
 import moment from 'moment';
 import 'moment/locale/es';
 import "../../styles/landing.css";
@@ -13,6 +12,7 @@ export const HomePatient = () => {
     const [nextReservation, setNextReservation] = useState(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [modalSuccess, setModalSuccess] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
@@ -36,6 +36,8 @@ export const HomePatient = () => {
                 }
             } catch (error) {
                 console.error("Error en la solicitud: ", error);
+            } finally {
+                setLoading(false);
             }
         }
         fetchData();
@@ -57,6 +59,7 @@ export const HomePatient = () => {
             if (response.message === 'Reserva cancelada exitosamente') {
                 setModalSuccess(true);
                 console.log("Reservación cancelada exitosamente");
+                setNextReservation(null);
             } else {
                 console.error("Error al cancelar la reservación: ", response.message);
             }
@@ -76,20 +79,27 @@ export const HomePatient = () => {
     };
 
     return (
-        <div className="text-center homepatient conteiner-fluid" style={{ height: '100vh', backgroundColor: '#EDE9E9' }}>
-            <NavbarPatient />
-            <div className="container mt-5" style={{ fontFamily: 'Nanum Gothic, sans-serif' }}>
-                <div className="row p-4 ">
+        <div className="text-center homepatient conteiner-fluid" style={{ height: '87.8vh', backgroundColor: '#EDE9E9' }}>
+            <div className="container" style={{ fontFamily: 'Nanum Gothic, sans-serif', paddingTop: '11vh' }}>
+                <div className="row">
                     <div className="col-6 p-4" style={{ height: '60vh', backgroundColor: '#FAFAFA', backgroundImage: 'url(https://github.com/4GeeksAcademy/finalProject-LATAM-pt25/blob/dating_blocking/src/front/img/logoPaciente.png?raw=true)' }}>
                         <h2 style={{ textAlign: 'left', maxWidth: '40%', color: '#808080' }}>Tu próximo</h2>
                         <div className="d-flex">
                             <h2 style={{ textAlign: 'left', marginBottom: '6vh', maxWidth: '40%', color: '#808080' }}>turno:</h2>
-                            {nextReservation ? (
-                                <h5 style={{ marginTop: '1.5vh', color: '#bdb76b', marginLeft: '3vh', fontStyle: 'oblique' }}>
-                                    {`${formatReservationDateTime(nextReservation.date)}`}
-                                </h5>
+                            {loading ? (
+                                <div className="spinner-border" role="status" style={{ width: '1.2rem', height: '1.2rem', color: '#bdb76b', marginTop: '1.4vh', marginLeft: '1.2vh', borderWidth: '0.1rem' }}>
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
                             ) : (
-                                <h5 style={{ marginTop: '1.5vh', color: '#bdb76b', marginLeft: '3vh', fontStyle: 'oblique' }}>Sin turno agendado</h5>
+                                <>
+                                    {nextReservation ? (
+                                        <h5 style={{ marginTop: '1.5vh', color: '#bdb76b', marginLeft: '3vh', fontStyle: 'oblique' }}>
+                                            {`${formatReservationDateTime(nextReservation.date)}`}
+                                        </h5>
+                                    ) : (
+                                        <h5 style={{ marginTop: '1.5vh', color: '#bdb76b', marginLeft: '3vh', fontStyle: 'oblique' }}>Sin turno agendado</h5>
+                                    )}
+                                </>
                             )}
                         </div>
                         {virtualLink ? (

@@ -6,7 +6,7 @@ export const Payment = () => {
     const { actions, store } = useContext(Context)
 
     return (
-        <div>
+        <div className="d-flex align-items-center justify-content-center" style={{ backgroundColor: '#EDE9E9', height: '87.8vh'}}>
             <Product />
         </div>
     )
