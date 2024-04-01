@@ -105,7 +105,7 @@ export const SchedulingComponent = () => {
         return { year, month, day, hour };
       });
       setExtractedInfo(extractedInfo);
-    } else{
+    } else {
       setExtractedInfo([])
     }
     const currentDate = new Date(year, month - 1, 1);
@@ -261,9 +261,9 @@ export const SchedulingComponent = () => {
             const isInWorkingHours = horasBloqueadasPorDia.some((item) => (
               hour >= parseInt(item.start_hour.split(':')[0]) && hour < parseInt(item.end_hour.split(':')[0])
             ));
-            const hourClassNames = `card border ${matchingHour ? "unavailableDate" : ""
+            const hourClassNames = `card border ${matchingHour ? "unavailableDateTherapist" : ""
               } ${isSelected ? "selected" : ""
-              } ${!isInWorkingHours ? "unavailableByDate" : ""
+              } ${!isInWorkingHours ? "unavailableByDateTherapist" : ""
               }`;
             return (
               <div key={hour} className="col-lg-4 col-md-4 col-sm-6 mb-2">

@@ -26,8 +26,7 @@
 }
 .unavailableByDate{
   border-color: #A9A9A9 !important;
-  box-shadow: 2px 2px rgba(0, 0, 0, 0.75) !important;
-  color: rgba(0, 0, 0, 0.75);
+  color:white;
   background-color: #A9A9A9;
   pointer-events: none;
 }

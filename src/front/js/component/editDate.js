@@ -10,7 +10,7 @@ export const SchedulingPatientEdit = () => {
   const { actions } = useContext(Context);
   const [calendar, setCalendar] = useState([]);
   const currentMonth = new Date().getMonth() + 1;
-  const [month, setMonth] = useState(currentDate); // empieza en enero
+  const [month, setMonth] = useState(currentMonth); // empieza en enero
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState(null);
   const [showModal, setShowModal] = useState(false);
