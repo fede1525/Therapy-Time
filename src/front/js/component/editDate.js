@@ -127,6 +127,7 @@ export const SchedulingPatientEdit = () => {
 
   useEffect(() => {
     console.log(dayOfWeek);
+    actions.getGlobalEnabled();
     function extractDateInfo(dateString) {
       const dateObject = new Date(dateString);
       const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11

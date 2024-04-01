@@ -96,6 +96,7 @@ export const SchedulingTherapist = ({ patientId }) => {
     useEffect(() => {
         console.log(dayOfWeek);
         fetchUnavailableDates();
+        actions.getGlobalEnabled();
         function extractDateInfo(dateString) {
             const dateObject = new Date(dateString);
             const month = dateObject.getMonth() + 1; // Los meses en JavaScript van de 0 a 11
