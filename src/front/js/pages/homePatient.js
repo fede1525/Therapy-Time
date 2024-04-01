@@ -59,6 +59,7 @@ export const HomePatient = () => {
             if (response.message === 'Reserva cancelada exitosamente') {
                 setModalSuccess(true);
                 console.log("Reservación cancelada exitosamente");
+                setNextReservation(null);
             } else {
                 console.error("Error al cancelar la reservación: ", response.message);
             }
@@ -86,7 +87,7 @@ export const HomePatient = () => {
                         <div className="d-flex">
                             <h2 style={{ textAlign: 'left', marginBottom: '6vh', maxWidth: '40%', color: '#808080' }}>turno:</h2>
                             {loading ? (
-                                <div className="spinner-border" role="status" style={{ width: '1.2rem', height: '1.2rem', color:'#bdb76b', marginTop:'1.4vh', marginLeft:'1.2vh', borderWidth: '0.1rem'}}>
+                                <div className="spinner-border" role="status" style={{ width: '1.2rem', height: '1.2rem', color: '#bdb76b', marginTop: '1.4vh', marginLeft: '1.2vh', borderWidth: '0.1rem' }}>
                                     <span className="visually-hidden">Loading...</span>
                                 </div>
                             ) : (
