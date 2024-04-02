@@ -270,10 +270,10 @@ def edit_profile():
 #ENDPOINTS PARA EL ENVIO DE CORREO ELECTRONICO Y RECUPERACION DE CONTRASEÑA
 
 #Variables para el envio de correo electronico
-EMAILJS_SERVICE_ID = 'service_yrznk4m'
-EMAILJS_TEMPLATE_ID = 'template_ebpnklz'
-EMAILJS_USER_ID = 'sm1cI8ucvO4Tvl_jb'
-ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
+EMAILJS_SERVICE_ID = 'service_3oehxe6'
+EMAILJS_TEMPLATE_ID = 'template_nwoupu9'
+EMAILJS_USER_ID = 'Kns-Kb5l_hepVS8Jd'
+ACCES_TOKEN = '7YDXpSlu35ArW_mTjKpR5'
 
 def enviar_correo_recuperacion(email, token):
     datos_correo = {

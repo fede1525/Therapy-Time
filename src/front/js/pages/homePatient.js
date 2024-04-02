@@ -118,7 +118,7 @@ export const HomePatient = () => {
                         <Link to="/payment"><button className="btn btn-block" disabled={!nextReservation} style={{ width: '99%', height: '8vh', fontFamily: 'Jura, sans-serif', backgroundColor: '#bdb5b5', color: 'white', fontSize: '3vh' }}>Abonar con Mercado Pago</button></Link>
                     </div>
                     <div className="col-6 p-4 d-flex flex-column align-items-center justify-content-center" style={{ height: '60vh', backgroundColor: '#FAFAFA', color: 'grey', borderLeftColor: '#EDE9E9', borderLeftWidth: '2vh', borderLeftStyle: 'solid' }}>
-                        <div className="p-4 border d-flex flex-column align-items-center justify-content-center" style={{ height: '50vh' }}>
+                        <div className="p-4 border d-flex flex-column align-items-center justify-content-center" style={{ height: '40vh' }}>
                             <p>Para solicitar un nuevo turno ingresá al siguiente enlace:</p>
                             <Link to="/new_date" className="border p-2" style={{ fontSize: '2.5vh', backgroundColor: '#8A97A6', color: 'white', width: '40vh', borderRadius: '0.5vh', fontFamily: 'Jura, sans-serif' }}>Nuevo Turno</Link>
                         </div>

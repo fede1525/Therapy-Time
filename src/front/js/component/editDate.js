@@ -5,6 +5,7 @@ import { FaTimes } from 'react-icons/fa';
 import { FaChevronLeft } from 'react-icons/fa';
 import { FaChevronRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { setHours } from 'date-fns';
 
 export const SchedulingPatientEdit = () => {
   const { actions, store } = useContext(Context);
@@ -78,19 +79,38 @@ export const SchedulingPatientEdit = () => {
     fetchUnavailableDates();
   }, [year, month]);
 
-  useEffect(() => {
-    const getReservation = async () => {
-      try {
-        const response = await actions.getPatientReservation();
-        if (response && response.id) {
-          setReservationId(response.id);
-        }
-      } catch (error) {
-        console.error('Error al obtener la reserva del paciente:', error);
+  const getReservation = async () => {
+    try {
+      const response = await actions.getPatientReservation();
+      if (response && response.id) {
+        setReservationId(response.id);
       }
-    };
+    } catch (error) {
+      console.error('Error al obtener la reserva del paciente:', error);
+    }
+  };
+  useEffect(() => {
     getReservation();
   }, []);
+
+  const handleBlockSelectedHours = async () => {
+    await actions.apiFetch('/bloquear', 'POST', selectedHours)
+      .then(selectedHours => {
+        console.log('Hora bloqueada exitosamente:', selectedHours);
+        openShowSuccessModal();
+        setSelectedHours([])
+      })
+      .catch(error => {
+        console.error('Error al bloquear la hora:', error);
+        console.log(selectedHours)
+      });
+  };
+  
+  const reservar = () =>{
+    handleReservationUpdate();
+    handleBlockSelectedHours();
+    console.log(selectedHours)
+  }
 
   const handleReservationUpdate = async () => {
     const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
@@ -238,9 +258,9 @@ export const SchedulingPatientEdit = () => {
             const isInWorkingHours = horasBloqueadasPorDia.some((item) => (
               hour >= parseInt(item.start_hour.split(':')[0]) && hour < parseInt(item.end_hour.split(':')[0])
             ));
-            const hourClassNames = `card border ${matchingHour ? "unavailableDateTherapist" : ""
+            const hourClassNames = `card border ${matchingHour ? "unavailableDate" : ""
               } ${isSelected ? "selected" : ""
-              } ${!isInWorkingHours ? "unavailableByDateTherapist" : ""
+              } ${!isInWorkingHours ? "unavailableByDate" : ""
               }`;
             return (
               <div key={hour} className="col-lg-4 col-md-4 col-sm-6 mb-2">
@@ -258,7 +278,7 @@ export const SchedulingPatientEdit = () => {
           })}
         </div>
         <div className="row mx-1 mt-2">
-          <button className='btn_horasPorFecha btn-block' onClick={handleReservationUpdate}>Actualizar Reserva</button>
+          <button className='btn_horasPorFecha btn-block' onClick={reservar}>Actualizar Reserva</button>
         </div>
         <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
           <div className="modal-dialog modal-dialog-centered">
@@ -321,7 +341,7 @@ export const SchedulingPatientEdit = () => {
             {renderModalContent()}
           </div>
         ) : (
-          <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '120%' }}>
+          <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '145%' }}>
             No se ha seleccionado ninguna fecha del calendario
           </div>
         )}

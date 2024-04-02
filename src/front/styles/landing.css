@@ -32,9 +32,10 @@
   /*Servicios*/
   .services{
     background-color: #FAFAFA;
-    height: 50vh;
+    height: 40vh;
     color:#C47C7A;
     font-family: 'Nanum Gothic', sans-serif;
+    display: flex;
   }
   .textServices{
     border-right: #C47C7A solid 1vh;
@@ -45,15 +46,15 @@
     font-size: 4.2vh;
   }
   .contentServices{
-    width: 100vh;
-    margin-left: 26vh;
+    margin-left: 25vh;
+    width: 45%;
   }
   .right_sidebar {
     position: absolute;
     right: 0;
-    top: 82vh; 
-    width: 10vh;
-    height: 50vh;
+    top: 72vh; 
+    width: 8vh;
+    height: 42vh;
     background-color:#B2A79F;
     border-top-left-radius: 10vh; 
   }
@@ -61,7 +62,7 @@
   .logo {
     width: 38vh; 
     height: auto; 
-    margin-left: 4.5vh;
+    margin-left: 2vh;
     margin-top: 1.8vh;
   }
   .linksNav a{
@@ -69,7 +70,7 @@
     margin-left: 13vh;
     margin-right: 9vh;
     font-family: 'Josefin Sans', sans-serif;
-    font-size: 2.3vh;
+    font-size: 2vh;
     color:#d8bab8 !important;
   }
   .columna-izquierda-top {
@@ -82,17 +83,17 @@
   }
   /* Sobre mi*/
   .columna-izquierda-bottom {
-    height: 68vh;
+    height: 60vh;
     background-color:#EDE9E9;
   }
   .columna-derecha-bottom {
-    height: 68vh;
+    height: 60vh;
     background-color: #FAFAFA; 
   }
   .textAbout{
     color:#C47C7A;
-    width: 100vh;
-    margin-left: 30vh;
+    width: 80vh;
+    margin-left: 22.5%;
     margin-top: 12vh;
     font-family: 'Nanum Gothic', sans-serif;
   }
@@ -103,9 +104,9 @@
     border-top-left-radius: 80px;
     border-bottom-right-radius: 80px;
     border: solid white 1.2vh;
-    margin-top: 6vh;
+    margin-top: 10vh;
     position: absolute;
-    left: 35vh;
+    left: 30vh;
     top: 0;
     transform: translateY(29%); 
   }

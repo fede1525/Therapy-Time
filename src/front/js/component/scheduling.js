@@ -348,7 +348,7 @@ export const SchedulingComponent = () => {
             {renderModalContent()}
           </div>
         ) : (
-          <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '120%' }}>
+          <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '155%' }}>
             No se ha seleccionado ninguna fecha del calendario
           </div>
         )}

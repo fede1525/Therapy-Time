@@ -107,6 +107,37 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
 
     const horasBloqueadasPorDia = filtrarPorDia(store.globalEnabled, dayOfWeek)
 
+    const handleBlockSelectedHours = async () => {
+        await actions.apiFetch('/bloquear', 'POST', selectedHours)
+          .then(selectedHours => {
+            console.log('Hora bloqueada exitosamente:', selectedHours);
+            openShowSuccessModal();
+            setSelectedHours([])
+          })
+          .catch(error => {
+            console.error('Error al bloquear la hora:', error);
+            console.log(selectedHours)
+          });
+      };
+      const handleUnblockSelectedHours = async (id) => {
+        await actions.apiFetch('/desbloquear/multiple', 'DELETE', id)
+          .then(selectedHours => {
+            console.log('Hora bloqueada exitosamente:', selectedHours);
+            openShowSuccessModal();
+            setSelectedHours([])
+          })
+          .catch(error => {
+            console.error('Error al bloquear la hora:', error);
+            console.log(selectedHours)
+          });
+      };
+      const id = selectedHours.find(item => item.id)
+      
+      const reservar = () => {
+        handleReservationUpdate();
+        handleBlockSelectedHours();
+        console.log(selectedHours)
+      };
     useEffect(() => {
         console.log(dayOfWeek);
         fetchUnavailableDates();
@@ -240,7 +271,7 @@ export const SchedulingTherapistEdit = ({ idReservation }) => {
                     })}
                 </div>
                 <div className="row mx-1 mt-2">
-                    <button className='btn_horasPorFecha btn-block' onClick={handleReservationUpdate}>Actualizar Reserva</button>
+                    <button className='btn_horasPorFecha btn-block' onClick={reservar}>Actualizar Reserva</button>
                 </div>
                 <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered">

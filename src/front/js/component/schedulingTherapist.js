@@ -94,6 +94,25 @@ export const SchedulingTherapist = ({ patientId, clearForm, updateReservations }
 
     const horasBloqueadasPorDia = filtrarPorDia(store.globalEnabled, dayOfWeek)
 
+    const handleBlockSelectedHours = async () => {
+        await actions.apiFetch('/bloquear', 'POST', selectedHours)
+            .then(selectedHours => {
+                console.log('Hora bloqueada exitosamente:', selectedHours);
+                openShowSuccessModal();
+                setSelectedHours([])
+            })
+            .catch(error => {
+                console.error('Error al bloquear la hora:', error);
+                console.log(selectedHours)
+            });
+    }
+
+    const reservar = () => {
+        handleReservation();
+        handleBlockSelectedHours();
+        console.log(selectedHours)
+    };
+
     useEffect(() => {
         console.log(dayOfWeek);
         fetchUnavailableDates();
@@ -249,7 +268,7 @@ export const SchedulingTherapist = ({ patientId, clearForm, updateReservations }
                     })}
                 </div>
                 <div className="row mx-1 mt-2">
-                    <button className='btn_horasPorFecha btn-block' onClick={handleReservation}>Reservar
+                    <button className='btn_horasPorFecha btn-block' onClick={reservar}>Reservar
                     </button>
                 </div>
                 <div className={`modal fade ${showSuccessModal ? 'show d-block' : 'd-none'}`} id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -313,7 +332,7 @@ export const SchedulingTherapist = ({ patientId, clearForm, updateReservations }
                         {renderModalContent()}
                     </div>
                 ) : (
-                    <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '125%' }}>
+                    <div className="no-selection-container d-flex justify-content-center align-items-center" style={{ backgroundColor: '#FAFAFA', color: 'grey', padding: '20px', height: '100%', width: '165%' }}>
                         No se ha seleccionado ninguna fecha del calendario
                     </div>
                 )}

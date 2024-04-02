@@ -173,7 +173,7 @@ export const Landing = () => {
                     <div className="columna-derecha-bottom col-9">
                         <div className="textAbout textAboutSmall" id="about">
                             <h1 className="mb-3">Lic. Vigano Sofia</h1>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet. Quisque ut erat non nisi consequat gravida.</p><p className="aboutSmallNone"> Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas posuere aliquam mauris eget congue. Proin eu sapien non quam sollicitudin efficitur. Donec nec augue id risus tincidunt consectetur.</p>
+                            <p>Graduada en Psicología Clínica con honores de la facultad Nacional de Cordoba, me especialicé en terapia cognitivo-conductual y terapia familiar sistémica. Participé en talleres de mindfulness y gestión emocional. Con experiencia en clínicas comunitarias y prácticas privadas, aspiro a seguir creciendo para apoyar mejor a mis pacientes en su camino hacia el bienestar.</p>
                             <a onClick={openShowAboutModal} className="btn btn_about" style={{ color: '#C57D7A' }}>[ Leer mas ]</a>
                         </div>
                     </div>
@@ -185,10 +185,10 @@ export const Landing = () => {
                     </div>
                     <div className="col-8 contentServices contentServSmall">
                         <ul>
-                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet.</li>
-                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet.</li>
-                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet.</li>
-                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet.</li>
+                            <li>Terapia individual centrada en el autoconocimiento y el crecimiento personal, adaptada a las necesidades únicas de cada individuo.</li>
+                            <li>Terapia de pareja para mejorar la comunicación, resolver conflictos y fortalecer la conexión emocional.</li>
+                            <li>Terapia familiar para abordar dinámicas disfuncionales, fortalecer los lazos familiares y promover un ambiente de apoyo.</li>
+                            <li>Asesoramiento en mindfulness y técnicas de gestión emocional para cultivar la atención plena y manejar el estrés y la ansiedad de manera efectiva.</li>
                         </ul>
                     </div>
                     <div className="col-1 right_sidebar"></div>
@@ -294,8 +294,8 @@ export const Landing = () => {
                             <button type="button" className="btn_close_contact" onClick={closeShowAboutModal} aria-label="Close" style={{ float: 'right' }}>X</button>
                         </div>
                         <div className="modal-body">
-                            <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet. Quisque ut erat non nisi consequat gravida. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas posuere aliquam mauris eget congue. Proin eu sapien non quam sollicitudin efficitur. Donec nec augue id risus tincidunt consectetur.</span><br></br>
-                            <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies eleifend velit, at aliquam leo malesuada sit amet. Quisque ut erat non nisi consequat gravida. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas posuere aliquam mauris eget congue. Proin eu sapien non quam sollicitudin efficitur. Donec nec augue id risus tincidunt consectetur.</span>
+                            <span>Graduada en Psicología Clínica con honores de la facultad Nacional de Cordoba, me especialicé en terapia cognitivo-conductual y terapia familiar sistémica. Participé en talleres de mindfulness y gestión emocional. Con experiencia en clínicas comunitarias y prácticas privadas, aspiro a seguir creciendo para apoyar mejor a mis pacientes en su camino hacia el bienestar.</span><br></br>
+                            <span>El viaje de la formación no solo fue académico, sino también un proceso interno de autodescubrimiento y crecimiento. Cada paso en mi camino hacia convertirme en terapeuta fue una oportunidad para aprender y desarrollar una comprensión más profunda de mí misma y de los demás. Ahora, con una base sólida de conocimientos y experiencias, estoy lista para enfrentar los desafíos que surjan en mi práctica profesional con confianza y empatía.</span>
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-guardar-contact" onClick={closeShowAboutModal}>Cerrar</button>
