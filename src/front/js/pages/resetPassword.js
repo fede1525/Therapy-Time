@@ -19,7 +19,7 @@ export const Reset_password = () => {
         global: ""
     });
     const [showSuccess, setShowSuccess] = useState(false);
-    const passwordRegex = /^(?=.[A-Z])(?=.[!@#$%^&()_+])[A-Za-z\d!@#$%^&()_+]{8,}$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&()_+])[A-Za-z\d!@#$%^&()_+]{8,}$/;
 
     const clearError = (field) => {
         if (field === 'global') {

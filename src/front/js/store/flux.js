@@ -210,7 +210,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			handleChangePassword: async (username, token, newPassword) => {
 				try {
-					const response = await fetch(process.env.BACKEND_URL + '/api/change_password', {
+					const response = await fetch(process.env.BACKEND_URL + 'api/change_password', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',

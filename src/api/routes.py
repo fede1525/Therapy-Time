@@ -270,10 +270,10 @@ def edit_profile():
 #ENDPOINTS PARA EL ENVIO DE CORREO ELECTRONICO Y RECUPERACION DE CONTRASEÑA
 
 #Variables para el envio de correo electronico
-EMAILJS_SERVICE_ID = 'service_3oehxe6'
-EMAILJS_TEMPLATE_ID = 'template_nwoupu9'
-EMAILJS_USER_ID = 'Kns-Kb5l_hepVS8Jd'
-ACCES_TOKEN = '7YDXpSlu35ArW_mTjKpR5'
+EMAILJS_SERVICE_ID = 'service_yrznk4m'
+EMAILJS_TEMPLATE_ID = 'template_ebpnklz'
+EMAILJS_USER_ID = 'sm1cI8ucvO4Tvl_jb'
+ACCES_TOKEN = '8TAMf4kzLuvMU3avQkTcm'
 
 def enviar_correo_recuperacion(email, token):
     datos_correo = {
@@ -313,7 +313,7 @@ def reset_password():
 
     hashed_temp_code = bcrypt.generate_password_hash(token).decode("utf-8")
     
-    token_expiry = datetime.now() + timedelta(minutes=30)
+    token_expiry = datetime.now() + timedelta(minutes=60)
     user.token_expiry = token_expiry
 
     user.reset_token = hashed_temp_code
@@ -334,6 +334,10 @@ def change_password():
     user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({"error": "El usuario ingresado es inválido"}), 404 
+    
+    if user.reset_token is None:
+        return jsonify({"error": "El usuario no tiene un token de reinicio de contraseña"}), 401
+    
     if bcrypt.check_password_hash(user.reset_token, token):
         new_password = bcrypt.generate_password_hash(new_password, 10).decode("utf-8")
         user.password = new_password 
@@ -341,7 +345,6 @@ def change_password():
         return jsonify({"error": "Contraseña cambiada exitosamente"}), 200
     else:
         return jsonify({"error": "El token ingresado es inválido o ha expirado"}), 401
-
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
